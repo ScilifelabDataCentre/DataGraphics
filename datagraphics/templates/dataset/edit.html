@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block head_title %}Edit {{ note['title'] or 'No title' }}{% endblock %}
+
+{% block body_title %}Edit {{ note['title'] or 'No title' }}{% endblock %}
+
+{% block main %}
+<form action="{{ url_for('.edit', iuid=note['_id']) }}"
+      enctype="multipart/form-data"
+      method="POST">
+  {{ csrf_token() }}
+  <div class="form-group row">
+    <label for="title"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Title</label>
+    <div class="col-md">
+      <input type="text" id="title" name="title"
+             class="form-control" autofocus
+             aria-describedby="titleHelp"
+             value="{{ note['title'] or '' }}">
+      <small id="titleHelp" class="form-text text-muted">
+        Single-line descriptive title for the note.
+      </small>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="text"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Text</label>
+    <div class="col-md">
+      <textarea id="text" name="text" rows="16"
+                class="form-control"
+                aria-describedby="textHelp">{{ note['text'] or '' }}</textarea>
+      <small id="textHelp" class="form-text text-muted">
+        Text content of the note. Formatted using Markdown.
+      </small>
+    </div>
+  </div>
+  {% if note['file'] %}
+  <div class="form-group row">
+    <label for="remove_file"
+           class="col-md-2 col-form-label text-right font-weight-bold">
+      Remove file</label>
+    <div class="col-md">
+      <div id="remove_file">
+        <div class="form-check">
+          <input type="checkbox" name="remove_file" id="{{ note['file']['filename'] }}"
+                 class="form-check-input" aria-describedby="remove_fileHelp"
+                 value="{{ note['file']['filename'] }}">
+          <label class="form-check-label" for="{{ note['file']['filename'] }}">
+            {{ macros.attachment_symbol() }}{{ note['file']['filename'] }}
+          </label>
+        </div>
+      </div>
+      <small id="remove_fileHelp" class="form-text text-muted">
+        Check the box to remove the file from the note.
+      </small>
+    </div>
+  </div>
+  {% endif %} {# if file #}
+  <div class="form-group row">
+    <label for="file"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Set file</label>
+    <div class="col-md">
+      <input type="file" id="file" name="file"
+	     class="form-control-file" aria-describedby="fileHelp">
+      <small id="fileHelp" class="form-text text-muted">
+        File to attach to the note. The existing file, if any, will be replaced.
+      </small>
+    </div>
+  </div>
+  {% if binders %}
+  <div class="form-group row">
+    <label for="remove_binders"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Remove from binder(s)</label>
+    <div class="col-md">
+      <div id="remove_binders">
+        {% for binder in binders %}
+        <div class="form-check">
+          <input type="checkbox" id="binder_{{ binder['_id'] }}"
+                 name="remove_binders"
+                 class="form-check-input" 
+                 value="{{ binder['_id'] }}">
+          <label class="form-check-label" for="binder_{{ binder['_id'] }}">
+            {{ binder['title'] or 'No title' }}</label>
+        </div>
+        {% endfor %}
+      </div>
+      <small class="form-text text-muted">
+        The note will be removed from the checked binders.
+      </small>
+    </div>
+  </div>
+  {% endif %} {# if binders #}
+  <div class="form-group row">
+    <div class="col-md-3 offset-md-2">
+      <button type="submit" class="btn btn-block btn-primary">Save</button>
+    </div>
+  </div>
+</form>
+{% endblock %} {# block main #}
+
+{% block actions %}
+<div class="mt-2">
+  <a href="{{ url_for('.display', iuid=note['_id']) }}"
+     class="btn btn-block btn-secondary">Cancel</a>
+</div>
+{% endblock %}

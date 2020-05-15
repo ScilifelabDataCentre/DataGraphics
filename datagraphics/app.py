@@ -47,7 +47,7 @@ def prepare():
     flask.g.db = utils.get_db(dbserver=flask.g.dbserver)
     flask.g.cache = {}          # key: iuid, value: doc
     flask.g.current_user = datagraphics.user.get_current_user()
-    flask.g.is_admin = flask.g.current_user and \
+    flask.g.am_admin = flask.g.current_user and \
                        flask.g.current_user["role"] == constants.ADMIN
 
 app.after_request(utils.log_access)

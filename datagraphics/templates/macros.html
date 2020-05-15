@@ -1,0 +1,27 @@
+{% macro dataset_symbol() -%}
+<span title="Dataset">{{ ':file_cabinet:' | emojize }}</span>&nbsp;
+{%- endmacro %}
+
+{% macro graphic_symbol() -%}
+<span title="Binder">{{ ':chart_increasing:' | emojize }}</span>&nbsp;
+{%- endmacro %}
+
+{% macro public_symbol() -%}
+<span title="Public">{{ ':earth_africa:' | emojize }}</span>&nbsp;
+{%- endmacro %}
+
+{% macro private_symbol() -%}
+<span title="Private">{{ ':locked:' | emojize }}</span>&nbsp;
+{%- endmacro %}
+
+{% macro access_symbol(element) -%}
+{% if element.get('public') %}
+{{ public_symbol() }}
+{% else %}
+{{ private_symbol() }}
+{% endif %}
+{%- endmacro %}
+
+{% macro download_symbol() -%}
+<span title="Download file">{{ ':inbox_tray:' | emojize }}</span>&nbsp;
+{%- endmacro %}

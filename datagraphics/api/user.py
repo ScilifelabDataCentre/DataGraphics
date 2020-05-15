@@ -21,7 +21,8 @@ def display(username):
     user = datagraphics.user.get_user(username=username)
     if not user:
         flask.abort(http.client.NOT_FOUND)
-    if not datagraphics.user.is_admin_or_self(user):
+    # XXX Use 'allow' function
+    if not datagraphics.user.am_admin_or_self(user):
         flask.abort(http.client.FORBIDDEN)
     user.pop("password", None)
     user.pop("apikey", None)
@@ -34,7 +35,8 @@ def logs(username):
     user = datagraphics.user.get_user(username=username)
     if not user:
         flask.abort(http.client.NOT_FOUND)
-    if not datagraphics.user.is_admin_or_self(user):
+    # XXX Use 'allow' function
+    if not datagraphics.user.am_admin_or_self(user):
         flask.abort(http.client.FORBIDDEN)
     return utils.jsonify(utils.get_json(user=get_user_basic(user),
                                         logs=utils.get_logs(user["_id"])),

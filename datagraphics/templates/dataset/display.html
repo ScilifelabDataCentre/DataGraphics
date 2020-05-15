@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block head_title %}{{ dataset['title'] or 'No title' }}{% endblock %}
+
+{% block body_title %}
+{% if g.current_user %}
+{{ macros.access_symbol(dataset) }}
+{% endif %}
+{{ macros.dataset_symbol() }}{{ dataset['title'] or 'No title' }}
+{% endblock %}
+
+{% block main %}
+<div>
+  {{ dataset['text'] | markdown }}
+</div>
+{% endblock %} {# block main #}
+
+{% block actions %}
+{% if allow_edit %}
+<div>
+  <form action="{{ url_for('.edit', iuid=dataset['_id']) }}">
+    <button type="submit" class="btn btn-block btn-sm btn-primary">
+      Edit</button>
+  </form>
+</div>
+<div class="mt-2">
+  {% if dataset['public'] %}
+  <form action="{{ url_for('.private', iuid=dataset['_id']) }}"
+        method="POST">
+    {{ csrf_token() }}
+    <button type="submit" class="btn btn-block btn-sm btn-warning"
+            title="Set the dataset to private access.">
+      Private</button>
+  </form>
+  {% else %}
+  <form action="{{ url_for('.public', iuid=dataset['_id']) }}"
+        method="POST">
+    {{ csrf_token() }}
+    <button type="submit" class="btn btn-block btn-sm btn-success"
+            title="Set the dataset to public access.">
+      Public</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %} {# if allow_edit #}
+{% if allow_delete %}
+<div class="mt-2 mb-4">
+  <form action="{{ url_for('.edit', iuid=dataset['_id']) }}"
+	method="POST">
+    {{ csrf_token() }}
+    <input type="hidden" name="_http_method" value="DELETE">
+    <button type="submit" class="btn btn-block btn-sm btn-danger"
+            {% if not possible_delete %}
+            disabled title="Dataset can't be deleted; is used in a graphic."
+            {% endif %}
+	    onclick="return confirm('Really delete the dataset?')">
+      Delete</button>
+  </form>
+</div>
+{% endif %}
+{% if g.current_user %}
+<form action="{{ url_for('.copy', iuid=dataset['_id']) }}"
+      method="POST">
+  {{ csrf_token() }}
+  <button type="submit" class="btn btn-block btn-sm btn-primary">
+    Copy dataset</button>
+</form>
+<div class="my-2">
+  {% include 'dataset/create.html' %}
+</div>
+<div class="mb-4">
+  {% set dataset = dataset['_id'] %}
+  {% include 'graphic/create.html' %}
+</div>
+{% endif %} {# if g.current_user #}
+{% endblock %} {# block actions #}
+
+{% block info %}
+<div class="small">
+  <span class="mr-3">Modified
+    <span class="localtime">{{ dataset['modified'] }}</span>
+  </span>
+  <span class="mr-3">
+    Created <span class="localtime">{{ dataset['created'] }}</span>
+  </span>
+  <a href="{{ url_for('.logs', iuid=dataset['_id']) }}">Logs</a>
+</div>
+{% endblock %} {# block info #}
+

@@ -147,11 +147,11 @@ class EntitySaver(AttachmentsSaver):
             public = utils.to_bool(flask.request.form.get("public"))
         self.doc["public"] = public
 
-    def set_text(self, text=None):
-        "Set the Markdown-formatted text."
-        if text is None:
-            text = flask.request.form.get("text") or ""
-        self.doc["text"] = text
+    def set_description(self, description=None):
+        "Set the Markdown-formatted description."
+        if description is None:
+            description = flask.request.form.get("description") or ""
+        self.doc["description"] = description
 
     def set_file(self, infile=None):
         "Set the file for this entity. At most one file."

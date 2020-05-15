@@ -21,6 +21,7 @@ DESIGN_DOC = {
         "public_modified": {"map": "function(doc) {if (doc.doctype !== 'graphic' || !doc.public) return; emit(doc.modified, doc.title);}"},
         "owner_modified": {"reduce": "_count",
                            "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit([doc.owner, doc.modified], doc.title);}"},
+        "dataset": {"map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}"},
         "file_size": {"reduce": "_sum",
                       "map": "function(doc) {if (doc.doctype !== 'graphic' || !doc._attachments) return; for (var key in doc._attachments) if (doc._attachments.hasOwnProperty(key)) emit(doc.owner, doc._attachments[key].length);}"}
     },
@@ -36,7 +37,7 @@ def create():
         with GraphicSaver() as saver:
             saver.set_title()
             saver.set_public(False)
-            saver.set_text()
+            saver.set_description()
             saver.set_file()
     except ValueError as error:
         utils.flash_error(str(error))
@@ -138,6 +139,48 @@ def private(iuid):
     else:
         utils.flash_error("Edit access to graphic not allowed.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
+
+@blueprint.route("/<iuid:iuid>.js")
+def serve(iuid, filename):
+    "Return the JavaScript of the graphic."
+    try:
+        graphic = get_graphic(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.referrer())
+    if not allow_view(graphic):
+        utils.flash_error("View access to graphic not allowed.")
+        return flask.redirect(utils.referrer())
+    filename = "vega_lite_specification.js"
+    try:
+        stub = graphic["_attachments"][filename]
+    except KeyError:
+        utils.flash_error("No Vega-Lite JavaScript for the graphic.")
+        return flask.redirect(flask.url(".display", iuid=iuid))
+    outfile = flask.g.db.get_attachment(graphic, filename)
+    response = flask.make_response(outfile.read())
+    response.headers.set("Content-Type", stub["content_type"])
+    if utils.to_bool(flask.request.args.get("download")):
+        response.headers.set("Content-Disposition", "attachment", 
+                             filename=filename)
+    return response
+
+@blueprint.route("/<iuid:iuid>/logs")
+def logs(iuid):
+    "Display the log records of the given graphic."
+    try:
+        graphic = get_graphic(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.referrer())
+    if not allow_view(graphic):
+        utils.flash_error("View access to graphic not allowed.")
+        return flask.redirect(utils.referrer())
+    return flask.render_template(
+        "logs.html",
+        title=f"Graphic {graphic['title'] or 'No title'}",
+        cancel_url=flask.url_for(".display", iuid=iuid),
+        logs=utils.get_logs(iuid))
 
 
 class GraphicSaver(EntitySaver):

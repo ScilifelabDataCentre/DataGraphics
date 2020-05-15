@@ -36,7 +36,7 @@ def create():
         with DatasetSaver() as saver:
             saver.set_title()
             saver.set_public(False)
-            saver.set_text()
+            saver.set_description()
             saver.set_file()
     except ValueError as error:
         utils.flash_error(str(error))
@@ -55,7 +55,11 @@ def display(iuid):
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(utils.referrer())
 
-    raise NotImplementedError
+    return flask.render_template("dataset/display.html",
+                                 dataset=dataset,
+                                 allow_edit=allow_edit(dataset),
+                                 allow_delete=allow_delete(dataset),
+                                 possible_delete=possible_delete(dataset))
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
@@ -139,6 +143,46 @@ def private(iuid):
         utils.flash_error("Edit access to dataset not allowed.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
+@blueprint.route("/<iuid:iuid>/file/<filename>")
+def download(iuid, filename):
+    "Download the file attachment; the dataset itself."
+    try:
+        dataset = get_dataset(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.referrer())
+    if not allow_view(dataset):
+        utils.flash_error("View access to dataset not allowed.")
+        return flask.redirect(utils.referrer())
+    try:
+        stub = dataset["_attachments"][filename]
+    except KeyError:
+        utils.flash_error("No such file attached to dataset.")
+        return flask.redirect(flask.url(".display", iuid=iuid))
+    outfile = flask.g.db.get_attachment(dataset, filename)
+    response = flask.make_response(outfile.read())
+    response.headers.set("Content-Type", stub["content_type"])
+    response.headers.set("Content-Disposition", "attachment", 
+                         filename=filename)
+    return response
+
+@blueprint.route("/<iuid:iuid>/logs")
+def logs(iuid):
+    "Display the log records of the given dataset."
+    try:
+        dataset = get_dataset(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.referrer())
+    if not allow_view(dataset):
+        utils.flash_error("View access to dataset not allowed.")
+        return flask.redirect(utils.referrer())
+    return flask.render_template(
+        "logs.html",
+        title=f"Dataset {dataset['title'] or 'No title'}",
+        cancel_url=flask.url_for(".display", iuid=iuid),
+        logs=utils.get_logs(iuid))
+
 
 class DatasetSaver(EntitySaver):
     "Dataset saver context with file attachment handling."
@@ -165,10 +209,10 @@ def get_dataset(iuid, get_file=False):
     return doc
 
 def get_graphics(dataset):
-    "Get the graphics the dataset is used for."
+    "Get the graphics entities the dataset is used for."
     result = []
     for row in flask.g.db.view("graphics", "dataset",
-                               key=note["_id"],
+                               key=dataset["_id"],
                                include_docs=True):
         flask.g.cache[row.doc["_id"]] = row.doc
         result.append(row.doc)

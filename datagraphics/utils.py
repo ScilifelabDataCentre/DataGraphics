@@ -8,9 +8,11 @@ import time
 import uuid
 
 import couchdb2
+import emoji
 import flask
 import flask_mail
 import jinja2.utils
+import marko
 import werkzeug.routing
 
 from datagraphics import constants
@@ -23,7 +25,8 @@ def init(app):
     """
     app.url_map.converters["name"] = NameConverter
     app.url_map.converters["iuid"] = IuidConverter
-    app.add_template_filter(thousands)
+    app.add_template_filter(markdown)
+    app.add_template_filter(emojize)
     db = get_db(app=app)
     logger = get_logger(app)
     if db.put_design("logs", DESIGN_DOC):
@@ -94,7 +97,7 @@ def admin_required(f):
     """
     @functools.wraps(f)
     def wrap(*args, **kwargs):
-        if not flask.g.is_admin:
+        if not flask.g.am_admin:
             flask.abort(http.client.UNAUTHORIZED)
         return f(*args, **kwargs)
     return wrap
@@ -200,12 +203,13 @@ def flash_message(msg):
     "Flash information message."
     flask.flash(str(msg), "message")
 
-def thousands(value):
-    "Template filter: Output integer with thousands delimiters."
-    if isinstance(value, int):
-        return "{:,}".format(value)
-    else:
-        return value
+def markdown(value):
+    "Template filter: Convert Markdown to HMTL."
+    return jinja2.utils.Markup(marko.Markdown().convert(value or ""))
+
+def emojize(value):
+    "Template filter: Convert emoji shortcodes to character."
+    return jinja2.utils.Markup(emoji.emojize(value or "", use_aliases=True))
 
 def accept_json():
     "Return True if the header Accept contains the JSON content type."
