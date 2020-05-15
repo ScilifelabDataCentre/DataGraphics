@@ -104,7 +104,9 @@
       {% block header %}
       <div class="row">
         <div class="col-md-9 offset-md-1">
-          <h2 class="mt-2 mb-3">{% block body_title %}{{ config['SITE_NAME'] }}{% endblock %}</h2>
+          {% block outer_body_title %}
+          <h2 class="mt-2 mb-3">{% block body_title %}Page title{% endblock %}</h2>
+          {% endblock %}
         </div>
         <div class="col-md-2 py-1">
           {% block meta %}
@@ -178,6 +180,9 @@
     <script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap4.min.js"></script>
     <script src="{{ url_for('static', filename='jquery.localtime-0.9.1.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@{{ constants.VEGA_VERSION }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@{{ constants.VEGA_LITE_VERSION }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@{{ constants.VEGA_EMBED_VERSION }}"></script>
     {% block javascript %}
     {% endblock %}
   </body>

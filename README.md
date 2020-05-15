@@ -1,9 +1,15 @@
 # DataGraphics
 
-Serve datasets and graphics on the web using Vega-Lite graphics.
+Datasets and graphics served on the web using Vega-Lite.
 
-Uses Python3, Flask, CouchDB server, CouchDB2 (Python module), jsonschema,
-Bootstrap, jQuery, DataTables, Vega-Lite.
+Uses Python3, Flask, Vega-Lite, CouchDB server, CouchDB2 (Python module),
+Marko, emoji, jsonschema, Bootstrap, jQuery, DataTables.
+
+[Vega-Lite](https://vega.github.io/vega-lite/)
+is a JavaScript library implementing a grammar of interactive graphics,
+provided by the
+[University of Washington Interactive Data Lab](https://idl.cs.washington.edu/)
+(UW IDL).
 
 ## Installation
 
@@ -51,5 +57,5 @@ Bootstrap, jQuery, DataTables, Vega-Lite.
    ```
 
 9. For running the Flask app in production mode, see the information
-   in the Flask manual and/or the Apache, nginx, or whichever outward-facing
-   web server you are using.
+   in the Flask manual and/or the Apache, nginx, or whichever
+   outward-facing web server you are using.

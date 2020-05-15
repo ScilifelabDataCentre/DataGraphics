@@ -428,3 +428,15 @@ def is_admin_and_not_self(user):
     if flask.g.is_admin:
         return flask.g.current_user["username"] != user["username"]
     return False
+
+def get_sum_file_size(username):
+    "Return the sum of attachments file sizes for the given user."
+    # XXX also graphics
+    rows = list(flask.g.db.view("datasets", "file_size",
+                                key=username,
+                                reduce=True,
+                                group_level=1))
+    if rows:
+        return rows[0].value
+    else:
+        return 0

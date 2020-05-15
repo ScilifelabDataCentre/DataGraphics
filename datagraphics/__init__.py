@@ -2,7 +2,7 @@
 
 import re
 
-__version__ = "0.0.1"
+__version__ = "0.0.3"
 
 class Constants:
     VERSION     = __version__
@@ -10,14 +10,19 @@ class Constants:
     BOOTSTRAP_VERSION  = "4.3.1"
     JQUERY_VERSION     = "3.3.1"
     DATATABLES_VERSION = "1.10.18"
+    VEGA_VERSION       = "5.11.1"
+    VEGA_LITE_VERSION  = "4.12.0"
+    VEGA_EMBED_VERSION = "6.7.1"
 
     NAME_RX  = re.compile(r"^[a-z][a-z0-9_-]*$", re.I)
     IUID_RX  = re.compile(r"^[a-f0-9]{32,32}$", re.I)
     EMAIL_RX = re.compile(r"^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$")
 
     # CouchDB document types
-    DOCTYPE_USER = "user"
-    DOCTYPE_LOG  = "log"
+    DOCTYPE_DATASET = "dataset"
+    DOCTYPE_GRAPHIC = "graphic"
+    DOCTYPE_USER    = "user"
+    DOCTYPE_LOG     = "log"
 
     # User roles
     ADMIN = "admin"

@@ -7,6 +7,8 @@ import flask
 from datagraphics import constants
 from datagraphics import utils
 
+import datagraphics.user
+
 
 class BaseSaver:
     "Base document saver context."
@@ -127,3 +129,70 @@ class AttachmentsSaver(BaseSaver):
 
     def delete_attachment(self, filename):
         self._delete_attachments.add(filename)
+
+
+class EntitySaver(AttachmentsSaver):
+    "Entity saver context handling one file (attachment) per entity."
+
+    def initialize(self):
+        self.doc["owner"] = flask.g.current_user["username"]
+
+    def set_title(self, title=None):
+        if title is None:
+            title = flask.request.form.get("title") or ""
+        self.doc["title"] = title
+
+    def set_public(self, public=None):
+        if public is None:
+            public = utils.to_bool(flask.request.form.get("public"))
+        self.doc["public"] = public
+
+    def set_text(self, text=None):
+        "Set the Markdown-formatted text."
+        if text is None:
+            text = flask.request.form.get("text") or ""
+        self.doc["text"] = text
+
+    def set_file(self, infile=None):
+        "Set the file for this entity. At most one file."
+        if infile is None:
+            infile = flask.request.files.get("file")
+        if not infile: return
+        current = get_entity_file(self.doc)
+        if current:
+            self.delete_attachment(current["filename"])
+        content = infile.read()
+        if flask.g.current_user.get("quota_file_size"):
+            username = flask.g.current_user["username"]
+            total = len(content) + datagraphics.user.get_sum_file_size(username)
+            if total > flask.g.current_user["quota_file_size"]:
+                raise ValueError(f"File {infile.filename} not added;"
+                                 " quota file size reached.")
+        self.add_attachment(infile.filename,
+                            content,
+                            infile.mimetype)
+
+    def remove_file(self, filename=None):
+        "Remove the file, if any."
+        if filename is None:
+            filename = flask.request.form.get("remove_file")
+        if filename:
+            self.delete_attachment(filename)
+
+
+def get_entity_file(entity):
+    "Return the info (or None) for the file to the entity."
+    try:
+        filename, stub = list(entity["_attachments"].items())[0]
+    except KeyError:
+        return None
+    else:
+        return {"filename": filename,
+                "content_type": stub["content_type"],
+                "length": stub["length"]}
+
+def add_entity_file(entity):
+    "Add the info (or None) for the file to the entity."
+    entity["file"] = get_entity_file(entity)
+    return entity
+
