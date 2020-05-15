@@ -4,8 +4,8 @@ import copy
 
 import flask
 
-from . import constants
-from . import utils
+from datagraphics import constants
+from datagraphics import utils
 
 
 class BaseSaver:

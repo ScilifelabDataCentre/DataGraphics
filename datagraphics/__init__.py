@@ -1,13 +1,11 @@
-"Web app template based on Flask, CouchDB. With user account handling."
+"Serve data and graphics on the web using Vega-Lite graphics."
 
 import re
 
-__version__ = "1.0.16"
+__version__ = "0.0.1"
 
 class Constants:
     VERSION     = __version__
-    SOURCE_NAME = "webapp-couchdb"
-    SOURCE_URL  = "https://github.com/pekrau/webapp-flask-couchdb-template"
 
     BOOTSTRAP_VERSION  = "4.3.1"
     JQUERY_VERSION     = "3.3.1"

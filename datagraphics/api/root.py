@@ -4,7 +4,7 @@ import http.client
 
 import flask
 
-from webapp import utils
+from datagraphics import utils
 
 
 blueprint = flask.Blueprint("api", __name__)

@@ -13,7 +13,7 @@ import flask_mail
 import jinja2.utils
 import werkzeug.routing
 
-from webapp import constants
+from datagraphics import constants
 
 def init(app):
     """Initialize app.

@@ -3,21 +3,21 @@
 import os
 import os.path
 
-from webapp import constants
-from webapp import utils
+from datagraphics import constants
+from datagraphics import utils
 
 ROOT_DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
-    SERVER_NAME = "127.0.0.1:5002",
-    SITE_NAME = "webapp-couchdb",
+    SERVER_NAME = "127.0.0.1:5005",
+    SITE_NAME = "DataGraphics",
     SITE_STATIC_DIRPATH = None,
     SITE_ICON = None,           # Filename, must be in 'SITE_STATIC_DIRPATH'
     SITE_LOGO = None,           # Filename, must be in 'SITE_STATIC_DIRPATH'
     DEBUG = False,
     LOG_DEBUG = False,
-    LOG_NAME = "webapp",
+    LOG_NAME = "datagraphics",
     LOG_FILEPATH = None,
     LOG_ROTATING = 0,           # Number of backup rotated log files, if any.
     LOG_FORMAT = "%(levelname)-10s %(asctime)s %(message)s",
@@ -29,7 +29,7 @@ DEFAULT_SETTINGS = dict(
     COUCHDB_URL = "http://127.0.0.1:5984/",
     COUCHDB_USERNAME = None,
     COUCHDB_PASSWORD = None,
-    COUCHDB_DBNAME = "webapp",
+    COUCHDB_DBNAME = "datagraphics",
     JSON_AS_ASCII = False,
     JSON_SORT_KEYS = False,
     MIN_PASSWORD_LENGTH = 6,

@@ -8,9 +8,9 @@ import flask
 import flask_mail
 import werkzeug.security
 
-from webapp import constants
-from webapp import utils
-from webapp.saver import BaseSaver
+from datagraphics import constants
+from datagraphics import utils
+from datagraphics.saver import BaseSaver
 
 def init(app):
     "Initialize; update CouchDB design document."

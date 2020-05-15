@@ -6,9 +6,9 @@ import couchdb2
 import flask
 import jsonschema
 
-import webapp
-from webapp import constants
-from webapp import utils
+import datagraphics
+from datagraphics import constants
+from datagraphics import utils
 
 
 blueprint = flask.Blueprint("about", __name__)
@@ -22,7 +22,8 @@ def software():
 def get_software():
     v = sys.version_info
     return [
-        (constants.SOURCE_NAME, webapp.__version__, constants.SOURCE_URL),
+        ("DataGraphics", datagraphics.__version__,
+         "https://github.com/pekrau/DataGraphics"),
         ("Python", f"{v.major}.{v.minor}.{v.micro}", "https://www.python.org/"),
         ("Flask", flask.__version__, "http://flask.pocoo.org/"),
         ("CouchDB server", flask.g.dbserver.version, 

@@ -4,24 +4,24 @@ import http.client
 
 import flask
 
-import webapp.user
-from webapp import utils
+import datagraphics.user
+from datagraphics import utils
 
 
 blueprint = flask.Blueprint("api_user", __name__)
 
 @blueprint.route("/")
 def all():
-    users = [get_user_basic(u) for u in webapp.user.get_users()]
+    users = [get_user_basic(u) for u in datagraphics.user.get_users()]
     return utils.jsonify(utils.get_json(users=users),
                          schema_url=utils.url_for("api_schema.users"))
 
 @blueprint.route("/<name:username>")
 def display(username):
-    user = webapp.user.get_user(username=username)
+    user = datagraphics.user.get_user(username=username)
     if not user:
         flask.abort(http.client.NOT_FOUND)
-    if not webapp.user.is_admin_or_self(user):
+    if not datagraphics.user.is_admin_or_self(user):
         flask.abort(http.client.FORBIDDEN)
     user.pop("password", None)
     user.pop("apikey", None)
@@ -31,10 +31,10 @@ def display(username):
 
 @blueprint.route("/<name:username>/logs")
 def logs(username):
-    user = webapp.user.get_user(username=username)
+    user = datagraphics.user.get_user(username=username)
     if not user:
         flask.abort(http.client.NOT_FOUND)
-    if not webapp.user.is_admin_or_self(user):
+    if not datagraphics.user.is_admin_or_self(user):
         flask.abort(http.client.FORBIDDEN)
     return utils.jsonify(utils.get_json(user=get_user_basic(user),
                                         logs=utils.get_logs(user["_id"])),

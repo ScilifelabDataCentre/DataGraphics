@@ -1,28 +1,28 @@
-"Web app template."
+"Serve data and graphics on the web using Vega-Lite graphics."
 
 import flask
 
-import webapp.about
-import webapp.config
-import webapp.user
-import webapp.site
+import datagraphics.about
+import datagraphics.config
+import datagraphics.user
+import datagraphics.site
 # To be developed.
-# import webapp.entity
+# import datagraphics.entity
 
-import webapp.api.about
-import webapp.api.root
-import webapp.api.schema
-import webapp.api.user
+import datagraphics.api.about
+import datagraphics.api.root
+import datagraphics.api.schema
+import datagraphics.api.user
 
-from webapp import constants
-from webapp import utils
+from datagraphics import constants
+from datagraphics import utils
 
 app = flask.Flask(__name__)
 
 # Get the configuration and initialize modules (database).
-webapp.config.init(app)
+datagraphics.config.init(app)
 utils.init(app)
-webapp.user.init(app)
+datagraphics.user.init(app)
 utils.mail.init_app(app)
 
 
@@ -43,7 +43,7 @@ def prepare():
     "Open the database connection; get the current user."
     flask.g.dbserver = utils.get_dbserver()
     flask.g.db = utils.get_db(dbserver=flask.g.dbserver)
-    flask.g.current_user = webapp.user.get_current_user()
+    flask.g.current_user = datagraphics.user.get_current_user()
     flask.g.is_admin = flask.g.current_user and \
                        flask.g.current_user["role"] == constants.ADMIN
 
@@ -58,16 +58,18 @@ def home():
         return flask.render_template("home.html")
 
 # Set up the URL map.
-app.register_blueprint(webapp.about.blueprint, url_prefix="/about")
-app.register_blueprint(webapp.user.blueprint, url_prefix="/user")
-app.register_blueprint(webapp.site.blueprint, url_prefix="/site")
+app.register_blueprint(datagraphics.about.blueprint, url_prefix="/about")
+app.register_blueprint(datagraphics.user.blueprint, url_prefix="/user")
+app.register_blueprint(datagraphics.site.blueprint, url_prefix="/site")
 # To be developed.
-# app.register_blueprint(webapp.entity.blueprint, url_prefix="/entity")
+# app.register_blueprint(datagraphics.entity.blueprint, url_prefix="/entity")
 
-app.register_blueprint(webapp.api.root.blueprint, url_prefix="/api")
-app.register_blueprint(webapp.api.about.blueprint, url_prefix="/api/about")
-app.register_blueprint(webapp.api.schema.blueprint, url_prefix="/api/schema")
-app.register_blueprint(webapp.api.user.blueprint, url_prefix="/api/user")
+app.register_blueprint(datagraphics.api.root.blueprint, url_prefix="/api")
+app.register_blueprint(datagraphics.api.about.blueprint, 
+                       url_prefix="/api/about")
+app.register_blueprint(datagraphics.api.schema.blueprint,
+                       url_prefix="/api/schema")
+app.register_blueprint(datagraphics.api.user.blueprint, url_prefix="/api/user")
 
 
 # This code is used only during development.
