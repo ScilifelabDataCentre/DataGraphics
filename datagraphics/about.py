@@ -21,7 +21,7 @@ def software():
 
 def get_software():
     v = sys.version_info
-    return [
+    return sorted([
         ("DataGraphics", datagraphics.__version__,
          "https://github.com/pekrau/DataGraphics"),
         ("Python", f"{v.major}.{v.minor}.{v.micro}", "https://www.python.org/"),
@@ -35,7 +35,12 @@ def get_software():
         ("Bootstrap", constants.BOOTSTRAP_VERSION, "https://getbootstrap.com/"),
         ("jQuery", constants.JQUERY_VERSION, "https://jquery.com/"),
         ("DataTables", constants.DATATABLES_VERSION, "https://datatables.net/"),
-    ]
+        ("Vega", constants.VEGA_VERSION, "https://vega.github.io/vega/"),
+        ("Vega-Lite", constants.VEGA_LITE_VERSION,
+         "https://vega.github.io/vega-lite/"),
+        ("Vega-Embed", constants.VEGA_EMBED_VERSION,
+         "https://github.com/vega/vega-embed"),
+    ], key=lambda t: t[0].lower())
 
 @blueprint.route("/settings")
 @utils.admin_required

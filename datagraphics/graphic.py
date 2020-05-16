@@ -6,7 +6,7 @@ import flask
 from datagraphics import constants
 from datagraphics import utils
 
-from datagraphics.saver import EntitySaver, add_entity_file
+from datagraphics.saver import EntitySaver
 
 
 def init(app):
@@ -36,7 +36,6 @@ def create():
     try:
         with GraphicSaver() as saver:
             saver.set_title()
-            saver.set_public(False)
             saver.set_description()
             saver.set_file()
     except ValueError as error:
@@ -106,40 +105,6 @@ def copy(iuid):
 
     raise NotImplementedError
 
-@blueprint.route("/<iuid:iuid>/public", methods=["POST"])
-@utils.login_required
-def public(iuid):
-    "Set the graphic to public access."
-    try:
-        graphic = get_graphic(iuid)
-    except ValueError as error:
-        utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
-    if allow_edit(graphic):
-        if not graphic["public"]:
-            with GraphicSaver(graphic) as saver:
-                saver.set_public(True)
-    else:
-        utils.flash_error("Edit access to graphic not allowed.")
-    return flask.redirect(flask.url_for(".display", iuid=iuid))
-
-@blueprint.route("/<iuid:iuid>/private", methods=["POST"])
-@utils.login_required
-def private(iuid):
-    "Set the graphic to private access."
-    try:
-        graphic = get_graphic(iuid)
-    except ValueError as error:
-        utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
-    if allow_edit(graphic):
-        if graphic["public"]:
-            with GraphicSaver(graphic) as saver:
-                saver.set_public(False)
-    else:
-        utils.flash_error("Edit access to graphic not allowed.")
-    return flask.redirect(flask.url_for(".display", iuid=iuid))
-
 @blueprint.route("/<iuid:iuid>.js")
 def serve(iuid, filename):
     "Return the JavaScript of the graphic."
@@ -191,7 +156,7 @@ class GraphicSaver(EntitySaver):
 
 # Utility functions
 
-def get_graphic(iuid, get_file=False):
+def get_graphic(iuid):
     "Get the graphic given its IUID."
     try:
         try:
@@ -202,8 +167,6 @@ def get_graphic(iuid, get_file=False):
         raise ValueError("No such graphic.")
     if doc.get("doctype") != constants.DOCTYPE_GRAPHIC:
         raise ValueError(f"Database entry {iuid} is not a graphic.")
-    if get_file:
-        add_entity_file(doc)
     flask.g.cache[iuid] = doc
     return doc
 

@@ -11,8 +11,8 @@ class Constants:
     JQUERY_VERSION     = "3.3.1"
     DATATABLES_VERSION = "1.10.18"
     VEGA_VERSION       = "5.11.1"
-    VEGA_LITE_VERSION  = "4.12.0"
-    VEGA_EMBED_VERSION = "6.7.1"
+    VEGA_LITE_VERSION  = "4.12.1"
+    VEGA_EMBED_VERSION = "6.8.0"
 
     NAME_RX  = re.compile(r"^[a-z][a-z0-9_-]*$", re.I)
     IUID_RX  = re.compile(r"^[a-f0-9]{32,32}$", re.I)
@@ -38,6 +38,7 @@ class Constants:
     # Content types
     HTML_MIMETYPE = "text/html"
     JSON_MIMETYPE = "application/json"
+    CSV_MIMETYPE  = "text/csv"
 
     # Misc
     JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#"
