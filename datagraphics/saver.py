@@ -1,6 +1,8 @@
 "Base document saver context classes."
 
+import base64
 import copy
+import hashlib
 
 import flask
 
@@ -19,8 +21,8 @@ class BaseSaver:
     def __init__(self, doc=None):
         if doc is None:
             self.original = {}
-            self.doc = {'_id': utils.get_iuid(),
-                        'created': utils.get_time()}
+            self.doc = {"_id": utils.get_iuid(),
+                        "created": utils.get_time()}
             self.initialize()
         else:
             self.original = copy.deepcopy(doc)
@@ -32,10 +34,11 @@ class BaseSaver:
 
     def __exit__(self, etyp, einst, etb):
         if etyp is not None: return False
-        self.finalize()
-        self.doc['doctype'] = self.DOCTYPE
-        self.doc['modified'] = utils.get_time()
+        self.finish()
+        self.doc["doctype"] = self.DOCTYPE
+        self.doc["modified"] = utils.get_time()
         flask.g.db.put(self.doc)
+        self.wrapup()
         self.add_log()
 
     def __getitem__(self, key):
@@ -52,8 +55,14 @@ class BaseSaver:
         "Preparations before making any changes."
         pass
 
-    def finalize(self):
-        "Final operations and checks on the document."
+    def finish(self):
+        "Final changes and checks on the document before storing it."
+        pass
+
+    def wrapup(self):
+        """Wrap up the save operation by performing actions that
+        must be done after the document has been stored.
+        """
         pass
 
     def add_log(self):
@@ -69,36 +78,41 @@ class BaseSaver:
                         if self.doc[k] != self.original[k]])
         removed = dict([(k, self.original[k])
                         for k in set(self.original or {}).difference(self.doc)])
-        for key in ['_id', '_rev', 'modified']:
+        for key in ["_id", "_rev", "modified"]:
             try:
                 added.remove(key)
             except ValueError:
                 pass
-        updated.pop('_rev', None)
-        updated.pop('modified', None)
+        updated.pop("_rev", None)
+        updated.pop("modified", None)
         for key in self.HIDDEN_FIELDS:
             if key in updated:
-                updated[key] = '***'
+                updated[key] = "***"
             if key in removed:
-                removed[key] = '***'
-        entry = {'_id': utils.get_iuid(),
-                 'doctype': constants.DOCTYPE_LOG,
-                 'docid': self.doc['_id'],
-                 'added': added,
-                 'updated': updated,
-                 'removed': removed,
-                 'timestamp': utils.get_time()}
-        if hasattr(flask.g, 'current_user') and flask.g.current_user:
-            entry['username'] = flask.g.current_user['username']
+                removed[key] = "***"
+        entry = {"_id": utils.get_iuid(),
+                 "doctype": constants.DOCTYPE_LOG,
+                 "docid": self.doc["_id"],
+                 "added": added,
+                 "updated": updated,
+                 "removed": removed,
+                 "timestamp": utils.get_time()}
+        entry.update(self.add_log_items())
+        if hasattr(flask.g, "current_user") and flask.g.current_user:
+            entry["username"] = flask.g.current_user["username"]
         else:
-            entry['username'] = None
+            entry["username"] = None
         if flask.has_request_context():
-            entry['remote_addr'] = str(flask.request.remote_addr)
-            entry['user_agent'] = str(flask.request.user_agent)
+            entry["remote_addr"] = str(flask.request.remote_addr)
+            entry["user_agent"] = str(flask.request.user_agent)
         else:
-            entry['remote_addr'] = None
-            entry['user_agent'] = None
+            entry["remote_addr"] = None
+            entry["user_agent"] = None
         flask.g.db.put(entry)
+
+    def add_log_items(self):
+        "Return a dictionary of additional items to add to the log entry."
+        return {}
 
 
 class AttachmentsSaver(BaseSaver):
@@ -108,27 +122,41 @@ class AttachmentsSaver(BaseSaver):
         self._delete_attachments = set()
         self._add_attachments = []
 
-    def finish(self):
+    def wrapup(self):
         """Delete any specified attachments.
         Store the input files as attachments.
         Must be done after document is saved.
         """
         for filename in self._delete_attachments:
             rev = flask.g.db.delete_attachment(self.doc, filename)
-            self.doc['_rev'] = rev
+            self.doc["_rev"] = rev
         for attachment in self._add_attachments:
             flask.g.db.put_attachment(self.doc,
-                                      attachment['content'],
-                                      filename=attachment['filename'],
-                                      content_type=attachment['mimetype'])
+                                      attachment["content"],
+                                      filename=attachment["filename"],
+                                      content_type=attachment["mimetype"])
 
     def add_attachment(self, filename, content, mimetype):
-        self._add_attachments.append({'filename': filename,
-                                      'content': content,
-                                      'mimetype': mimetype})
+        self._add_attachments.append({"filename": filename,
+                                      "content": content,
+                                      "mimetype": mimetype})
 
     def delete_attachment(self, filename):
         self._delete_attachments.add(filename)
+
+    def add_log_items(self):
+        "Return a dictionary of additional items to add to the log entry."
+        result = {}
+        if self._delete_attachments:
+            result["attachments_deleted"] = self._delete_attachments
+        if self._add_attachments:
+            for att in self._add_attachments:
+                content = att.pop("content")
+                att["length"] = len(content)
+                md5 = hashlib.md5(content.encode("utf-8"))
+                att["digest"] = base64.b64encode(md5.digest()).decode("utf-8")
+            result["attachments_added"] = self._add_attachments
+        return result
 
 
 class EntitySaver(AttachmentsSaver):
