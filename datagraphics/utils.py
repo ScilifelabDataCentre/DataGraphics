@@ -27,6 +27,7 @@ def init(app):
     app.url_map.converters["iuid"] = IuidConverter
     app.add_template_filter(markdown)
     app.add_template_filter(emojize)
+    app.add_template_filter(float_default)
     db = get_db(app=app)
     logger = get_logger(app)
     if db.put_design("logs", DESIGN_DOC):
@@ -153,6 +154,12 @@ def url_for(endpoint, **values):
     "Same as 'flask.url_for', but with '_external' set to True."
     return flask.url_for(endpoint, _external=True, **values)
 
+def referrer(url=None):
+    """Return the URL for the referring page ('referer').
+    Return the given URL if no referring page; the home page if none given.
+    """
+    return flask.request.headers.get("referer") or url or flask.url_for("home")
+
 def http_GET():
     "Is the HTTP method GET?"
     return flask.request.method == "GET"
@@ -210,6 +217,16 @@ def markdown(value):
 def emojize(value):
     "Template filter: Convert emoji shortcodes to character."
     return jinja2.utils.Markup(emoji.emojize(value or "", use_aliases=True))
+
+def float_default(value, default=""):
+    if value is None:
+        return default
+    elif isinstance(value, int):
+        return str(value)
+    elif isinstance(value, str):
+        return value or default
+    else:
+        return "%g" % value
 
 def accept_json():
     "Return True if the header Accept contains the JSON content type."

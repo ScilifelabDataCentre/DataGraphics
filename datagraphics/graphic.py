@@ -37,7 +37,7 @@ def create():
         with GraphicSaver() as saver:
             saver.set_title()
             saver.set_description()
-            saver.set_file()
+            saver.set_spec()
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.referrer())
@@ -54,8 +54,7 @@ def display(iuid):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
-
-    raise NotImplementedError
+    return flask.render_template("graphic/display.html", graphic=graphic)
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
@@ -71,7 +70,7 @@ def edit(iuid):
         if not allow_edit(graphic):
             utils.flash_error("Edit access to graphic not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
-        raise NotImplementedError
+        return flask.render_template("graphic/edit.html", graphic=graphic)
 
     elif utils.http_POST():
         if not allow_edit(graphic):
@@ -87,13 +86,15 @@ def edit(iuid):
             utils.flash_error("Delete access to graphic not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
         flask.g.db.delete(graphic)
+        for log in utils.get_logs(graphic["_id"], cleanup=False):
+            flask.g.db.delete(log)
         utils.flash_message("The graphic was deleted.")
         return flask.redirect(flask.url_for("home"))
 
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
 def copy(iuid):
-    "Copy the graphic, including its file, but not its binders."
+    "Copy the graphic."
     try:
         graphic = get_graphic(iuid)
     except ValueError as error:
@@ -105,9 +106,9 @@ def copy(iuid):
 
     raise NotImplementedError
 
-@blueprint.route("/<iuid:iuid>.js")
-def serve(iuid, filename):
-    "Return the JavaScript of the graphic."
+@blueprint.route("/<iuid:iuid>.<ext>")
+def serve(iuid, ext):
+    "Return the JSON or JavaScript specification of the Vega-Lite graphic."
     try:
         graphic = get_graphic(iuid)
     except ValueError as error:
@@ -116,18 +117,24 @@ def serve(iuid, filename):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
-    filename = "vega_lite_specification.js"
+    filename = "vega_lite_specification.json"
     try:
         stub = graphic["_attachments"][filename]
     except KeyError:
-        utils.flash_error("No Vega-Lite JavaScript for the graphic.")
+        utils.flash_error("No Vega-Lite JSON for the graphic.")
         return flask.redirect(flask.url(".display", iuid=iuid))
     outfile = flask.g.db.get_attachment(graphic, filename)
-    response = flask.make_response(outfile.read())
-    response.headers.set("Content-Type", stub["content_type"])
+    if ext == "json":
+        response = flask.make_response(outfile.read())
+        response.headers.set("Content-Type", constants.JSON_MIMETYPE)
+    elif ext == "js":
+        spec = outfile.read()
+        divid = flask.request.args.get("divid") or "graphic"
+        response = flask.make_response(f"vegaEmbed('#{divid}', {spec});")
+        response.headers.set("Content-Type", constants.JS_MIMETYPE)
     if utils.to_bool(flask.request.args.get("download")):
         response.headers.set("Content-Disposition", "attachment", 
-                             filename=filename)
+                             filename=f"{graphic['title']}.{ext}")
     return response
 
 @blueprint.route("/<iuid:iuid>/logs")
@@ -143,7 +150,7 @@ def logs(iuid):
         return flask.redirect(utils.referrer())
     return flask.render_template(
         "logs.html",
-        title=f"Graphic {graphic['title'] or 'No title'}",
+        title=f"Graphic {graphic['title']}",
         cancel_url=flask.url_for(".display", iuid=iuid),
         logs=utils.get_logs(iuid))
 

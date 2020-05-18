@@ -2,7 +2,7 @@
 
 import re
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 class Constants:
     VERSION     = __version__
@@ -39,6 +39,7 @@ class Constants:
     HTML_MIMETYPE = "text/html"
     JSON_MIMETYPE = "application/json"
     CSV_MIMETYPE  = "text/csv"
+    JS_MIMETYPE   = "text/javascript"
 
     # Misc
     JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#"

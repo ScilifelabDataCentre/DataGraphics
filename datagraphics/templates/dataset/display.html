@@ -23,18 +23,14 @@
 {% endblock %}
 
 {% block main %}
+<p class="lead">
+  {{ dataset['# records'] }} records,
+  {{ storage | filesizeformat }}
+</p>
 <div>
-  {{ dataset['text'] | markdown }}
+  {{ dataset['description'] | markdown }}
 </div>
-<div class="card my-2">
-  <div class="card-body">
-    <div class="row font-weight-bold">
-      <div class="col-md-2 text-right"># records</div>
-      <div class="col-md-2">{{ dataset['# records'] }}</div>
-    </div>
-  </div>
-</div>
-<table class="table">
+<table class="table mt-2">
   <tr>
     <th>Field</th>
     <th>Type</th>
@@ -54,11 +50,11 @@
     <td>{{ meta['type'] }}</td>
     <td>{{ meta['# null'] }}</td>
     <td>{{ meta['# distinct'] | default('-') }}</td>
-    <td>{{ meta['min'] | default('-') }}</td>
-    <td>{{ meta['max'] | default('-') }}</td>
-    <td>{{ meta['mean'] | default('-') }}</td>
-    <td>{{ meta['median'] | default('-') }}</td>
-    <td>{{ meta['stdev'] | default('-') }}</td>
+    <td>{{ meta.get('min') | float_default('-') }}</td>
+    <td>{{ meta.get('max') | float_default('-') }}</td>
+    <td>{{ meta.get('mean') | float_default('-') }}</td>
+    <td>{{ meta.get('median') | float_default('-') }}</td>
+    <td>{{ meta.get('stdev') | float_default('-') }}</td>
     <td>{{ meta['# true'] | default('-') }}</td>
     <td>{{ meta['# false'] | default('-') }}</td>
   </tr>

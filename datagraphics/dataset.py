@@ -63,9 +63,12 @@ def display(iuid):
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(utils.referrer())
+    storage = sum([s['length'] 
+                   for s in dataset.get('_attachments', {}).values()])
 
     return flask.render_template("dataset/display.html",
                                  dataset=dataset,
+                                 storage=storage,
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset))
@@ -84,13 +87,21 @@ def edit(iuid):
         if not allow_edit(dataset):
             utils.flash_error("Edit access to dataset not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
-        raise NotImplementedError
+        return flask.render_template("dataset/edit.html", dataset=dataset)
 
     elif utils.http_POST():
         if not allow_edit(dataset):
             utils.flash_error("Edit access to dataset not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
-        raise NotImplementedError
+        try:
+            with DatasetSaver(dataset) as saver:
+                saver.set_title()
+                saver.set_description()
+                saver.set_public(False)
+                saver.set_data()
+        except ValueError as error:
+            utils.flash_error(str(error))
+        return flask.redirect(flask.url_for(".display", iuid=iuid))
 
     elif utils.http_DELETE():
         if not possible_delete(dataset):
@@ -171,21 +182,22 @@ def serve(iuid, ext):
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.referrer())
-    if ext not in ("json", "csv"):
-        raise ValueError("invalid data format specified")
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(utils.referrer())
-    outfile = flask.g.db.get_attachment(dataset, f"data.{ext}")
-    response = flask.make_response(outfile.read())
     if ext == "json":
+        outfile = flask.g.db.get_attachment(dataset, "data.json")
+        response = flask.make_response(outfile.read())
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
     elif ext == "csv":
+        outfile = flask.g.db.get_attachment(dataset, "data.csv")
+        response = flask.make_response(outfile.read())
         response.headers.set("Content-Type", constants.CSV_MIMETYPE)
+    else:
+        raise ValueError("invalid data format specified")
     if utils.to_bool(flask.request.args.get("download")):
-        title = dataset["title"] or dataset["_id"]
         response.headers.set("Content-Disposition", "attachment", 
-                             filename=f"{title}.{ext}")
+                             filename=f"{dataset['title']}.{ext}")
     return response
 
 @blueprint.route("/<iuid:iuid>/logs")
