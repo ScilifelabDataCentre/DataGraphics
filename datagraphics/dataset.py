@@ -3,6 +3,7 @@
 import csv
 import io
 import json
+import statistics
 
 import couchdb2
 import flask
@@ -153,27 +154,29 @@ def private(iuid):
         utils.flash_error("Edit access to dataset not allowed.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
-@blueprint.route("/<iuid:iuid>/file/<filename>")
-def download(iuid, filename):
-    "Download the file attachment; the dataset itself."
+@blueprint.route("/<iuid:iuid>.<ext>")
+def serve(iuid, ext):
+    "Return the content of the dataset as JSON or CSV."
     try:
         dataset = get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.referrer())
+    if ext not in ("json", "csv"):
+        raise ValueError("invalid data format specified")
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(utils.referrer())
-    try:
-        stub = dataset["_attachments"][filename]
-    except KeyError:
-        utils.flash_error("No such file attached to dataset.")
-        return flask.redirect(flask.url(".display", iuid=iuid))
-    outfile = flask.g.db.get_attachment(dataset, filename)
+    outfile = flask.g.db.get_attachment(dataset, f"data.{ext}")
     response = flask.make_response(outfile.read())
-    response.headers.set("Content-Type", stub["content_type"])
-    response.headers.set("Content-Disposition", "attachment", 
-                         filename=filename)
+    if ext == "json":
+        response.headers.set("Content-Type", constants.JSON_MIMETYPE)
+    elif ext == "csv":
+        response.headers.set("Content-Type", constants.CSV_MIMETYPE)
+    if utils.to_bool(flask.request.args.get("download")):
+        title = dataset["title"] or dataset["_id"]
+        response.headers.set("Content-Disposition", "attachment", 
+                             filename=f"{title}.{ext}")
     return response
 
 @blueprint.route("/<iuid:iuid>/logs")
@@ -217,14 +220,16 @@ class DatasetSaver(EntitySaver):
         else:
             raise ValueError("Cannot handle data file of type"
                              f" {infile.content_type}.")
+        self.doc["# records"] = len(data)
+        self.update_meta(data)
 
         json_content = json.dumps(data)
 
         outfile = io.StringIO()
         writer = csv.DictWriter(outfile, fieldnames=list(data[0].keys()))
         writer.writeheader()
-        for row in data:
-            writer.writerow(row)
+        for record in data:
+            writer.writerow(record)
         outfile.seek(0)
         csv_content = outfile.read()
 
@@ -244,8 +249,9 @@ class DatasetSaver(EntitySaver):
 
     def get_json_data(self, infile):
         """Return the data from the given JSON infile.
-        If there is a 'meta' entry for the dataset, check against it.
-        Otherwise create it.
+        If there is a 'meta' entry for the dataset, check against types it.
+        Otherwise define it.
+        Update the 'meta' entries.
         """
         data = json.load(infile)
         if not data:
@@ -254,46 +260,44 @@ class DatasetSaver(EntitySaver):
             raise ValueError("JSON data does not contain a list.")
         first = data[0]
         if not first:
-            raise ValueError("Empty first item in JSON data.")
+            raise ValueError("Empty first record in JSON data.")
         if not isinstance(first, dict):
-            raise ValueError(f"JSON data item 0 '{first}' is not an object.")
+            raise ValueError(f"JSON data record 0 '{first}' is not an object.")
         try:
             meta = self.doc["meta"]
         except KeyError:
-            # Create the 'meta' entry for the dataset if it does not exist.
-            meta = dict((key, {}) for key in first)
-            self.doc["meta"] = meta
+            # Define the 'meta' entry for the dataset if it does not exist.
+            # Figure out the types from the items in the first data record.
+            self.doc["meta"] = meta = dict((key, {}) for key in first)
             for key, value in first.items():
                 try:
                     meta[key]["type"] = TYPE_NAME_MAP[type(value)]
                 except KeyError:
                     raise ValueError(f"JSON data item 0 '{first}'"
                                      " contains illegal type")
-        # Check item homogeneity, and set 'null' in 'meta'.
+        # Check data homogeneity, and set 'null' in 'meta'.
         TYPE_OBJECT_MAP = dict((n, o) for o, n in TYPE_NAME_MAP.items())
         keys = list(meta.keys())
-        for key in keys:
-            meta[key]["null"] = False
-        for pos, item in enumerate(data):
-            if not isinstance(item, dict):
-                raise ValueError(f"JSON data item {pos} '{item}'"
+        for pos, record in enumerate(data):
+            if not isinstance(record, dict):
+                raise ValueError(f"JSON data record {pos} '{record}'"
                                  " is not an object.")
             for key in keys:
                 try:
-                    value = item[key]
+                    value = record[key]
                 except KeyError:
-                    item[key] = value = None
-                if value is None:
-                    meta[key]["null"] = True
-                elif type(value) != TYPE_OBJECT_MAP[meta[key]["type"]]:
-                    raise ValueError(f"JSON data item {pos} '{item}'"
+                    record[key] = value = None
+                if value is not None and \
+                   type(value) != TYPE_OBJECT_MAP[meta[key]["type"]]:
+                    raise ValueError(f"JSON data record {pos} '{record}'"
                                      " contains wrong type.")
         return data
 
     def get_csv_data(self, infile):
         """Retun the data frin the given CSV infile.
-        If there is a 'meta' entry for the dataset, check against it.
-        Otherwise create it.
+        If there is a 'meta' entry for the dataset, check against types it.
+        Otherwise define it.
+        Update the 'meta' entries.
         """
         reader = csv.DictReader(io.StringIO(infile.read().decode("utf-8")))
         data = list(reader)
@@ -301,20 +305,22 @@ class DatasetSaver(EntitySaver):
             raise ValueError("No data in CSV file.")
 
         TYPE_OBJECT_MAP = dict((n, o) for o, n in TYPE_NAME_MAP.items())
-        def to_bool(s):
+        def bool2(s):
             if s == "True": return True
+            if s == "true": return True
             if s == "False": return False
+            if s == "false": return False
             if not s: return None
             raise ValueError(f"invalid bool '{s}'")
-        TYPE_OBJECT_MAP["boolean"] = to_bool
+        TYPE_OBJECT_MAP["boolean"] = bool2
 
         first = data[0]
         try:
             meta = self.doc["meta"]
         except KeyError:
-            # Create the 'meta' entry for the dataset if it does not exist.
-            meta = dict((key, {}) for key in first)
-            self.doc["meta"] = meta
+            # Define the 'meta' entry for the dataset if it does not exist.
+            # Figure out the types from the items in the first data record.
+            self.doc["meta"] = meta = dict((key, {}) for key in first)
             for key, value in first.items():
                 try:
                     int(value)
@@ -325,35 +331,74 @@ class DatasetSaver(EntitySaver):
                         meta[key]["type"] = "number"
                     except ValueError:
                         try:
-                            to_bool(value)
+                            bool2(value)
                             meta[key]["type"] = "boolean"
                         except ValueError:
                             meta[key]["type"] = "string"
         # Convert values; checks homogeneity and set 'null' in 'meta'.
         keys = list(meta.keys())
-        for key in keys:
-            meta[key]["null"] = False
-        for pos, item in enumerate(data):
-            for key, value in item.items():
+        for pos, record in enumerate(data):
+            for key, value in record.items():
                 if value:
                     try:
-                        item[key] = TYPE_OBJECT_MAP[meta[key]["type"]](value)
+                        record[key] = TYPE_OBJECT_MAP[meta[key]["type"]](value)
                     except ValueError:
-                        raise ValueError(f"JSON data item {pos} '{item}'"
+                        raise ValueError(f"JSON data record {pos} '{record}'"
                                          " contains wrong type.")
-                else:
-                    # An empty string is a string when type is 'string';
-                    # otherwise None.
-                    if meta[key]["type"] != "string":
-                        item[key] = None
-                if item[key] is None:
-                    meta[key]["null"] = True
+                elif meta[key]["type"] != "string":
+                    # An empty string is a string when type is 'string'.
+                    # Otherwise None.
+                    record[key] = None
         return data
+
+    def update_meta(self, data):
+        "Update the 'meta' entry given the data."
+        for key, meta in self.doc["meta"].items():
+            meta["# null"] = len([r[key] for r in data if r[key] is None])
+            if meta["type"] in ("string", "integer"):
+                distinct = set(r[key] for r in data if r[key] is not None)
+                meta["# distinct"] = len(distinct)
+                try:
+                    meta["min"] = min(distinct)
+                except ValueError:
+                    meta["min"] = None
+                try:
+                    meta["max"] = max(distinct)
+                except ValueError:
+                    meta["max"] = None
+            elif meta["type"] == "number":
+                values = [r[key] for r in data if r[key] is not None]
+                try:
+                    meta["min"] = min(values)
+                except ValueError:
+                    meta["min"] = None
+                try:
+                    meta["max"] = max(values)
+                except ValueError:
+                    meta["max"] = None
+                try:
+                    meta["mean"] = statistics.mean(values)
+                except statistics.StatisticsError:
+                    meta["mean"] = None
+                try:
+                    meta["median"] = statistics.median(values)
+                except statistics.StatisticsError:
+                    meta["median"] = None
+                try:
+                    meta["stdev"] = statistics.stdev(values)
+                except statistics.StatisticsError:
+                    meta["stdev"] = None
+            elif meta["type"] == "boolean":
+                meta["# true"] = len([r[key] for r in data if r[key] is True])
+                meta["# false"] = len([r[key] for r in data if r[key] is False])
 
     def remove_data(self):
         "Remove the data."
         for filename in list(self.doc.get("_attachments", {}).keys()):
             self.delete_attachment(filename)
+        for meta in self.doc["meta"].valuess():
+            for item in ("distinct", "min", "max", "mean", "media", "stdev"):
+                meta.pop(item, None)
 
 
 # Utility functions

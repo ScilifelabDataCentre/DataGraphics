@@ -7,6 +7,7 @@ import datagraphics.config
 import datagraphics.user
 import datagraphics.site
 import datagraphics.dataset
+import datagraphics.datasets
 import datagraphics.graphic
 
 import datagraphics.api.about
@@ -65,6 +66,7 @@ app.register_blueprint(datagraphics.about.blueprint, url_prefix="/about")
 app.register_blueprint(datagraphics.user.blueprint, url_prefix="/user")
 app.register_blueprint(datagraphics.site.blueprint, url_prefix="/site")
 app.register_blueprint(datagraphics.dataset.blueprint, url_prefix="/dataset")
+app.register_blueprint(datagraphics.datasets.blueprint, url_prefix="/datasets")
 app.register_blueprint(datagraphics.graphic.blueprint, url_prefix="/graphic")
 
 app.register_blueprint(datagraphics.api.root.blueprint, url_prefix="/api")
@@ -73,10 +75,6 @@ app.register_blueprint(datagraphics.api.about.blueprint,
 app.register_blueprint(datagraphics.api.schema.blueprint,
                        url_prefix="/api/schema")
 app.register_blueprint(datagraphics.api.user.blueprint, url_prefix="/api/user")
-# app.register_blueprint(datagraphics.api.dataset.blueprint,
-#                        url_prefix="/api/dataset")
-# app.register_blueprint(datagraphics.api.graphics.blueprint,
-#                        url_prefix="/api/graphics")
 
 
 # This code is used only during development.

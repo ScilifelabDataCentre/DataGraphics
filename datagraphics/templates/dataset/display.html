@@ -9,10 +9,61 @@
 {{ macros.dataset_symbol() }}{{ dataset['title'] or 'No title' }}
 {% endblock %}
 
+{% block meta %}
+<div>
+  <a href="{{ url_for('.serve', iuid=dataset['_id'], ext='json', download=True) }}"
+     title="Download dataset content."
+     class="badge badge-pill badge-primary">JSON file</a>
+</div>
+<div>
+  <a href="{{ url_for('.serve', iuid=dataset['_id'], ext='csv', download=True) }}"
+     title="Download dataset content."
+     class="badge badge-pill badge-primary">CSV file</a>
+</div>
+{% endblock %}
+
 {% block main %}
 <div>
   {{ dataset['text'] | markdown }}
 </div>
+<div class="card my-2">
+  <div class="card-body">
+    <div class="row font-weight-bold">
+      <div class="col-md-2 text-right"># records</div>
+      <div class="col-md-2">{{ dataset['# records'] }}</div>
+    </div>
+  </div>
+</div>
+<table class="table">
+  <tr>
+    <th>Field</th>
+    <th>Type</th>
+    <th># null</th>
+    <th># distinct</th>
+    <th>Min</th>
+    <th>Max</th>
+    <th>Mean</th>
+    <th>Median</th>
+    <th>Stdev</th>
+    <th># true</th>
+    <th># false</th>
+  </tr>
+  {% for key, meta in dataset['meta'].items() %}
+  <tr>
+    <td>{{ key }}</td>
+    <td>{{ meta['type'] }}</td>
+    <td>{{ meta['# null'] }}</td>
+    <td>{{ meta['# distinct'] | default('-') }}</td>
+    <td>{{ meta['min'] | default('-') }}</td>
+    <td>{{ meta['max'] | default('-') }}</td>
+    <td>{{ meta['mean'] | default('-') }}</td>
+    <td>{{ meta['median'] | default('-') }}</td>
+    <td>{{ meta['stdev'] | default('-') }}</td>
+    <td>{{ meta['# true'] | default('-') }}</td>
+    <td>{{ meta['# false'] | default('-') }}</td>
+  </tr>
+  {% endfor %}
+</table>
 {% endblock %} {# block main #}
 
 {% block actions %}

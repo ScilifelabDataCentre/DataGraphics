@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block head_title %}
+{% if g.current_user %}
+My datasets
+{% else %}
+Datasets
+{% endif %}
+{% endblock %}
+
+{% block body_title %}
+{% if g.current_user %}
+My datasets
+{% else %}
+Datasets
+{% endif %}
+{% endblock %}
+
+{% block main %}
+{{ macros.datasets_table(datasets, show_public=show_public) }}
+{% endblock %} {# block main #}
+
+{% block actions %}
+{% if g.current_user %}
+<div class="mb-2">
+  {% include 'dataset/create.html' %}
+</div>
+{% endif %} {# if g.current_user #}
+{% endblock %} {# block actions #}
+
+{% block javascript %}
+<script>
+  $(function() {
+    $("#datasets").DataTable( {
+      pagingType: "full_numbers",
+      pageLength: 25,
+      order: [[{{ 1 + show_public }}, "desc"]]
+    });
+  });
+</script>
+{% endblock %}

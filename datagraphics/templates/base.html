@@ -41,6 +41,25 @@
       </button>
       <div class="collapse navbar-collapse" id="top_navbar">
         <ul class="navbar-nav mr-auto">
+          {% if g.current_user %}
+          <li class="nav-item dropdown">
+            <a href="#" id="navbarDatasets" 
+               class="nav-link dropdown-toggle pr-4"
+               role="button" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">Datasets</a>
+            <div class="dropdown-menu" aria-labelledby="navbarDatasets">
+              <a class="dropdown-item"
+                 href="{{ url_for('datasets.display') }}">My datasets</a>
+              <a class="dropdown-item"
+                 href="{{ url_for('datasets.public') }}">Public datasets</a>
+            </div>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('datasets.display') }}">
+              Datasets</a>
+          </li>
+          {% endif %} {# if g.current_user #}
           {% if g.am_admin %}
           <li class="nav-item dropdown">
             <a href="#" id="navbarAdmin" class="nav-link dropdown-toggle pr-4"
