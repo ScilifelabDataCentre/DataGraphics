@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block head_title %}
+{% if g.current_user %}
+Public datasets
+{% else %}
+Datasets
+{% endif %}
+{% endblock %}
+
+{% block body_title %}
+{% if g.current_user %}
+Public datasets
+{% else %}
+Datasets
+{% endif %}
+{% endblock %}
+
+{% block main %}
+{{ macros.datasets_table(datesets, show_public=False) }}
+{% endblock %} {# block main #}
+
+{% block javascript %}
+<script>
+  $(function() {
+    $("#datasets").DataTable( {
+      pagingType: "full_numbers",
+      pageLength: 25,
+      order: [[1, "desc"]]
+    });
+  });
+</script>
+{% endblock %}

@@ -108,7 +108,7 @@ def edit(iuid):
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
 def copy(iuid):
-    "Copy the dataset, including its file, but not its binders."
+    "Copy the dataset, including its data content."
     try:
         dataset = get_dataset(iuid)
     except ValueError as error:
@@ -117,8 +117,17 @@ def copy(iuid):
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(flask.url_for(".display", iuid=iuid))
-
-    raise NotImplementedError
+    try:
+        with DatasetSaver() as saver:
+            saver.set_title(f"Copy of {dataset['title']}")
+            saver.set_description(dataset["description"])
+            saver.set_public(False)
+            saver.set_data(flask.g.db.get_attachment(dataset, "data.json"),
+                           content_type=constants.JSON_MIMETYPE)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.referrer())
+    return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>/public", methods=["POST"])
 @utils.login_required
@@ -207,15 +216,17 @@ class DatasetSaver(EntitySaver):
             public = utils.to_bool(flask.request.form.get("public"))
         self.doc["public"] = public
 
-    def set_data(self, infile=None):
+    def set_data(self, infile=None, content_type=None):
         "Set the data for this dataset from the input file (CSV or JSON)."
         if infile is None:
             infile = flask.request.files.get("file")
         if not infile: return
 
-        if infile.content_type == constants.JSON_MIMETYPE:
+        if content_type is None:
+            content_type = infile.content_type
+        if content_type == constants.JSON_MIMETYPE:
             data = self.get_json_data(infile)
-        elif infile.content_type == constants.CSV_MIMETYPE:
+        elif content_type == constants.CSV_MIMETYPE:
             data = self.get_csv_data(infile)
         else:
             raise ValueError("Cannot handle data file of type"

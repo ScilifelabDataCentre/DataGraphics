@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block head_title %}{{ dataset['title'] or 'No title' }}{% endblock %}
+{% block head_title %}{{ dataset['title'] }}{% endblock %}
 
 {% block body_title %}
 {% if g.current_user %}
 {{ macros.access_symbol(dataset) }}
 {% endif %}
-{{ macros.dataset_symbol() }}{{ dataset['title'] or 'No title' }}
+{{ macros.dataset_symbol() }}{{ dataset['title']  }}
 {% endblock %}
 
 {% block meta %}

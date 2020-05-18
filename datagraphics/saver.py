@@ -167,8 +167,8 @@ class EntitySaver(AttachmentsSaver):
 
     def set_title(self, title=None):
         if title is None:
-            title = flask.request.form.get("title") or ""
-        self.doc["title"] = title
+            title = flask.request.form.get("title")
+        self.doc["title"] = title or "Untitled"
 
     def set_description(self, description=None):
         "Set the Markdown-formatted description."

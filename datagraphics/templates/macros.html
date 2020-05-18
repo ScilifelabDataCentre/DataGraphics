@@ -14,8 +14,8 @@
 <span title="Private">{{ ':locked:' | emojize }}</span>&nbsp;
 {%- endmacro %}
 
-{% macro access_symbol(element) -%}
-{% if element.get('public') %}
+{% macro access_symbol(item) -%}
+{% if item.get('public') %}
 {{ public_symbol() }}
 {% else %}
 {{ private_symbol() }}
@@ -26,14 +26,14 @@
 <span title="Download file">{{ ':inbox_tray:' | emojize }}</span>&nbsp;
 {%- endmacro %}
 
-{% macro datasets_table(datasets, public=False, show_public=False) -%}
+{% macro datasets_table(datasets, show_public=False) -%}
 <table id="datasets" class="table table-sm">
   <thead>
     <tr>
       {% if show_public %}
       <th width="5%"></th>
       {% endif %}
-      <th>Datasets</th>
+      <th>Dataset</th>
       <th>Modified</th>
     </tr>
   </thead>
@@ -41,15 +41,11 @@
     {% for dataset in datasets %}
     <tr>
       {% if show_public %}
-      <td>
-        {% if dataset['public'] %}
-        {{ public_symbol() }}
-        {% endif %}
-      </td>
-      {% endif %} {# if show_public #}
+      <td>{{ access_symbol(dataset) }}</td>
+      {% endif %}
       <td>
         <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
-          {{ dataset_symbol() }}{{ dataset['title'] or 'No title' }}</a>
+          {{ dataset_symbol() }}{{ dataset['title'] }}</a>
       </td>
       <td class="small localtime">{{ dataset['modified'] }}</td>
     </tr>
