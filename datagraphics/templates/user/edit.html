@@ -36,7 +36,7 @@
     <div class="col-md">
       {% for role in constants.USER_ROLES %}
       <div class="form-check">
-        <input type="checkbox" name="role" id="role_{{ role }}"
+        <input type="radio" name="role" id="role_{{ role }}"
                class="form-check-input"
                value="{{ role }}"
                {{ role == user['role'] and 'checked' or '' }}>
@@ -72,6 +72,20 @@
 {% endblock %} {# block main #}
 
 {% block actions %}
+{% if deletable %}
+<div class="mt-2 mb-4">
+  <form action="{{ url_for('.edit', username=user['username']) }}"
+	method="POST">
+    {{ csrf_token() }}
+    <input type="hidden" name="_http_method" value="DELETE">
+    <button type="submit" class="btn btn-danger btn-block"
+	    data-toggle="tooltip" data-placement="left"
+	    title="Delete the user account."
+            onclick="return confirm('Really delete? Cannot be undone.')">
+      Delete</button>
+  </form>
+</div>
+{% endif %} {# if deletable #}
 <div class="mt-2">
   <form action="{{ url_for('.display', username=user['username']) }}"
 	method="GET">

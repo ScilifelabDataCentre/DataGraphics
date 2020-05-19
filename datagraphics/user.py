@@ -13,11 +13,26 @@ from datagraphics import utils
 from datagraphics.saver import BaseSaver
 
 def init(app):
-    "Initialize; update CouchDB design document."
+    """Initialize; update CouchDB design document.
+    Create the admin user specified in the settings file, if any.
+    """
     db = utils.get_db(app=app)
     logger = utils.get_logger(app)
     if db.put_design("users", DESIGN_DOC):
         logger.info("Updated users design document.")
+    if app.config["ADMIN_USER"]:
+        with app.app_context():
+            flask.g.db = db
+            user = get_user(username=app.config["ADMIN_USER"]["username"])
+            if user is None:
+                with UserSaver() as saver:
+                    saver.set_username(app.config["ADMIN_USER"]["username"])
+                    saver.set_email(app.config["ADMIN_USER"]["email"])
+                    saver.set_role(constants.ADMIN)
+                    saver.set_status(constants.ENABLED)
+                    saver.set_password(app.config["ADMIN_USER"]["password"])
+            logger.info("Created admin user " +
+                        app.config["ADMIN_USER"]["username"])
 
 DESIGN_DOC = {
     "views": {
@@ -74,7 +89,11 @@ def register():
                 saver.set_username(flask.request.form.get("username"))
                 saver.set_email(flask.request.form.get("email"))
                 saver.set_role(constants.USER)
-                saver.set_password()
+                if flask.g.am_admin:
+                    saver.set_password(flask.request.form.get("password") or None)
+                    saver.set_status(constants.ENABLED)
+                else:
+                    saver.set_password()
             user = saver.doc
         except ValueError as error:
             utils.flash_error(error)
@@ -82,9 +101,12 @@ def register():
         utils.get_logger().info(f"registered user {user['username']}")
         # Directly enabled; send code to the user.
         if user["status"] == constants.ENABLED:
-            send_password_code(user, "registration")
-            utils.get_logger().info(f"enabled user {user['username']}")
-            utils.flash_message("User account created; check your email.")
+            if user["password"][:5] == "code:":
+                send_password_code(user, "registration")
+                utils.get_logger().info(f"enabled user {user['username']}")
+                utils.flash_message("User account created; check your email.")
+            else:
+                utils.flash_message("User account created and password set.")
         # Was set to 'pending'; send email to admins.
         else:
             admins = get_users(constants.ADMIN, status=constants.ENABLED)
@@ -171,8 +193,7 @@ def display(username):
         return flask.redirect(flask.url_for("home"))
     return flask.render_template("user/display.html",
                                  user=user,
-                                 enable_disable=am_admin_and_not_self(user),
-                                 deletable=is_empty(user))
+                                 enable_disable=am_admin_and_not_self(user))
 
 @blueprint.route("/display/<name:username>/edit",
                  methods=["GET", "POST", "DELETE"])
@@ -190,7 +211,8 @@ def edit(username):
     if utils.http_GET():
         return flask.render_template("user/edit.html",
                                      user=user,
-                                     change_role=am_admin_and_not_self(user))
+                                     change_role=am_admin_and_not_self(user),
+                                     deletable=is_empty(user))
 
     elif utils.http_POST():
         with UserSaver(user) as saver:
@@ -215,7 +237,7 @@ def edit(username):
         utils.flash_message(f"Deleted user {username}.")
         utils.get_logger().info(f"deleted user {username}")
         if flask.g.am_admin:
-            return flask.redirect(flask.url_for(".users"))
+            return flask.redirect(flask.url_for(".all"))
         else:
             return flask.redirect(flask.url_for("home"))
 
@@ -414,8 +436,7 @@ def send_password_code(user, action):
 
 def is_empty(user):
     "Is the given user account empty? No data associated with it."
-    # XXX Needs implementation.
-    return False
+    return not get_user_datasets(user) and not get_user_graphics(user)
 
 def am_admin_or_self(user):
     "Is the current user admin, or the same as the given user?"
@@ -429,6 +450,28 @@ def am_admin_and_not_self(user):
         return flask.g.current_user["username"] != user["username"]
     return False
 
+def get_user_datasets(user):
+    "Get the datasets owned by the user."
+    result = []
+    for row in flask.g.db.view("datasets", "owner_modified",
+                               startkey=[user["username"]],
+                               endkey=[user["username"], "ZZZZZZ"],
+                               include_docs=True):
+        flask.g.cache[row.doc["_id"]] = row.doc
+        result.append(row.doc)
+    return result
+    
+def get_user_graphics(user):
+    "Get the graphics owned by the user."
+    result = []
+    for row in flask.g.db.view("graphics", "owner_modified",
+                               startkey=[user["username"]],
+                               endkey=[user["username"], "ZZZZZZ"],
+                               include_docs=True):
+        flask.g.cache[row.doc["_id"]] = row.doc
+        result.append(row.doc)
+    return result
+    
 def get_sum_file_size(username):
     "Return the sum of attachments file sizes for the given user."
     result = 0
