@@ -65,13 +65,16 @@ def display(iuid):
         return flask.redirect(utils.referrer())
     storage = sum([s['length'] 
                    for s in dataset.get('_attachments', {}).values()])
-
+    am_admin_or_self = flask.g.am_admin or \
+                       (flask.g.current_user and 
+                        dataset["owner"] == flask.g.current_user["username"])
     return flask.render_template("dataset/display.html",
                                  dataset=dataset,
                                  storage=storage,
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
-                                 possible_delete=possible_delete(dataset))
+                                 possible_delete=possible_delete(dataset),
+                                 am_admin_or_self=am_admin_or_self)
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required

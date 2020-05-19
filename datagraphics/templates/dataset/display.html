@@ -23,10 +23,6 @@
 {% endblock %}
 
 {% block main %}
-<p class="lead">
-  {{ dataset['# records'] }} records,
-  {{ storage | filesizeformat }}
-</p>
 <div>
   {{ dataset['description'] | markdown }}
 </div>
@@ -123,14 +119,31 @@
 {% endblock %} {# block actions #}
 
 {% block info %}
-<div class="small">
-  <span class="mr-3">Modified
+<div>
+  {{ dataset['# records'] }} records
+</div>
+<div>
+  {{ storage | filesizeformat }}
+</div>
+<div>
+  Owner
+  {% if am_admin_or_self %}
+  <a href="{{ url_for('user.display', username=dataset['owner']) }}">
+    {{ dataset['owner'] }}</a>
+  {% else %}
+  {{ dataset['owner'] }}
+  {% endif %}
+</div>
+<div class="small mt-4">
+  <div>Modified
     <span class="localtime">{{ dataset['modified'] }}</span>
-  </span>
-  <span class="mr-3">
+  </div>
+  <div>
+    <a href="{{ url_for('.logs', iuid=dataset['_id']) }}">Logs</a>
+  </div>
+  <div>
     Created <span class="localtime">{{ dataset['created'] }}</span>
-  </span>
-  <a href="{{ url_for('.logs', iuid=dataset['_id']) }}">Logs</a>
+  </div>
 </div>
 {% endblock %} {# block info #}
 

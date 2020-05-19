@@ -92,14 +92,14 @@
 {% endblock %} {# block actions #}
 
 {% block info %}
-<div class="small">
-  <div class="mt-4">
+<div class="small mt-4">
+  <div>
     Modified <span class="localtime">{{ user['modified'] }}</span>
   </div>
-  <div class="mt-1">
+  <div>
     <a href="{{ url_for('.logs', username=user['username']) }}">Logs</a>
   </div>
-  <div class="mt-1">
+  <div>
     Created <span class="localtime">{{ user['created'] }}</span>
   </div>
 </div>
