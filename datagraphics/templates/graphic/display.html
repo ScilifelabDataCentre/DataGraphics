@@ -13,10 +13,16 @@
 {% endblock %}
 
 {% block main %}
+{% if dataset is none() %}
+<p class="lead text-danger">
+  Dataset does not exist, or view access is not allowed.
+</p>
+{% else %}
 <p class="lead">
   Dataset <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
     {{ dataset['title'] }}</a>
 </p>
+{% endif %}
 <div id="graphic">
 </div>
 <div>
@@ -114,10 +120,12 @@
 {% endblock %} {# block info #}
 
 {% block javascript %}
+{% if dataset is not none() %}
 <script src="https://cdn.jsdelivr.net/npm/vega@{{ constants.VEGA_VERSION }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-lite@{{ constants.VEGA_LITE_VERSION }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@{{ constants.VEGA_EMBED_VERSION }}"></script>
 <script type="text/javascript">
   vegaEmbed('#graphic', {{ graphic['specification'] | tojson(indent=2) }});
 </script>
+{% endif %}
 {% endblock %}

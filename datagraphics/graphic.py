@@ -40,6 +40,7 @@ def create():
         with GraphicSaver() as saver:
             saver.set_title()
             saver.set_description()
+            saver.set_public(False)
             saver.set_dataset(datagraphics.dataset.get_dataset(
                 flask.request.form.get("dataset")))
             saver.set_specification()
@@ -61,12 +62,11 @@ def display(iuid):
         return flask.redirect(utils.referrer())
     try:
         dataset = datagraphics.dataset.get_dataset(graphic["dataset"])
-    except ValueError as error: # Should not happen.
-        utils.flash_error(str(error))
-        return flask.redirect(flask.url_for("home"))
-    if not allow_view(dataset):
-        utils.flash_error("View access to dataset of graphic not allowed.")
-        return flask.redirect(utils.referrer())
+    except ValueError as error:
+        dataset = None
+    else:
+        if not allow_view(dataset):
+            dataset = None
     am_admin_or_self = datagraphics.user.am_admin_or_self(username=graphic["owner"])
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
