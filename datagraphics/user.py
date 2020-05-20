@@ -441,11 +441,13 @@ def is_empty(user):
     "Is the given user account empty? No data associated with it."
     return not get_user_datasets(user) and not get_user_graphics(user)
 
-def am_admin_or_self(user):
+def am_admin_or_self(user=None, username=None):
     "Is the current user admin, or the same as the given user?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == user["username"]
+    if user is not None:
+        username = user["username"]
+    return flask.g.current_user["username"] == username
 
 def am_admin_and_not_self(user):
     "Is the current user admin, but not the same as the given user?"

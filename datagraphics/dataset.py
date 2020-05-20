@@ -8,6 +8,7 @@ import statistics
 import couchdb2
 import flask
 
+import datagraphics.user
 from datagraphics import constants
 from datagraphics import utils
 
@@ -65,9 +66,7 @@ def display(iuid):
         return flask.redirect(utils.referrer())
     storage = sum([s['length'] 
                    for s in dataset.get('_attachments', {}).values()])
-    am_admin_or_self = flask.g.am_admin or \
-                       (flask.g.current_user and 
-                        dataset["owner"] == flask.g.current_user["username"])
+    am_admin_or_self = datagraphics.user.am_admin_or_self(username=dataset["owner"])
     return flask.render_template("dataset/display.html",
                                  dataset=dataset,
                                  storage=storage,
@@ -225,11 +224,6 @@ class DatasetSaver(EntitySaver):
     "Dataset saver context with data content handling."
 
     DOCTYPE = constants.DOCTYPE_DATASET
-
-    def set_public(self, public=None):
-        if public is None:
-            public = utils.to_bool(flask.request.form.get("public"))
-        self.doc["public"] = public
 
     def set_data(self, infile=None, content_type=None):
         "Set the data for this dataset from the input file (CSV or JSON)."

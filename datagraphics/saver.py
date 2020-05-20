@@ -175,3 +175,8 @@ class EntitySaver(AttachmentsSaver):
         if description is None:
             description = flask.request.form.get("description") or ""
         self.doc["description"] = description
+
+    def set_public(self, public=None):
+        if public is None:
+            public = utils.to_bool(flask.request.form.get("public"))
+        self.doc["public"] = public

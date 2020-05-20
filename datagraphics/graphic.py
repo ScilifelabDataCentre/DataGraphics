@@ -6,6 +6,7 @@ import couchdb2
 import flask
 
 import datagraphics.dataset
+import datagraphics.user
 from datagraphics import constants
 from datagraphics import utils
 from datagraphics.saver import EntitySaver
@@ -58,7 +59,20 @@ def display(iuid):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
-    return flask.render_template("graphic/display.html", graphic=graphic)
+    try:
+        dataset = datagraphics.dataset.get_dataset(graphic["dataset"])
+    except ValueError as error: # Should not happen.
+        utils.flash_error(str(error))
+        return flask.redirect(flask.url_for("home"))
+    if not allow_view(dataset):
+        utils.flash_error("View access to dataset of graphic not allowed.")
+        return flask.redirect(utils.referrer())
+    am_admin_or_self = datagraphics.user.am_admin_or_self(username=graphic["owner"])
+    return flask.render_template("graphic/display.html",
+                                 graphic=graphic,
+                                 dataset=dataset,
+                                 allow_edit=allow_edit(graphic),
+                                 am_admin_or_self=am_admin_or_self)
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
@@ -80,7 +94,15 @@ def edit(iuid):
         if not allow_edit(graphic):
             utils.flash_error("Edit access to graphic not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
-        raise NotImplementedError
+        try:
+            with GraphicSaver(graphic) as saver:
+                saver.set_title()
+                saver.set_description()
+                saver.set_specification()
+        except ValueError as error:
+            utils.flash_error(str(error))
+            return flask.redirect(utils.referrer())
+        return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
     elif utils.http_DELETE():
         if not allow_delete(graphic):
@@ -106,6 +128,40 @@ def copy(iuid):
         return flask.redirect(flask.url_for(".display", iuid=iuid))
 
     raise NotImplementedError
+
+@blueprint.route("/<iuid:iuid>/public", methods=["POST"])
+@utils.login_required
+def public(iuid):
+    "Set the graphic to public access."
+    try:
+        graphic = get_graphic(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.referrer())
+    if allow_edit(graphic):
+        if not graphic["public"]:
+            with GraphicSaver(graphic) as saver:
+                saver.set_public(True)
+    else:
+        utils.flash_error("Edit access to graphic not allowed.")
+    return flask.redirect(flask.url_for(".display", iuid=iuid))
+
+@blueprint.route("/<iuid:iuid>/private", methods=["POST"])
+@utils.login_required
+def private(iuid):
+    "Set the graphic to private access."
+    try:
+        graphic = get_graphic(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.referrer())
+    if allow_edit(graphic):
+        if graphic["public"]:
+            with GraphicSaver(graphic) as saver:
+                saver.set_public(False)
+    else:
+        utils.flash_error("Edit access to graphic not allowed.")
+    return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>.<ext>")
 def serve(iuid, ext):

@@ -13,11 +13,28 @@
 {% endblock %}
 
 {% block main %}
-<div class="pre">
-  {{ graphic['specification'] }}
+<p class="lead">
+  Dataset <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
+    {{ dataset['title'] }}</a>
+</p>
+<div id="graphic">
 </div>
 <div>
   {{ graphic['description'] | markdown }}
+</div>
+<p>
+  <button type="button" class="btn btn-outline-dark"
+          data-toggle="collapse" data-target="#collapseSpecification"
+          aria-expanded="false" aria-controls="collapseSpecification">
+    Show JSON specification
+  </button>
+</p>
+<div class="collapse" id="collapseSpecification">
+  <div class="card card-body">
+    <pre>
+      {{ graphic['specification'] | tojson(indent=2) }}
+    </pre>
+  </div>
 </div>
 {% endblock %} {# block main #}
 
@@ -36,7 +53,7 @@
     {{ csrf_token() }}
     <button type="submit" class="btn btn-block btn-sm btn-warning"
             title="Set the graphic to private access.">
-      Private</button>
+      Set private</button>
   </form>
   {% else %}
   <form action="{{ url_for('.public', iuid=graphic['_id']) }}"
@@ -44,13 +61,13 @@
     {{ csrf_token() }}
     <button type="submit" class="btn btn-block btn-sm btn-success"
             title="Set the graphic to public access.">
-      Public</button>
+      Set public</button>
   </form>
   {% endif %}
 </div>
 {% endif %} {# if allow_edit #}
 {% if allow_delete %}
-<div class="mt-2 mb-4">
+<div class="mt-2">
   <form action="{{ url_for('.edit', iuid=graphic['_id']) }}"
 	method="POST">
     {{ csrf_token() }}
@@ -62,12 +79,14 @@
 </div>
 {% endif %}
 {% if g.current_user %}
-<form action="{{ url_for('.copy', iuid=graphic['_id']) }}"
-      method="POST">
-  {{ csrf_token() }}
-  <button type="submit" class="btn btn-block btn-sm btn-primary">
-    Copy graphic</button>
-</form>
+<div class="mt-4">
+  <form action="{{ url_for('.copy', iuid=graphic['_id']) }}"
+        method="POST">
+    {{ csrf_token() }}
+    <button type="submit" class="btn btn-block btn-sm btn-primary">
+      Copy graphic</button>
+  </form>
+</div>
 {% endif %} {# if g.current_user #}
 {% endblock %} {# block actions #}
 
@@ -94,3 +113,11 @@
 </div>
 {% endblock %} {# block info #}
 
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/vega@{{ constants.VEGA_VERSION }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@{{ constants.VEGA_LITE_VERSION }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@{{ constants.VEGA_EMBED_VERSION }}"></script>
+<script type="text/javascript">
+  vegaEmbed('#graphic', {{ graphic['specification'] | tojson(indent=2) }});
+</script>
+{% endblock %}

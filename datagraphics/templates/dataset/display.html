@@ -73,7 +73,7 @@
     {{ csrf_token() }}
     <button type="submit" class="btn btn-block btn-sm btn-warning"
             title="Set the dataset to private access.">
-      Private</button>
+      Set private</button>
   </form>
   {% else %}
   <form action="{{ url_for('.public', iuid=dataset['_id']) }}"
@@ -81,13 +81,13 @@
     {{ csrf_token() }}
     <button type="submit" class="btn btn-block btn-sm btn-success"
             title="Set the dataset to public access.">
-      Public</button>
+      Set public</button>
   </form>
   {% endif %}
 </div>
 {% endif %} {# if allow_edit #}
 {% if allow_delete %}
-<div class="mt-2 mb-4">
+<div class="mt-2">
   <form action="{{ url_for('.edit', iuid=dataset['_id']) }}"
 	method="POST">
     {{ csrf_token() }}
@@ -102,16 +102,15 @@
 </div>
 {% endif %}
 {% if g.current_user %}
-<form action="{{ url_for('.copy', iuid=dataset['_id']) }}"
-      method="POST">
-  {{ csrf_token() }}
-  <button type="submit" class="btn btn-block btn-sm btn-primary">
-    Copy dataset</button>
-</form>
-<div class="my-2">
-  {% include 'dataset/create.html' %}
+<div class="mt-4">
+  <form action="{{ url_for('.copy', iuid=dataset['_id']) }}"
+        method="POST">
+    {{ csrf_token() }}
+    <button type="submit" class="btn btn-block btn-sm btn-primary">
+      Copy dataset</button>
+  </form>
 </div>
-<div class="mb-4">
+<div class="mt-2">
   {% include 'graphic/create.html' %}
 </div>
 {% endif %} {# if g.current_user #}
