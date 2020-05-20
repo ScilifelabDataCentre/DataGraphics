@@ -13,6 +13,7 @@
             enctype="multipart/form-data"
             method="POST">
         {{ csrf_token() }}
+        <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
         <div class="modal-header">
           <h5 class="modal-title" id="createGraphicModalLabel">Create graphic</h5>
           <button type="button" class="close" data-dismiss="modal"
@@ -38,25 +39,33 @@
 	           class="col-md-2 col-form-label text-right font-weight-bold">
               Description</label>
             <div class="col-md">
-              <textarea id="description" name="description" rows="16"
+              <textarea id="description" name="description" rows="6"
                         class="form-control"
-                        aria-describedby="textHelp"></textarea>
+                        aria-describedby="descriptionHelp"></textarea>
               <small id="descriptionHelp" class="form-text text-muted">
                 Description of the graphic. Formatted using Markdown.
               </small>
             </div>
           </div>
           <div class="form-group row">
-            <label for="file"
+            <label for="specification"
 	           class="col-md-2 col-form-label text-right font-weight-bold">
-              File</label>
+              Specification</label>
             <div class="col-md">
-              <input type="file" id="file" name="file"
-	             class="form-control-file"
-	             aria-describedby="fileHelp">
-              <small id="fileHelp" class="form-text text-muted">
-                File containing the graphic specification in Vega-Lite
-                JavaScript.
+              <textarea id="specification" name="specification" rows="14"
+                        class="form-control"
+                        aria-describedby="specificationHelp"
+>{
+  "$schema": "{{ constants.VEGA_LITE_SCHEMA }}",
+  "data": {
+    "url": "{{ url_for('dataset.serve', iuid=dataset['_id'], ext='csv', _external=True) }}",
+    "format": {"type": "csv"}
+  }
+}
+</textarea>
+              <small id="specificationHelp" class="form-text text-muted">
+                Specification of the graphic using
+                <a href="{{ constants.VEGA_LITE_URL }}">Vega-Lite</a> JSON.
               </small>
             </div>
           </div>

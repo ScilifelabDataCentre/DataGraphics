@@ -67,6 +67,36 @@ def get_logger(app=None):
         _logger.addHandler(loghandler)
     return _logger
 
+def get_dbserver(app=None):
+    "Get the connection to the CouchDB database server."
+    if app is None:
+        app = flask.current_app
+    return couchdb2.Server(href=app.config["COUCHDB_URL"],
+                           username=app.config["COUCHDB_USERNAME"],
+                           password=app.config["COUCHDB_PASSWORD"])
+
+def get_db(dbserver=None, app=None):
+    if app is None:
+        app = flask.current_app
+    if dbserver is None:
+        dbserver = get_dbserver(app=app)
+    return dbserver[app.config["COUCHDB_DBNAME"]]
+
+def get_logs(docid, cleanup=True):
+    """Return the list of log entries for the given document identifier,
+    sorted by reverse timestamp.
+    """
+    result = [r.doc for r in flask.g.db.view("logs", "doc",
+                                             startkey=[docid, "ZZZZZZ"],
+                                             endkey=[docid],
+                                             descending=True,
+                                             include_docs=True)]
+    if cleanup:
+        for log in result:
+            for key in ["_id", "_rev", "doctype", "docid"]:
+                log.pop(key)
+    return result
+
 def log_access(response):
     "Record access using the logger."
     if flask.g.current_user:
@@ -228,6 +258,17 @@ def float_default(value, default=""):
     else:
         return "%g" % value
 
+def slugify(s):
+    """Return the string converted into a valid slug.
+    - Only lower case characters.
+    - Dash instead of blanks.
+    - ASCII letters, numbers and dash.
+    - All other characters removed.
+    """
+    s = s.strip().lower().replace(" ", "-")
+    s = unicodedata.normalize("NFKD", s)
+    return "".join([c for c in s if c in constants.SLUG_CHARS])
+
 def accept_json():
     "Return True if the header Accept contains the JSON content type."
     acc = flask.request.accept_mimetypes
@@ -255,36 +296,6 @@ def jsonify(result, schema_url=None):
     if schema_url:
         response.headers.add("Link", schema_url, rel="schema")
     return response
-
-def get_dbserver(app=None):
-    "Get the connection to the CouchDB database server."
-    if app is None:
-        app = flask.current_app
-    return couchdb2.Server(href=app.config["COUCHDB_URL"],
-                           username=app.config["COUCHDB_USERNAME"],
-                           password=app.config["COUCHDB_PASSWORD"])
-
-def get_db(dbserver=None, app=None):
-    if app is None:
-        app = flask.current_app
-    if dbserver is None:
-        dbserver = get_dbserver(app=app)
-    return dbserver[app.config["COUCHDB_DBNAME"]]
-
-def get_logs(docid, cleanup=True):
-    """Return the list of log entries for the given document identifier,
-    sorted by reverse timestamp.
-    """
-    result = [r.doc for r in flask.g.db.view("logs", "doc",
-                                             startkey=[docid, "ZZZZZZ"],
-                                             endkey=[docid],
-                                             descending=True,
-                                             include_docs=True)]
-    if cleanup:
-        for log in result:
-            for key in ["_id", "_rev", "doctype", "docid"]:
-                log.pop(key)
-    return result
 
 
 class JsonException(Exception):

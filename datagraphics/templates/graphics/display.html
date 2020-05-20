@@ -2,31 +2,31 @@
 
 {% block head_title %}
 {% if g.current_user %}
-Public datasets
+My graphics
 {% else %}
-Datasets
+Graphics
 {% endif %}
 {% endblock %}
 
 {% block body_title %}
 {% if g.current_user %}
-Public datasets
+My graphics
 {% else %}
-Datasets
+Graphics
 {% endif %}
 {% endblock %}
 
 {% block main %}
-{{ macros.datasets_table(datasets, show_public=False) }}
+{{ macros.graphics_table(graphics, show_public=show_public) }}
 {% endblock %} {# block main #}
 
 {% block javascript %}
 <script>
   $(function() {
-    $("#datasets").DataTable( {
+    $("#graphics").DataTable( {
       pagingType: "full_numbers",
       pageLength: 25,
-      order: [[1, "desc"]]
+      order: [[{{ 1 + show_public }}, "desc"]]
     });
   });
 </script>

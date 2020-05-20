@@ -9,6 +9,7 @@ import datagraphics.site
 import datagraphics.dataset
 import datagraphics.datasets
 import datagraphics.graphic
+import datagraphics.graphics
 
 import datagraphics.api.about
 import datagraphics.api.root
@@ -44,6 +45,7 @@ def setup_template_context():
 @app.before_request
 def prepare():
     "Open the database connection; get the current user."
+    flask.g.timer = utils.Timer()
     flask.g.dbserver = utils.get_dbserver()
     flask.g.db = utils.get_db(dbserver=flask.g.dbserver)
     flask.g.cache = {}          # key: iuid, value: doc
@@ -68,6 +70,7 @@ app.register_blueprint(datagraphics.site.blueprint, url_prefix="/site")
 app.register_blueprint(datagraphics.dataset.blueprint, url_prefix="/dataset")
 app.register_blueprint(datagraphics.datasets.blueprint, url_prefix="/datasets")
 app.register_blueprint(datagraphics.graphic.blueprint, url_prefix="/graphic")
+app.register_blueprint(datagraphics.graphics.blueprint, url_prefix="/graphics")
 
 app.register_blueprint(datagraphics.api.root.blueprint, url_prefix="/api")
 app.register_blueprint(datagraphics.api.about.blueprint, 

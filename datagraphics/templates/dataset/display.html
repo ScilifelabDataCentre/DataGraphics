@@ -42,7 +42,7 @@
   </tr>
   {% for key, meta in dataset['meta'].items() %}
   <tr>
-    <td>{{ key }}</td>
+    <th>{{ key }}</th>
     <td>{{ meta['type'] }}</td>
     <td>{{ meta['# null'] }}</td>
     <td>{{ meta['# distinct'] | default('-') }}</td>
@@ -112,20 +112,13 @@
   {% include 'dataset/create.html' %}
 </div>
 <div class="mb-4">
-  {% set dataset = dataset['_id'] %}
   {% include 'graphic/create.html' %}
 </div>
 {% endif %} {# if g.current_user #}
 {% endblock %} {# block actions #}
 
 {% block info %}
-<div>
-  {{ dataset['# records'] }} records
-</div>
-<div>
-  {{ storage | filesizeformat }}
-</div>
-<div>
+<div class="mt-4">
   Owner
   {% if am_admin_or_self %}
   <a href="{{ url_for('user.display', username=dataset['owner']) }}">
@@ -134,14 +127,20 @@
   {{ dataset['owner'] }}
   {% endif %}
 </div>
-<div class="small mt-4">
-  <div>Modified
+<div class="mt-4">
+  {{ dataset['# records'] }} records
+</div>
+<div>
+  {{ storage | filesizeformat }}
+</div>
+<div class="mt-4">
+  <div class="small">Modified
     <span class="localtime">{{ dataset['modified'] }}</span>
   </div>
-  <div>
+  <div class="small">
     <a href="{{ url_for('.logs', iuid=dataset['_id']) }}">Logs</a>
   </div>
-  <div>
+  <div class="small">
     Created <span class="localtime">{{ dataset['created'] }}</span>
   </div>
 </div>

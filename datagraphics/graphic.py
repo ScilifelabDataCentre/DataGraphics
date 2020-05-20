@@ -1,11 +1,13 @@
 "Graphic to display dataset."
 
+import json
+
 import couchdb2
 import flask
 
+import datagraphics.dataset
 from datagraphics import constants
 from datagraphics import utils
-
 from datagraphics.saver import EntitySaver
 
 
@@ -37,7 +39,9 @@ def create():
         with GraphicSaver() as saver:
             saver.set_title()
             saver.set_description()
-            saver.set_spec()
+            saver.set_dataset(datagraphics.dataset.get_dataset(
+                flask.request.form.get("dataset")))
+            saver.set_specification()
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.referrer())
@@ -79,9 +83,6 @@ def edit(iuid):
         raise NotImplementedError
 
     elif utils.http_DELETE():
-        if not possible_delete(graphic):
-            utils.flash_error("Graphic cannot be deleted; use by graphics.")
-            return flask.redirect(flask.url_for(".display", iuid=iuid))
         if not allow_delete(graphic):
             utils.flash_error("Delete access to graphic not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
@@ -160,6 +161,19 @@ class GraphicSaver(EntitySaver):
 
     DOCTYPE = constants.DOCTYPE_GRAPHIC
 
+    def set_dataset(self, dataset):
+        if not datagraphics.dataset.allow_view(dataset):
+            raise ValueError("View access to dataset not allowed.")
+        self.doc["dataset"] = dataset["_id"]
+
+    def set_specification(self, specification=None):
+        "Set the Vega-Lite JSON specification."
+        if specification is None:
+            specification = flask.request.form.get("specification") or ""
+        specification = json.loads(specification)
+        # XXX Check against JSON Schema
+        self.doc["specification"] = specification
+
 
 # Utility functions
 
@@ -195,7 +209,3 @@ def allow_delete(graphic):
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
     return flask.current_user["username"] == graphic["owner"]
-
-def possible_delete(graphic):
-    "Is it possible to delete the graphic?"
-    return True

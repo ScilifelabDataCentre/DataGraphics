@@ -54,3 +54,30 @@
 </table>
 {%- endmacro %}
 
+{% macro graphics_table(graphics, show_public=False) -%}
+<table id="graphics" class="table table-sm">
+  <thead>
+    <tr>
+      {% if show_public %}
+      <th width="5%"></th>
+      {% endif %}
+      <th>Graphic</th>
+      <th>Modified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for graphic in graphics %}
+    <tr>
+      {% if show_public %}
+      <td>{{ access_symbol(graphic) }}</td>
+      {% endif %}
+      <td>
+        <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
+          {{ graphic_symbol() }}{{ graphic['title'] }}</a>
+      </td>
+      <td class="small localtime">{{ graphic['modified'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{%- endmacro %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block head_title %}User {{ user['username'] }} graphics{% endblock %}
+
+{% block body_title %}
+User <a href="{{ url_for('user.display', username=user['username']) }}">
+  {{ user['username'] }}</a> graphics
+{% endblock %}
+
+{% block main %}
+{{ macros.graphics_table(graphics, show_public=True) }}
+{% endblock %} {# block main #}
+
+{% block javascript %}
+<script>
+  $(function() {
+    $("#graphics").DataTable( {
+      pagingType: "full_numbers",
+      pageLength: 25,
+      order: [[2, "desc"]]
+    });
+  });
+</script>
+{% endblock %}

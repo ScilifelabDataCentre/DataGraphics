@@ -1,4 +1,4 @@
-"User display and login/logout HTMl endpoints."
+"User display, register, login/logout, etc endpoints."
 
 import http.client
 import json
@@ -99,13 +99,16 @@ def register():
             utils.flash_error(error)
             return flask.redirect(flask.url_for(".register"))
         utils.get_logger().info(f"registered user {user['username']}")
-        # Directly enabled; send code to the user.
         if user["status"] == constants.ENABLED:
+            # Directly enabled; send code to the user.
             if user["password"][:5] == "code:":
                 send_password_code(user, "registration")
                 utils.get_logger().info(f"enabled user {user['username']}")
                 utils.flash_message("User account created; check your email.")
+            # Directly enabled and password set. No email to anyone.
             else:
+                utils.get_logger().info(f"enabled user {user['username']}"
+                                        " and set password")
                 utils.flash_message("User account created and password set.")
         # Was set to 'pending'; send email to admins.
         else:

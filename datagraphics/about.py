@@ -36,8 +36,7 @@ def get_software():
         ("jQuery", constants.JQUERY_VERSION, "https://jquery.com/"),
         ("DataTables", constants.DATATABLES_VERSION, "https://datatables.net/"),
         ("Vega", constants.VEGA_VERSION, "https://vega.github.io/vega/"),
-        ("Vega-Lite", constants.VEGA_LITE_VERSION,
-         "https://vega.github.io/vega-lite/"),
+        ("Vega-Lite", constants.VEGA_LITE_VERSION, constants.VEGA_LITE_URL),
         ("Vega-Embed", constants.VEGA_EMBED_VERSION,
          "https://github.com/vega/vega-embed"),
     ], key=lambda t: t[0].lower())

@@ -54,10 +54,26 @@
                  href="{{ url_for('datasets.public') }}">Public datasets</a>
             </div>
           </li>
+          <li class="nav-item dropdown">
+            <a href="#" id="navbarGraphics" 
+               class="nav-link dropdown-toggle pr-4"
+               role="button" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">Graphics</a>
+            <div class="dropdown-menu" aria-labelledby="navbarGraphics">
+              <a class="dropdown-item"
+                 href="{{ url_for('graphics.display') }}">My graphics</a>
+              <a class="dropdown-item"
+                 href="{{ url_for('graphics.public') }}">Public graphics</a>
+            </div>
+          </li>
           {% else %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('datasets.display') }}">
               Datasets</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('graphics.display') }}">
+              Graphics</a>
           </li>
           {% endif %} {# if g.current_user #}
           {% if g.am_admin %}
@@ -163,7 +179,7 @@
       {% block footer %}
       <hr>
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md">
           {% if config['HOST_URL'] %}
           <a href="{{ config['HOST_URL'] }}">
             {% if config['HOST_LOGO'] %}
@@ -182,7 +198,12 @@
           {% endif %}
           {% endif %}
         </div>
-        <div class="col-md-4 offset-md-4 text-right">
+        <div class="col-md">
+          {% if config['DEBUG'] %}
+          <div class="small">Execution time {{ g.timer.milliseconds }} ms</div>
+          {% endif %}
+        </div>
+        <div class="col-md offset-md-4 text-right">
           <a href="https://github.com/pekrau/DataGraphics">DataGraphics</a>
 	  version {{ constants.VERSION }}
         </div>

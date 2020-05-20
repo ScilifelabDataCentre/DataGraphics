@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block head_title %}{{ graphic['title'] }}{% endblock %}
+
+{% block body_title %}
+{% if g.current_user %}
+{{ macros.access_symbol(graphic) }}
+{% endif %}
+{{ macros.dataset_symbol() }}{{ graphic['title']  }}
+{% endblock %}
+
+{% block meta %}
+{% endblock %}
+
+{% block main %}
+<div class="pre">
+  {{ graphic['specification'] }}
+</div>
+<div>
+  {{ graphic['description'] | markdown }}
+</div>
+{% endblock %} {# block main #}
+
+{% block actions %}
+{% if allow_edit %}
+<div>
+  <form action="{{ url_for('.edit', iuid=graphic['_id']) }}">
+    <button type="submit" class="btn btn-block btn-sm btn-primary">
+      Edit</button>
+  </form>
+</div>
+<div class="mt-2">
+  {% if graphic['public'] %}
+  <form action="{{ url_for('.private', iuid=graphic['_id']) }}"
+        method="POST">
+    {{ csrf_token() }}
+    <button type="submit" class="btn btn-block btn-sm btn-warning"
+            title="Set the graphic to private access.">
+      Private</button>
+  </form>
+  {% else %}
+  <form action="{{ url_for('.public', iuid=graphic['_id']) }}"
+        method="POST">
+    {{ csrf_token() }}
+    <button type="submit" class="btn btn-block btn-sm btn-success"
+            title="Set the graphic to public access.">
+      Public</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %} {# if allow_edit #}
+{% if allow_delete %}
+<div class="mt-2 mb-4">
+  <form action="{{ url_for('.edit', iuid=graphic['_id']) }}"
+	method="POST">
+    {{ csrf_token() }}
+    <input type="hidden" name="_http_method" value="DELETE">
+    <button type="submit" class="btn btn-block btn-sm btn-danger"
+	    onclick="return confirm('Really delete the graphic?')">
+      Delete</button>
+  </form>
+</div>
+{% endif %}
+{% if g.current_user %}
+<form action="{{ url_for('.copy', iuid=graphic['_id']) }}"
+      method="POST">
+  {{ csrf_token() }}
+  <button type="submit" class="btn btn-block btn-sm btn-primary">
+    Copy graphic</button>
+</form>
+{% endif %} {# if g.current_user #}
+{% endblock %} {# block actions #}
+
+{% block info %}
+<div class="mt-4">
+  Owner
+  {% if am_admin_or_self %}
+  <a href="{{ url_for('user.display', username=graphic['owner']) }}">
+    {{ graphic['owner'] }}</a>
+  {% else %}
+  {{ graphic['owner'] }}
+  {% endif %}
+</div>
+<div class="mt-4">
+  <div class="small">Modified
+    <span class="localtime">{{ graphic['modified'] }}</span>
+  </div>
+  <div class="small">
+    <a href="{{ url_for('.logs', iuid=graphic['_id']) }}">Logs</a>
+  </div>
+  <div class="small">
+    Created <span class="localtime">{{ graphic['created'] }}</span>
+  </div>
+</div>
+{% endblock %} {# block info #}
+
