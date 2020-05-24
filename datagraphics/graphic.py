@@ -60,17 +60,10 @@ def display(iuid):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
-    try:
-        dataset = datagraphics.dataset.get_dataset(graphic["dataset"])
-    except ValueError as error:
-        dataset = None
-    else:
-        if not allow_view(dataset):
-            dataset = None
     am_admin_or_self = datagraphics.user.am_admin_or_self(username=graphic["owner"])
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
-                                 dataset=dataset,
+                                 dataset=get_dataset(graphic),
                                  allow_edit=allow_edit(graphic),
                                  am_admin_or_self=am_admin_or_self)
 
@@ -265,3 +258,14 @@ def allow_delete(graphic):
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
     return flask.current_user["username"] == graphic["owner"]
+
+def get_dataset(graphic):
+    "Get the dataset for the graphic, if allowed. Else None."
+    try:
+        dataset = datagraphics.dataset.get_dataset(graphic["dataset"])
+    except ValueError as error:
+        return None
+    if not allow_view(dataset):
+        return None
+    return dataset
+    

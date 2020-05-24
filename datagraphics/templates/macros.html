@@ -63,6 +63,8 @@
       {% endif %}
       <th>Graphic</th>
       <th>Modified</th>
+      <th>Dataset</th>
+      <th>Modified</th>
     </tr>
   </thead>
   <tbody>
@@ -76,6 +78,20 @@
           {{ graphic_symbol() }}{{ graphic['title'] }}</a>
       </td>
       <td class="small localtime">{{ graphic['modified'] }}</td>
+      {% if graphic['dataset'] %}
+      <td>
+        <a href="{{ url_for('dataset.display', iuid=graphic['dataset']['_id']) }}">
+          {{ dataset_symbol() }}{{ graphic['dataset']["title"] }}
+        </a>
+      </td>
+      <td class="small localtime">{{ graphic['dataset']['modified'] }}</td>
+      {% else %}
+      <td class="text-danger"
+          title="Dataset does not exist, or view access to it is not allowed.">
+        inaccessible
+      </td>
+      <td>-</td>
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>

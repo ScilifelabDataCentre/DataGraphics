@@ -26,6 +26,8 @@ def display():
                                                    endkey="",
                                                    include_docs=True,
                                                    descending=True)]
+    for graphic in graphics:
+        graphic["dataset"] = datagraphics.graphic.get_dataset(graphic)
     return flask.render_template("graphics/display.html",
                                  graphics=graphics,
                                  show_public=bool(flask.g.current_user))
@@ -38,6 +40,11 @@ def public():
                                                endkey="",
                                                include_docs=True,
                                                descending=True)]
+    for graphic in graphics:
+        dataset = datagraphics.graphic.get_dataset(graphic)
+        if dataset is not None:
+            if not dataset["public"]: dataset = None
+        graphic["dataset"] = dataset
     return flask.render_template("graphics/public.html", graphics=graphics)
 
 @blueprint.route("/user/<name:username>")
@@ -56,6 +63,8 @@ def user(username):
                                                endkey=(username, ""),
                                                include_docs=True,
                                                descending=True)]
+    for graphic in graphics:
+        dataset = datagraphics.graphic.get_dataset(graphic)
     return flask.render_template("graphics/user.html",
                                  user=user,
                                  graphics=graphics,
