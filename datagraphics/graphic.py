@@ -60,12 +60,10 @@ def display(iuid):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
-    am_admin_or_self = datagraphics.user.am_admin_or_self(username=graphic["owner"])
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  dataset=get_dataset(graphic),
-                                 allow_edit=allow_edit(graphic),
-                                 am_admin_or_self=am_admin_or_self)
+                                 allow_edit=allow_edit(graphic))
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required

@@ -66,14 +66,13 @@ def display(iuid):
         return flask.redirect(utils.referrer())
     storage = sum([s['length'] 
                    for s in dataset.get('_attachments', {}).values()])
-    am_admin_or_self = datagraphics.user.am_admin_or_self(username=dataset["owner"])
     return flask.render_template("dataset/display.html",
                                  dataset=dataset,
+                                 graphics=get_graphics(dataset),
                                  storage=storage,
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
-                                 possible_delete=possible_delete(dataset),
-                                 am_admin_or_self=am_admin_or_self)
+                                 possible_delete=possible_delete(dataset))
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
@@ -255,8 +254,8 @@ class DatasetSaver(EntitySaver):
 
         if flask.g.current_user.get("quota_file_size"):
             username = flask.g.current_user["username"]
-            total = len(json_content) + len(csv_content) \
-                    + datagraphics.user.get_sum_file_size(username)
+            total = len(json_content) + len(csv_content) + \
+                    datagraphics.user.get_sum_file_size(username)
             if total > flask.g.current_user["quota_file_size"]:
                 raise ValueError(f"File {infile.filename} not added;"
                                  " quota file size reached.")
@@ -438,13 +437,17 @@ def get_dataset(iuid):
     return doc
 
 def get_graphics(dataset):
-    "Get the graphics entities the dataset is used for."
+    """Get the graphics entities the dataset is used for.
+    Exclude those not allowed to view.
+    """
+    from datagraphics.graphic import allow_view
     result = []
     for row in flask.g.db.view("graphics", "dataset",
                                key=dataset["_id"],
                                include_docs=True):
-        flask.g.cache[row.doc["_id"]] = row.doc
-        result.append(row.doc)
+        if allow_view(row.doc):
+            flask.g.cache[row.doc["_id"]] = row.doc
+            result.append(row.doc)
     return result
 
 def allow_view(dataset):

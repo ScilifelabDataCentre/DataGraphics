@@ -99,7 +99,7 @@
 {% block info %}
 <div class="mt-4">
   Owner:
-  {% if am_admin_or_self %}
+  {% if am_admin_or_self(username=graphic['owner']) %}
   <a href="{{ url_for('user.display', username=graphic['owner']) }}">
     {{ graphic['owner'] }}</a>
   {% else %}

@@ -23,39 +23,82 @@
 {% endblock %}
 
 {% block main %}
+<p class="lead">
+  {{ dataset['# records'] }} records
+</p>
 <div>
   {{ dataset['description'] | markdown }}
 </div>
-<table class="table mt-2">
-  <tr>
-    <th>Field</th>
-    <th>Type</th>
-    <th># null</th>
-    <th># distinct</th>
-    <th>Min</th>
-    <th>Max</th>
-    <th>Mean</th>
-    <th>Median</th>
-    <th>Stdev</th>
-    <th># true</th>
-    <th># false</th>
-  </tr>
-  {% for key, meta in dataset['meta'].items() %}
-  <tr>
-    <th>{{ key }}</th>
-    <td>{{ meta['type'] }}</td>
-    <td>{{ meta['# null'] }}</td>
-    <td>{{ meta['# distinct'] | default('-') }}</td>
-    <td>{{ meta.get('min') | float_default('-') }}</td>
-    <td>{{ meta.get('max') | float_default('-') }}</td>
-    <td>{{ meta.get('mean') | float_default('-') }}</td>
-    <td>{{ meta.get('median') | float_default('-') }}</td>
-    <td>{{ meta.get('stdev') | float_default('-') }}</td>
-    <td>{{ meta['# true'] | default('-') }}</td>
-    <td>{{ meta['# false'] | default('-') }}</td>
-  </tr>
-  {% endfor %}
-</table>
+<div class="card">
+  <div class="card-header">
+    <h5>Data field properties</h5>
+  </div>
+  <div class="card-body">
+    <table class="table table-sm">
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th># null</th>
+        <th># distinct</th>
+        <th>Min</th>
+        <th>Max</th>
+        <th>Mean</th>
+        <th>Median</th>
+        <th>Stdev</th>
+        <th># true</th>
+        <th># false</th>
+      </tr>
+      {% for key, meta in dataset['meta'].items() %}
+      <tr>
+        <th>{{ key }}</th>
+        <td>{{ meta['type'] }}</td>
+        <td>{{ meta['# null'] }}</td>
+        <td>{{ meta['# distinct'] | default('-') }}</td>
+        <td>{{ meta.get('min') | float_default('-') }}</td>
+        <td>{{ meta.get('max') | float_default('-') }}</td>
+        <td>{{ meta.get('mean') | float_default('-') }}</td>
+        <td>{{ meta.get('median') | float_default('-') }}</td>
+        <td>{{ meta.get('stdev') | float_default('-') }}</td>
+        <td>{{ meta['# true'] | default('-') }}</td>
+        <td>{{ meta['# false'] | default('-') }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<div class="card mt-4">
+  <div class="card-header">
+    <h5>Graphics visualizing the dataset</h5>
+  </div>
+  <div class="card-body">
+    <table id="graphics" class="table table-sm">
+      <tr>
+        <th></th>
+        <th>Graphic</th>
+        <th>Modified</th>
+        <th>Owner</th>
+      </tr>
+      {% for graphic in graphics %}
+      <tr>
+        <td>{{ macros.access_symbol(graphic) }}</td>
+        <td>
+          <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
+            {{ graphic['title'] }}</a>
+        </td>
+        <td class="small localtime">{{ graphic['modified'] }}</td>
+        <td>
+          {% if am_admin_or_self(username=dataset['owner']) %}
+          <a href="{{ url_for('user.display', username=dataset['owner']) }}">
+            {{ dataset['owner'] }}</a>
+          {% else %}
+          {{ dataset['owner'] }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
 {% endblock %} {# block main #}
 
 {% block actions %}
@@ -118,19 +161,16 @@
 
 {% block info %}
 <div class="mt-4">
-  Owner
-  {% if am_admin_or_self %}
+  Owner:
+  {% if am_admin_or_self(username=dataset['owner']) %}
   <a href="{{ url_for('user.display', username=dataset['owner']) }}">
     {{ dataset['owner'] }}</a>
   {% else %}
   {{ dataset['owner'] }}
   {% endif %}
 </div>
-<div class="mt-4">
-  {{ dataset['# records'] }} records
-</div>
 <div>
-  {{ storage | filesizeformat }}
+  Storage: {{ storage | filesizeformat }}
 </div>
 <div class="mt-4">
   <div class="small">Modified
