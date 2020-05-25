@@ -4,6 +4,7 @@ import json
 
 import couchdb2
 import flask
+from flask_cors import cross_origin
 
 import datagraphics.dataset
 import datagraphics.user
@@ -155,6 +156,7 @@ def private(iuid):
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>.<ext>")
+@cross_origin()
 def serve(iuid, ext):
     "Return the JSON or JavaScript specification of the Vega-Lite graphic."
     try:
@@ -165,18 +167,12 @@ def serve(iuid, ext):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
-    filename = "vega_lite_specification.json"
-    try:
-        stub = graphic["_attachments"][filename]
-    except KeyError:
-        utils.flash_error("No Vega-Lite JSON for the graphic.")
-        return flask.redirect(flask.url(".display", iuid=iuid))
-    outfile = flask.g.db.get_attachment(graphic, filename)
+    spec = graphic["specification"]
     if ext == "json":
-        response = flask.make_response(outfile.read())
+        response = flask.make_response(spec)
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
     elif ext == "js":
-        spec = outfile.read()
+        spec = json.dumps(spec)
         divid = flask.request.args.get("divid") or "graphic"
         response = flask.make_response(f"vegaEmbed('#{divid}', {spec});")
         response.headers.set("Content-Type", constants.JS_MIMETYPE)

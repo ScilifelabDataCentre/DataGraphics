@@ -10,6 +10,16 @@
 {% endblock %}
 
 {% block meta %}
+<div>
+  <a href="{{ url_for('.serve', iuid=graphic['_id'], ext='json', download=True) }}"
+     title="Download graphic specification."
+     class="badge badge-pill badge-primary">JSON file</a>
+</div>
+<div>
+  <a href="{{ url_for('.serve', iuid=graphic['_id'], ext='js', download=True) }}"
+     title="Download graphic JavaScript code."
+     class="badge badge-pill badge-primary">JavaScript file</a>
+</div>
 {% endblock %}
 
 {% block main %}

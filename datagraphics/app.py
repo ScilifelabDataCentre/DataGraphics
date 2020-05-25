@@ -20,6 +20,7 @@ from datagraphics import constants
 from datagraphics import utils
 
 app = flask.Flask(__name__)
+# flask_cors.CORS(app)
 
 # Get the configuration and initialize modules (database).
 datagraphics.config.init(app)

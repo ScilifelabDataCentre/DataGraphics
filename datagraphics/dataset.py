@@ -7,6 +7,7 @@ import statistics
 
 import couchdb2
 import flask
+from flask_cors import cross_origin
 
 import datagraphics.user
 from datagraphics import constants
@@ -176,6 +177,7 @@ def private(iuid):
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>.<ext>")
+@cross_origin()
 def serve(iuid, ext):
     "Return the content of the dataset as JSON or CSV."
     try:
