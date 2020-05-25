@@ -167,7 +167,13 @@ def serve(iuid, ext):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
+    dataset = get_dataset(graphic)
+    if not dataset:
+        flask.abort(403, description="View access to dataset not allowed.")
     spec = graphic["specification"]
+    if utils.to_bool(flask.request.args.get("inline")):
+        outfile = flask.g.db.get_attachment(dataset, "data.json")
+        spec["data"] = {"values": json.load(outfile)}
     if ext == "json":
         response = flask.make_response(spec)
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
@@ -262,4 +268,3 @@ def get_dataset(graphic):
     if not allow_view(dataset):
         return None
     return dataset
-    
