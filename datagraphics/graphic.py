@@ -5,6 +5,7 @@ import json
 import couchdb2
 import flask
 from flask_cors import cross_origin
+import jsonschema
 
 import datagraphics.dataset
 import datagraphics.user
@@ -118,8 +119,17 @@ def copy(iuid):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(flask.url_for(".display", iuid=iuid))
-
-    raise NotImplementedError
+    try:
+        with GraphicSaver() as saver:
+            saver.set_title(f"Copy of {graphic['title']}")
+            saver.set_description(graphic["description"])
+            saver.set_public(False)
+            saver.set_dataset(datagraphics.dataset.get_dataset(graphic["dataset"]))
+            saver.set_specification(graphic["specification"])
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.referrer())
+    return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>/public", methods=["POST"])
 @utils.login_required
@@ -175,7 +185,7 @@ def serve(iuid, ext):
         outfile = flask.g.db.get_attachment(dataset, "data.json")
         spec["data"] = {"values": json.load(outfile)}
     if ext == "json":
-        response = flask.make_response(spec)
+        response = flask.jsonify(spec)
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
     elif ext == "js":
         spec = json.dumps(spec)
@@ -183,8 +193,9 @@ def serve(iuid, ext):
         response = flask.make_response(f"vegaEmbed('#{divid}', {spec});")
         response.headers.set("Content-Type", constants.JS_MIMETYPE)
     if utils.to_bool(flask.request.args.get("download")):
+        slug = utils.slugify(graphic['title'])
         response.headers.set("Content-Disposition", "attachment", 
-                             filename=f"{graphic['title']}.{ext}")
+                             filename=f"{slug}.{ext}")
     return response
 
 @blueprint.route("/<iuid:iuid>/logs")
@@ -219,9 +230,16 @@ class GraphicSaver(EntitySaver):
         "Set the Vega-Lite JSON specification."
         if specification is None:
             specification = flask.request.form.get("specification") or ""
-        specification = json.loads(specification)
-        # XXX Check against JSON Schema
-        self.doc["specification"] = specification
+            # If it is not even valid JSON, then don't save it, just complain.
+            specification = json.loads(specification)
+        try:
+            # Save it, even if incorrect Vega-Lite.
+            self.doc["specification"] = specification
+            utils.validate_vega_lite(specification)
+        except jsonschema.ValidationError as error:
+            self.doc["error"] = str(error)
+        else:
+            self.doc["error"] = None
 
 
 # Utility functions

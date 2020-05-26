@@ -35,9 +35,11 @@ def get_software():
         ("Bootstrap", constants.BOOTSTRAP_VERSION, "https://getbootstrap.com/"),
         ("jQuery", constants.JQUERY_VERSION, "https://jquery.com/"),
         ("DataTables", constants.DATATABLES_VERSION, "https://datatables.net/"),
-        ("Vega", constants.VEGA_VERSION, "https://vega.github.io/vega/"),
-        ("Vega-Lite", constants.VEGA_LITE_VERSION, constants.VEGA_LITE_URL),
-        ("Vega-Embed", constants.VEGA_EMBED_VERSION,
+        ("Vega", flask.current_app.config["VEGA_VERSION"],
+         "https://vega.github.io/vega/"),
+        ("Vega-Lite", flask.current_app.config["VEGA_LITE_VERSION"],
+         "https://vega.github.io/vega-lite/"),
+        ("Vega-Embed", flask.current_app.config["VEGA_EMBED_VERSION"],
          "https://github.com/vega/vega-embed"),
     ], key=lambda t: t[0].lower())
 
@@ -45,8 +47,10 @@ def get_software():
 @utils.admin_required
 def settings():
     config = flask.current_app.config.copy()
-    for key in ["SECRET_KEY", "MAIL_PASSWORD"]:
+    for key in ["SECRET_KEY", "MAIL_PASSWORD", 
+                "ADMIN_USER", "COUCHDB_PASSWORD"]:
         if config.get(key):
             config[key] = "<hidden>"
+    config.pop("VEGA_LITE_SCHEMA", None)
     return flask.render_template("about/settings.html",
                                  items=sorted(config.items()))

@@ -56,7 +56,7 @@
                         class="form-control"
                         aria-describedby="specificationHelp"
 >{
-  "$schema": "{{ constants.VEGA_LITE_SCHEMA }}",
+  "$schema": "{{ config['VEGA_LITE_SCHEMA_URL'] }}",
   "data": {
     "url": "{{ url_for('dataset.serve', iuid=dataset['_id'], ext='csv', _external=True) }}",
     "format": {"type": "csv"}
@@ -65,7 +65,7 @@
 </textarea>
               <small id="specificationHelp" class="form-text text-muted">
                 Specification of the graphic using
-                <a href="{{ constants.VEGA_LITE_URL }}">Vega-Lite</a> JSON.
+                <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> JSON.
               </small>
             </div>
           </div>

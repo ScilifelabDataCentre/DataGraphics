@@ -1,5 +1,6 @@
 "Configuration."
 
+import json
 import os
 import os.path
 
@@ -32,6 +33,7 @@ DEFAULT_SETTINGS = dict(
     COUCHDB_DBNAME = "datagraphics",
     JSON_AS_ASCII = False,
     JSON_SORT_KEYS = False,
+    JSONIFY_PRETTYPRINT_REGULAR = False,
     MIN_PASSWORD_LENGTH = 6,
     PERMANENT_SESSION_LIFETIME = 7 * 24 * 60 * 60, # seconds; 1 week
     MAIL_SERVER = "localhost",
@@ -43,6 +45,11 @@ DEFAULT_SETTINGS = dict(
     USER_ENABLE_IMMEDIATELY = False,
     USER_ENABLE_EMAIL_WHITELIST = [], # List of regexp's
     ADMIN_USER = {},                  # Keys: username, email, password
+    VEGA_VERSION         = "5.12.1",
+    VEGA_LITE_VERSION    = "4.12.2",  # Must match file in 'static'!
+    VEGA_EMBED_VERSION   = "6.8.0",
+    VEGA_LITE_URL        = "https://vega.github.io/vega-lite/",
+    VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v4.json",
 )
 
 def init(app):
@@ -67,6 +74,7 @@ def init(app):
         else:
             app.config["SETTINGS_FILE"] = filepath
             break
+
     # Modify the configuration from environment variables.
     for key, convert in [("DEBUG", utils.to_bool),
                          ("SECRET_KEY", str),
@@ -83,7 +91,14 @@ def init(app):
             app.config[key] = convert(os.environ[key])
         except (KeyError, TypeError, ValueError):
             pass
+
     # Sanity check; should not execute if this fails.
     assert app.config["SECRET_KEY"]
     assert app.config["SALT_LENGTH"] > 6
     assert app.config["MIN_PASSWORD_LENGTH"] > 4
+
+    # Read in JSON Schema for Vega-Lite from file in 'static'.
+    filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            f"static/v{app.config['VEGA_LITE_VERSION']}.json")
+    with open(filepath) as f:
+        app.config['VEGA_LITE_SCHEMA'] = json.load(f)

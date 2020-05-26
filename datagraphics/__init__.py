@@ -1,9 +1,11 @@
 "Serve data and graphics on the web using Vega-Lite graphics."
 
+import json
+import os.path
 import re
 import string
 
-__version__ = "0.2.6"
+__version__ = "0.2.7"
 
 class Constants:
     VERSION     = __version__
@@ -41,15 +43,8 @@ class Constants:
     CSV_MIMETYPE  = "text/csv"
     JS_MIMETYPE   = "text/javascript"
 
-    # Vega-Lite constants
-    VEGA_VERSION       = "5.11.1"
-    VEGA_LITE_VERSION  = "4.12.1"
-    VEGA_EMBED_VERSION = "6.8.0"
-    VEGA_LITE_URL      = "https://vega.github.io/vega-lite/"
-    VEGA_LITE_SCHEMA   = "https://vega.github.io/schema/vega-lite/v4.json"
-
-    # Misc
-    JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#"
+    # JSON Schema
+    JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#",
 
     def __setattr__(self, key, value):
         raise ValueError("cannot set constant")

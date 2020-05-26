@@ -103,7 +103,7 @@
 
 {% block actions %}
 {% if allow_edit %}
-<div>
+<div class="mt-4">
   <form action="{{ url_for('.edit', iuid=dataset['_id']) }}">
     <button type="submit" class="btn btn-block btn-sm btn-primary">
       Edit</button>

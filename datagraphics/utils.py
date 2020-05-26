@@ -5,6 +5,7 @@ import functools
 import http.client
 import logging
 import time
+import unicodedata
 import uuid
 
 import couchdb2
@@ -12,6 +13,7 @@ import emoji
 import flask
 import flask_mail
 import jinja2.utils
+import jsonschema
 import marko
 import werkzeug.routing
 
@@ -260,14 +262,22 @@ def float_default(value, default=""):
 
 def slugify(s):
     """Return the string converted into a valid slug.
-    - Only lower case characters.
     - Dash instead of blanks.
     - ASCII letters, numbers and dash.
     - All other characters removed.
     """
-    s = s.strip().lower().replace(" ", "-")
+    s = s.strip()
+    s = s.replace(" ", "-")
     s = unicodedata.normalize("NFKD", s)
     return "".join([c for c in s if c in constants.SLUG_CHARS])
+
+def validate_vega_lite(spec):
+    """Validate the given spec as proper Vega-Lite.
+    Will raise 'jsonschema.ValidationError' if anything is wrong.
+    """
+    jsonschema.validate(instance=spec,
+                        schema=flask.current_app.config["VEGA_LITE_SCHEMA"],
+                        format_checker=jsonschema.draft7_format_checker)
 
 def accept_json():
     "Return True if the header Accept contains the JSON content type."

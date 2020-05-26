@@ -199,8 +199,9 @@ def serve(iuid, ext):
     else:
         raise ValueError("invalid data format specified")
     if utils.to_bool(flask.request.args.get("download")):
+        slug = utils.slugify(dataset['title'])
         response.headers.set("Content-Disposition", "attachment", 
-                             filename=f"{dataset['title']}.{ext}")
+                             filename=f"{slug}.{ext}")
     return response
 
 @blueprint.route("/<iuid:iuid>/logs")
