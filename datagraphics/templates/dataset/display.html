@@ -7,6 +7,7 @@
 {{ macros.access_symbol(dataset) }}
 {% endif %}
 {{ macros.dataset_symbol() }}{{ dataset['title']  }}
+<span class="small text-muted ml-4">{{ dataset['# records'] }} records</span>
 {% endblock %}
 
 {% block meta %}
@@ -23,9 +24,6 @@
 {% endblock %}
 
 {% block main %}
-<p class="lead">
-  {{ dataset['# records'] }} records
-</p>
 <div>
   {{ dataset['description'] | markdown }}
 </div>

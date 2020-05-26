@@ -273,10 +273,10 @@ def slugify(s):
 
 def validate_vega_lite(spec):
     """Validate the given spec as proper Vega-Lite.
-    Will raise 'jsonschema.ValidationError' if anything is wrong.
+    Raises 'jsonschema.ValidationError' if something is wrong.
     """
-    jsonschema.validate(instance=spec,
-                        schema=flask.current_app.config["VEGA_LITE_SCHEMA"],
+    jsonschema.validate(spec,
+                        flask.current_app.config["VEGA_LITE_SCHEMA"],
                         format_checker=jsonschema.draft7_format_checker)
 
 def accept_json():

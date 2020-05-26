@@ -34,6 +34,8 @@
       <th width="5%"></th>
       {% endif %}
       <th>Dataset</th>
+      <th># fields</th>
+      <th># records</th>
       <th>Modified</th>
     </tr>
   </thead>
@@ -46,6 +48,12 @@
       <td>
         <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
           {{ dataset_symbol() }}{{ dataset['title'] }}</a>
+      </td>
+      <td class="text-right text-monospace">
+        <span class="mr-5">{{ dataset["meta"].keys() | length }}</span>
+      </td>
+      <td class="text-right text-monospace">
+        <span class="mr-5">{{ dataset["# records"] }}</span>
       </td>
       <td class="small localtime">{{ dataset['modified'] }}</td>
     </tr>

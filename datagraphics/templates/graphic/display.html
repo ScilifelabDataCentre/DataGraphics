@@ -28,7 +28,16 @@
 {% endblock %}
 
 {% block main %}
-{% if dataset %}
+{% if graphic['error'] %}
+<div class="card">
+  <div class="card-header text-white bg-danger">
+    <h5>Vega-Lite error</h5>
+  </div>
+  <div class="card-body">
+    <pre>{{ graphic['error'] }}</pre>
+  </div>
+</div>
+{% elif dataset %}
 <p class="lead">
   {{ macros.access_symbol(dataset) }}
   <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
@@ -41,7 +50,7 @@
   Dataset does not exist, or view access to it is not allowed.
 </p>
 {% endif %}
-<div>
+<div class="mt-2">
   {{ graphic['description'] | markdown }}
 </div>
 <p>

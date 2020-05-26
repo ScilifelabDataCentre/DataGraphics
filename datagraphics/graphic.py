@@ -26,10 +26,8 @@ DESIGN_DOC = {
         "public_modified": {"map": "function(doc) {if (doc.doctype !== 'graphic' || !doc.public) return; emit(doc.modified, doc.title);}"},
         "owner_modified": {"reduce": "_count",
                            "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit([doc.owner, doc.modified], doc.title);}"},
-        "dataset": {"map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}"},
-        "file_size": {"reduce": "_sum",
-                      "map": "function(doc) {if (doc.doctype !== 'graphic' || !doc._attachments) return; for (var key in doc._attachments) if (doc._attachments.hasOwnProperty(key)) emit(doc.owner, doc._attachments[key].length);}"}
-    },
+        "dataset": {"map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}"}
+    }
 }
 
 blueprint = flask.Blueprint("graphic", __name__)
@@ -65,7 +63,8 @@ def display(iuid):
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  dataset=get_dataset(graphic),
-                                 allow_edit=allow_edit(graphic))
+                                 allow_edit=allow_edit(graphic),
+                                 allow_delete=allow_delete(graphic))
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
@@ -232,15 +231,14 @@ class GraphicSaver(EntitySaver):
             specification = flask.request.form.get("specification") or ""
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
+        # Save it, even if incorrect Vega-Lite.
+        self.doc["specification"] = specification
         try:
-            # Save it, even if incorrect Vega-Lite.
-            self.doc["specification"] = specification
             utils.validate_vega_lite(specification)
         except jsonschema.ValidationError as error:
             self.doc["error"] = str(error)
         else:
             self.doc["error"] = None
-
 
 # Utility functions
 

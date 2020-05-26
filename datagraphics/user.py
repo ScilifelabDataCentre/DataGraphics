@@ -503,12 +503,11 @@ def count_user_graphics(user):
     
 def get_storage(username):
     "Return the sum of attachments file sizes for the given user."
-    result = 0
-    for viewname in ("datasets", "graphics"):
-        rows = list(flask.g.db.view(viewname, "file_size",
-                                    key=username,
-                                    reduce=True,
-                                    group_level=1))
-        if rows:
-            result += rows[0].value
-    return result
+    rows = list(flask.g.db.view("datasets", "file_size",
+                                key=username,
+                                reduce=True,
+                                group_level=1))
+    if rows:
+        return rows[0].value
+    else:
+        return 0
