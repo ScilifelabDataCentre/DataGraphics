@@ -9,6 +9,22 @@
   <col style="width:20%">
   <col style="width:80%">
   <tr>
+    <th class="text-right">Datasets</th>
+    <td>
+      <a href="{{ url_for('datasets.user', username=user['username']) }}"
+         class="badge badge-primary">
+        {{ user['count']['datasets'] }}</a>
+    </td>
+  </tr>
+  <tr>
+    <th class="text-right">Graphics</th>
+    <td>
+      <a href="{{ url_for('graphics.user', username=user['username']) }}"
+         class="badge badge-primary">
+        {{ user['count']['graphics'] }}</a>
+    </td>
+  </tr>
+  <tr>
     <th class="text-right">Email</th>
     <td>{{ user['email'] }}</td>
   </tr>
@@ -49,7 +65,7 @@
       Reset password</button>
   </form>
 </div>
-{% if enable_disable %}
+{% if am_admin_or_self(user) %}
 <div class="mt-2">
   {% if user['status'] != constants.ENABLED %}
   <form action="{{ url_for('.enable', username=user['username']) }}"
@@ -65,7 +81,7 @@
   </form>
   {% endif %}
 </div>
-{% endif %} {# if enable_disable #}
+{% endif %} {# if am_admin_or_self(user) #}
 {% if g.current_user['username'] == user['username'] %}
 <div class="mt-2">
   <form action="{{ url_for('.logout') }}"

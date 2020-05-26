@@ -81,7 +81,7 @@
       {% if graphic['dataset'] %}
       <td>
         <a href="{{ url_for('dataset.display', iuid=graphic['dataset']['_id']) }}">
-          {{ dataset_symbol() }}{{ graphic['dataset']["title"] }}
+          {{ dataset_symbol() }}{{ graphic['dataset']['title'] }}
         </a>
       </td>
       <td class="small localtime">{{ graphic['dataset']['modified'] }}</td>

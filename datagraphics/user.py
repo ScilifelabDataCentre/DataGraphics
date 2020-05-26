@@ -194,9 +194,9 @@ def display(username):
     if not am_admin_or_self(user):
         utils.flash_error("Access not allowed.")
         return flask.redirect(flask.url_for("home"))
-    return flask.render_template("user/display.html",
-                                 user=user,
-                                 enable_disable=am_admin_and_not_self(user))
+    user["count"] = {"datasets": count_user_datasets(user),
+                     "graphics": count_user_graphics(user)}
+    return flask.render_template("user/display.html", user=user)
 
 @blueprint.route("/display/<name:username>/edit",
                  methods=["GET", "POST", "DELETE"])
@@ -214,7 +214,6 @@ def edit(username):
     if utils.http_GET():
         return flask.render_template("user/edit.html",
                                      user=user,
-                                     change_role=am_admin_and_not_self(user),
                                      deletable=is_empty(user))
 
     elif utils.http_POST():
@@ -266,8 +265,7 @@ def logs(username):
 @utils.admin_required
 def all():
     "Display list of all users."
-    users = get_users()
-    return flask.render_template("user/all.html", users=users)
+    return flask.render_template("user/all.html", users=get_users())
 
 @blueprint.route("/enable/<name:username>", methods=["POST"])
 @utils.admin_required
@@ -399,6 +397,10 @@ def get_users(role=None, status=None):
                   flask.g.db.view("users", "role", key=role, include_docs=True)]
     if status is not None:
         result = [d for d in result if d["status"] == status]
+    for user in result:
+        user["count"] = {"datasets": count_user_datasets(user),
+                         "graphics": count_user_graphics(user)}
+        user["storage"] = get_storage(user["username"])
     return result
 
 def get_current_user():
@@ -465,6 +467,17 @@ def get_user_datasets(user):
         flask.g.cache[row.doc["_id"]] = row.doc
         result.append(row.doc)
     return result
+
+def count_user_datasets(user):
+    "Return the number of datasets owned by the user."
+    rows = list(flask.g.db.view("datasets", "owner_modified",
+                                startkey=[user["username"]],
+                                endkey=[user["username"], "ZZZZZZ"],
+                                reduce=True))
+    if rows:
+        return rows[0].value
+    else:
+        return 0
     
 def get_user_graphics(user):
     "Get the graphics owned by the user."
@@ -477,7 +490,18 @@ def get_user_graphics(user):
         result.append(row.doc)
     return result
     
-def get_sum_file_size(username):
+def count_user_graphics(user):
+    "Return the number of datasets owned by the user."
+    rows = list(flask.g.db.view("graphics", "owner_modified",
+                                startkey=[user["username"]],
+                                endkey=[user["username"], "ZZZZZZ"],
+                                reduce=True))
+    if rows:
+        return rows[0].value
+    else:
+        return 0
+    
+def get_storage(username):
     "Return the sum of attachments file sizes for the given user."
     result = 0
     for viewname in ("datasets", "graphics"):

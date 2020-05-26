@@ -9,6 +9,10 @@
   <thead>
     <tr>
       <th>User</th>
+      <th>Datasets</th>
+      <th>Graphics</th>
+      <th>Storage</th>
+      <th>Quota storage</th>
       <th>Email</th>
       <th>Role</th>
       <th>Status</th>
@@ -22,6 +26,22 @@
         <a href="{{ url_for('.display', username=user['username']) }}">
           {{ user['username'] }}</a>
       </td>
+      <td>
+        <a href="{{ url_for('datasets.user', username=user['username']) }}"
+           class="badge badge-primary">
+          {{ user['count']['datasets'] }}</a>
+      </td>
+      <td>
+        <a href="{{ url_for('graphics.user', username=user['username']) }}"
+           class="badge badge-primary">
+          {{ user['count']['graphics'] }}</a>
+      </td>
+      <td class="text-right">
+        <span class="mr-3">{{ user["storage"] }}</span>
+      </td>
+      <td class="text-right">
+        <span class="mr-3">{{ user.get("quota_storage") | default('-', True) }}</span>
+      </td>
       <td>{{ user['email'] }}</td>
       <td>{{ user['role'] }}</td>
       <td>
@@ -33,7 +53,7 @@
         {{ user['status'] }}
         {% endif %}
       </td>
-      <td class="localtime">{{ user['modified'] }}</td>
+      <td class="localtime small">{{ user['modified'] }}</td>
     </tr>
     {% endfor %}
   </tbody>

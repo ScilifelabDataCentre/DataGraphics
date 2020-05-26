@@ -254,13 +254,13 @@ class DatasetSaver(EntitySaver):
         outfile.seek(0)
         csv_content = outfile.read()
 
-        if flask.g.current_user.get("quota_file_size"):
+        if flask.g.current_user.get("quota_storage"):
             username = flask.g.current_user["username"]
             total = len(json_content) + len(csv_content) + \
-                    datagraphics.user.get_sum_file_size(username)
-            if total > flask.g.current_user["quota_file_size"]:
+                    datagraphics.user.get_storage(username)
+            if total > flask.g.current_user["quota_storage"]:
                 raise ValueError(f"File {infile.filename} not added;"
-                                 " quota file size reached.")
+                                 " quota storage reached.")
         self.add_attachment("data.json",
                             json_content,
                             constants.JSON_MIMETYPE)

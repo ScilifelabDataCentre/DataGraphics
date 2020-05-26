@@ -64,7 +64,7 @@ def user(username):
                                                include_docs=True,
                                                descending=True)]
     for graphic in graphics:
-        dataset = datagraphics.graphic.get_dataset(graphic)
+        graphic["dataset"] = datagraphics.graphic.get_dataset(graphic)
     return flask.render_template("graphics/user.html",
                                  user=user,
                                  graphics=graphics,

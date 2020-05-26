@@ -48,7 +48,7 @@ def user(username):
     if user is None:
         utils.flash_error("No such user.")
         return flask.redirect(flask.url_for("home"))
-    if not datadatasets.user.am_admin_or_self(user):
+    if not datagraphics.user.am_admin_or_self(user):
         utils.flash_error("View access to user is not allowed.")
         return flask.redirect(flask.url_for("home"))
     datasets = [r.doc for r in flask.g.db.view("datasets", "owner_modified",
