@@ -14,7 +14,7 @@ provided by the
 ## Installation
 
 1. Download and unpack the zipped codebase from
-   [GitHub](https://github.com/pekrau/NoteBinders). The source code
+   [GitHub](https://github.com/pekrau/DataGraphics). The source code
    directory is called `{SOURCE}` in the following.
 
 2. Set up your Python3 environment, e.g. using virtualenv, for the
@@ -24,12 +24,20 @@ provided by the
    `pip install -r requirements.txt'` in the `{SOURCE}` directory.
    
 4. Create your JSON file `settings.json` in either the directory
-   `{SOURCE}/site` or `{SOURCE}/notebinders` by making a copy of 
+   `{SOURCE}/site` or `{SOURCE}/datagraphics` by making a copy of 
    `{SOURCE}/site/example_settings.json`. Edit as appropriate for your site.
+
+   For security, the `settings.json` should be readable only for the Linux
+   account that runs the Flask server process.
+
+   The `settings.json` file may contain an entry `ADMIN_USER` which will
+   create an admin user if it doesn't exist. See the `example_settings.json`
+   file for how it should look. The password for this user ought to be
+   changed as soon as it has been created, for security.
    
    If your email server is not the simple `localhost` with no password,
    then you need to set those variables. See the file
-   `{SOURCE}/notebinders/__init__.py` for all email-related settings
+   `{SOURCE}/datagraphics/__init__.py` for all email-related settings
    variables.
 
 5. Set up the CouchDB database that your app will use, and add the name of
@@ -44,14 +52,15 @@ provided by the
    $ export PYTHONPATH=$PWD:$PYTHONPATH
    ```
 
-7. Use the command-line interface to create an admin user account.
+7. You mays use the command-line interface to create user accounts.
    This will also automatically load the index definitions to
-   the CouchDB server.
+   the CouchDB server, if not already done.
    ```
    $ python cli.py -A
    ```
 
-8. Run the Flask app in development mode as usual.
+8. Run the Flask app in development mode as usual. This will automatically
+   load the index definitons to the CouchDB server, if not already done.
    ```
    $ python app.py
    ```

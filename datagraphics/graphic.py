@@ -245,15 +245,14 @@ class GraphicSaver(EntitySaver):
         specification.pop("$schema", None)
         specification.pop("data", None)
         spec.update(specification)
-        specification = spec
-        # Save it, even if incorrect Vega-Lite.
-        self.doc["specification"] = specification
         try:
-            utils.validate_vega_lite(specification)
+            utils.validate_vega_lite(spec)
         except jsonschema.ValidationError as error:
             self.doc["error"] = str(error)
         else:
             self.doc["error"] = None
+        # Save it, even if incorrect Vega-Lite.
+        self.doc["specification"] = spec
 
 # Utility functions
 
