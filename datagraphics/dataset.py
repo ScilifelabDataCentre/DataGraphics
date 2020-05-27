@@ -227,6 +227,10 @@ class DatasetSaver(EntitySaver):
 
     DOCTYPE = constants.DOCTYPE_DATASET
 
+    def initialize(self):
+        super(self).initialize()
+        self.doc["meta"] = {}
+
     def set_data(self, infile=None, content_type=None):
         "Set the data for this dataset from the input file (CSV or JSON)."
         if infile is None:
@@ -272,8 +276,7 @@ class DatasetSaver(EntitySaver):
     def get_json_data(self, infile):
         """Return the data from the given JSON infile.
         If there is a 'meta' entry for the dataset, check against types it.
-        Otherwise define it.
-        Update the 'meta' entries.
+        Otherwise set it. Update the 'meta' entries.
         """
         data = json.load(infile)
         if not data:
@@ -285,12 +288,12 @@ class DatasetSaver(EntitySaver):
             raise ValueError("Empty first record in JSON data.")
         if not isinstance(first, dict):
             raise ValueError(f"JSON data record 0 '{first}' is not an object.")
-        try:
-            meta = self.doc["meta"]
-        except KeyError:
-            # Define the 'meta' entry for the dataset if it does not exist.
+        meta = self.doc["meta"]
+        if not meta:
+            # The 'meta' entry for the dataset has not been set.
             # Figure out the types from the items in the first data record.
-            self.doc["meta"] = meta = dict((key, {}) for key in first)
+            for key in first:
+                meta[key] = {}
             for key, value in first.items():
                 try:
                     meta[key]["type"] = TYPE_NAME_MAP[type(value)]
@@ -318,8 +321,7 @@ class DatasetSaver(EntitySaver):
     def get_csv_data(self, infile):
         """Retun the data frin the given CSV infile.
         If there is a 'meta' entry for the dataset, check against types it.
-        Otherwise define it.
-        Update the 'meta' entries.
+        Otherwise set it. Update the 'meta' entries.
         """
         reader = csv.DictReader(io.StringIO(infile.read().decode("utf-8")))
         data = list(reader)
@@ -336,13 +338,13 @@ class DatasetSaver(EntitySaver):
             raise ValueError(f"invalid bool '{s}'")
         TYPE_OBJECT_MAP["boolean"] = bool2
 
-        first = data[0]
-        try:
-            meta = self.doc["meta"]
-        except KeyError:
-            # Define the 'meta' entry for the dataset if it does not exist.
+        meta = self.doc["meta"]
+        if not meta:
+            # The 'meta' entry for the dataset has not been set.
             # Figure out the types from the items in the first data record.
-            self.doc["meta"] = meta = dict((key, {}) for key in first)
+            first = data[0]
+            for key in first:
+                meta[key] = {}
             for key, value in first.items():
                 try:
                     int(value)

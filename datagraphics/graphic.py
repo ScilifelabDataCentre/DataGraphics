@@ -223,6 +223,8 @@ class GraphicSaver(EntitySaver):
     def set_dataset(self, dataset):
         if not datagraphics.dataset.allow_view(dataset):
             raise ValueError("View access to dataset not allowed.")
+        if not dataset["meta"] or not dataset["meta"]["# records"]:
+            raise ValueError("Cannot create graphics for empty dataset.")
         self.doc["dataset"] = dataset["_id"]
 
     def set_specification(self, specification=None):

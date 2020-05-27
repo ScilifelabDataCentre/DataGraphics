@@ -151,9 +151,11 @@
       Copy dataset</button>
   </form>
 </div>
+{% if dataset['meta'] %}
 <div class="mt-2">
   {% include 'graphic/create.html' %}
 </div>
+{% endif %}
 {% endif %} {# if g.current_user #}
 {% endblock %} {# block actions #}
 
