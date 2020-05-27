@@ -57,6 +57,7 @@
                         aria-describedby="specificationHelp"
 >{
   "$schema": "{{ config['VEGA_LITE_SCHEMA_URL'] }}",
+  "title": "dataset['title']",
   "data": {
     "url": "{{ url_for('dataset.serve', iuid=dataset['_id'], ext='csv', _external=True) }}",
     "format": {"type": "csv"}
@@ -68,9 +69,9 @@
                 <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> JSON.
                 <br>
                 <strong>
-                  The items <code>$schema</code> and <code>data</code>
-                  are fixed, and attempts to change them will be
-                  overruled when saving.
+                  The items <code>$schema</code>, <code>title</code>
+                  and <code>data</code> are fixed, and attempts to
+                  change them will be overruled when saving.
                 </strong>
               </small>
             </div>
