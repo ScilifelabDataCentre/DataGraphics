@@ -13,7 +13,8 @@ import datagraphics.graphics
 
 import datagraphics.api.about
 import datagraphics.api.root
-import datagraphics.api.schema
+import datagraphics.api.dataset
+import datagraphics.api.datasets
 import datagraphics.api.user
 
 from datagraphics import constants
@@ -74,12 +75,16 @@ app.register_blueprint(datagraphics.datasets.blueprint, url_prefix="/datasets")
 app.register_blueprint(datagraphics.graphic.blueprint, url_prefix="/graphic")
 app.register_blueprint(datagraphics.graphics.blueprint, url_prefix="/graphics")
 
-app.register_blueprint(datagraphics.api.root.blueprint, url_prefix="/api")
+app.register_blueprint(datagraphics.api.root.blueprint,
+                       url_prefix="/api")
 app.register_blueprint(datagraphics.api.about.blueprint, 
                        url_prefix="/api/about")
-app.register_blueprint(datagraphics.api.schema.blueprint,
-                       url_prefix="/api/schema")
-app.register_blueprint(datagraphics.api.user.blueprint, url_prefix="/api/user")
+app.register_blueprint(datagraphics.api.dataset.blueprint,
+                       url_prefix="/api/dataset")
+app.register_blueprint(datagraphics.api.datasets.blueprint,
+                       url_prefix="/api/datasets")
+app.register_blueprint(datagraphics.api.user.blueprint,
+                       url_prefix="/api/user")
 
 
 # This code is used only during development.

@@ -12,13 +12,15 @@ class User(base.Base):
         "Get user JSON."
         url = f"{base.SETTINGS['ROOT_URL']}/user/{base.SETTINGS['USERNAME']}"
         response = self.session.get(url)
-        user = self.check_schema(response)
+        self.assertEqual(response.status_code, http.client.OK)
+        # user = self.check_schema(response)
 
     def test_users_data(self):
         "Get all users JSON."
         url = f"{base.SETTINGS['ROOT_URL']}/user"
         response = self.session.get(url)
-        user = self.check_schema(response)
+        self.assertEqual(response.status_code, http.client.OK)
+        # user = self.check_schema(response)
 
 
 if __name__ == '__main__':

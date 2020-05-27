@@ -1,7 +1,5 @@
 "About API endpoints."
 
-import http.client
-
 import flask
 
 from datagraphics import utils
@@ -13,15 +11,6 @@ blueprint = flask.Blueprint("api", __name__)
 def root():
     "API root."
     items = {
-        "schema": {
-            "root": {"href": utils.url_for("api_schema.root")},
-            "logs": {"href": utils.url_for("api_schema.logs")},
-            "user": {"href": utils.url_for("api_schema.user")},
-            "users": {"href": utils.url_for("api_schema.users")},
-            "about/software": {
-                "href": utils.url_for("api_schema.about_software")
-            }
-        },
         "about": {
             "software": {"href": utils.url_for("api_about.software")}
         }
@@ -36,5 +25,4 @@ def root():
         items["users"] = {
             "href": utils.url_for("api_user.all")
         }
-    return utils.jsonify(utils.get_json(**items),
-                         schema_url=utils.url_for("api_schema.root"))
+    return flask.jsonify(utils.get_json(**items))

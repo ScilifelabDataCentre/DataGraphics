@@ -16,6 +16,13 @@ Datasets
 {% endif %}
 {% endblock %}
 
+{% block meta %}
+<div>
+  <a href="{{ url_for('api_datasets.public') }}"
+     class="badge badge-dark">API</a>
+</div>
+{% endblock %} {# block meta #}
+
 {% block main %}
 {{ macros.datasets_table(datasets, show_public=False) }}
 {% endblock %} {# block main #}

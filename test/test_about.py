@@ -12,6 +12,7 @@ class About(base.Base):
         "Get software API JSON."
         url = f"{base.SETTINGS['ROOT_URL']}/about/software"
         response = self.session.get(url)
+        self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
 
 

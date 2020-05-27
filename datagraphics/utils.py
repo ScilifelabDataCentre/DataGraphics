@@ -302,14 +302,6 @@ def get_json(**data):
     result.update(data)
     return result
 
-def jsonify(result, schema_url=None):
-    """Return a Response object containing the JSON of "result".
-    Optionally add a header Link to the schema."""
-    response = flask.jsonify(result)
-    if schema_url:
-        response.headers.add("Link", schema_url, rel="schema")
-    return response
-
 
 class JsonException(Exception):
     "JSON API error response."

@@ -16,7 +16,7 @@ SCHEMA_LINK_RX = re.compile(r'<([^>])+>; rel="([^"]+)')
 JSON_MIMETYPE = 'application/json'
 
 DEFAULT_SETTINGS = {
-    'ROOT_URL': 'http://127.0.0.1:5002/api',
+    'ROOT_URL': 'http://127.0.0.1:5005/api',
     'USERNAME': None,           # Needs to be set! Must have admin privileges.
     'APIKEY': None              # Needs to be set! For the above user.
 }
@@ -75,13 +75,15 @@ class Base(unittest.TestCase):
             return self._root
 
     def check_schema(self, response):
-        """Check that the response JSON data matches the schema
-        linked to in the response header.
+        """If there is JSON schema linked to in the response header,
+        check the response JSON data.
         Return the response JSON.
         """
-        self.assertEqual(response.status_code, http.client.OK)
         result = response.json()
-        url = response.links['schema']['url']
+        try:
+            url = response.links['schema']['url']
+        except KeyError:
+            return result
         try:
             schema = self.schemas[url]
         except KeyError:

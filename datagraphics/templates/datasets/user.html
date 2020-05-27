@@ -7,6 +7,13 @@ User <a href="{{ url_for('user.display', username=user['username']) }}">
   {{ user['username'] }}</a> datasets
 {% endblock %}
 
+{% block meta %}
+<div>
+  <a href="{{ url_for('api_datasets.user', username=user['username']) }}"
+     class="badge badge-dark">API</a>
+</div>
+{% endblock %} {# block meta #}
+
 {% block main %}
 {{ macros.datasets_table(datasets, show_public=True) }}
 {% endblock %} {# block main #}

@@ -12,6 +12,10 @@
 
 {% block meta %}
 <div>
+  <a href="{{ url_for('api_dataset.serve', iuid=dataset['_id']) }}"
+     class="badge badge-dark">API</a>
+</div>
+<div>
   <a href="{{ url_for('.serve', iuid=dataset['_id'], ext='json', download=True) }}"
      title="Download dataset content."
      class="badge badge-pill badge-primary">JSON file</a>
@@ -21,7 +25,7 @@
      title="Download dataset content."
      class="badge badge-pill badge-primary">CSV file</a>
 </div>
-{% endblock %}
+{% endblock %} {# block meta #}
 
 {% block main %}
 <div>

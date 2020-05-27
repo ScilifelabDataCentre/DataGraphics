@@ -1,16 +1,16 @@
-"Test the root API endpoint."
+"Test the dataset API endpoints."
 
 import http.client
 
 import base
 
 
-class Root(base.Base):
-    "Test the root API endpoint."
+class Dataset(base.Base):
+    "Test the dataset API endpoint."
 
-    def test_root_data(self):
-        "Get API root JSON."
-        url = f"{base.SETTINGS['ROOT_URL']}"
+    def test_dataset(self):
+        "Get datasets API JSON."
+        url = f"{base.SETTINGS['ROOT_URL']}/datasets/public"
         response = self.session.get(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
