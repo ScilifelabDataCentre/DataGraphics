@@ -14,8 +14,8 @@ provided by the
 ## Installation
 
 1. Download and unpack the zipped codebase from
-   [GitHub](https://github.com/pekrau/DataGraphics). The source code
-   directory is called `{SOURCE}` in the following.
+   [https://github.com/pekrau/DataGraphics](https://github.com/pekrau/DataGraphics).
+   The source code directory is called `{SOURCE}` in the following.
 
 2. Set up your Python3 environment, e.g. using virtualenv, for the
    `{SOURCE}` directory.
@@ -37,7 +37,7 @@ provided by the
    
    If your email server is not the simple `localhost` with no password,
    then you need to set those variables. See the file
-   `{SOURCE}/datagraphics/__init__.py` for all email-related settings
+   `{SOURCE}/datagraphics/config.py` for all email-related settings
    variables.
 
 5. Set up the CouchDB database that your app will use, and add the name of
@@ -53,6 +53,7 @@ provided by the
    ```
 
 7. You mays use the command-line interface to create user accounts.
+   (See point 4 above for how to create an admin user in a different way.)
    This will also automatically load the index definitions to
    the CouchDB server, if not already done.
    ```
@@ -61,6 +62,8 @@ provided by the
 
 8. Run the Flask app in development mode as usual. This will automatically
    load the index definitons to the CouchDB server, if not already done.
+   If the `ADMIN_USER` entry has been defined properly in the `settings.json`
+   file, it will be created.
    ```
    $ python app.py
    ```

@@ -25,14 +25,20 @@ def init(app):
             flask.g.db = db
             user = get_user(username=app.config["ADMIN_USER"]["username"])
             if user is None:
-                with UserSaver() as saver:
-                    saver.set_username(app.config["ADMIN_USER"]["username"])
-                    saver.set_email(app.config["ADMIN_USER"]["email"])
-                    saver.set_role(constants.ADMIN)
-                    saver.set_status(constants.ENABLED)
-                    saver.set_password(app.config["ADMIN_USER"]["password"])
-            logger.info("Created admin user " +
-                        app.config["ADMIN_USER"]["username"])
+                try:
+                    with UserSaver() as saver:
+                        saver.set_username(app.config["ADMIN_USER"]["username"])
+                        saver.set_email(app.config["ADMIN_USER"]["email"])
+                        saver.set_role(constants.ADMIN)
+                        saver.set_status(constants.ENABLED)
+                        saver.set_password(app.config["ADMIN_USER"]["password"])
+                    logger.info("Created admin user " +
+                                app.config["ADMIN_USER"]["username"])
+                except ValueError as error:
+                    logger.error("Could not create admin user; misconfiguration.")
+            else:
+                logger.info(f"Admin user {app.config['ADMIN_USER']['username']}"
+                            " already exists.")
 
 DESIGN_DOC = {
     "views": {
