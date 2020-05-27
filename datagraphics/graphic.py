@@ -231,6 +231,21 @@ class GraphicSaver(EntitySaver):
             specification = flask.request.form.get("specification") or ""
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
+        # Ensure that the fixed items stay put.
+        # A bit complicated, to keep fixed items at the top, and
+        # the rest of the items in the order specified in the input.
+        spec = {"$schema": flask.current_app.config['VEGA_LITE_SCHEMA_URL'],
+                "data": {"url": flask.url_for("dataset.serve",
+                                              iuid=self.doc["dataset"],
+                                              ext="csv",
+                                              _external=True),
+                         "format": {"type": "csv"}
+                }
+        }
+        specification.pop("$schema", None)
+        specification.pop("data", None)
+        spec.update(specification)
+        specification = spec
         # Save it, even if incorrect Vega-Lite.
         self.doc["specification"] = specification
         try:

@@ -260,12 +260,15 @@ def float_default(value, default=""):
     else:
         return "%g" % value
 
-def slugify(s):
+def slugify(s, lowercase=False):
     """Return the string converted into a valid slug.
+    - Lower case, if specified.
     - Dash instead of blanks.
     - ASCII letters, numbers and dash.
     - All other characters removed.
     """
+    if lowercase:
+        s = s.lower()
     s = s.strip()
     s = s.replace(" ", "-")
     s = unicodedata.normalize("NFKD", s)
