@@ -26,14 +26,17 @@
 <span title="Download file">{{ ':inbox_tray:' | emojize }}</span>&nbsp;
 {%- endmacro %}
 
-{% macro datasets_table(datasets, show_public=False) -%}
+{% macro datasets_table(datasets, show_public=False, show_owner=False) -%}
 <table id="datasets" class="table table-sm">
   <thead>
     <tr>
       {% if show_public %}
-      <th width="5%"></th>
+      <th>Access</th>
       {% endif %}
       <th>Dataset</th>
+      {% if show_owner %}
+      <th>Owner</th>
+      {% endif %}
       <th># fields</th>
       <th># records</th>
       <th>Modified</th>
@@ -49,11 +52,21 @@
         <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
           {{ dataset_symbol() }}{{ dataset['title'] }}</a>
       </td>
+      {% if show_owner %}
+      <td>
+        {% if g.am_admin %}
+        <a href="{{ url_for('user.display', username=dataset['owner']) }}">
+          {{ dataset['owner'] }}</a>
+        {% else %}
+        {{ dataset['owner'] }}
+        {% endif %}
+      </td>
+      {% endif %}
       <td class="text-right text-monospace">
         <span class="mr-5">{{ dataset["meta"].keys() | length }}</span>
       </td>
       <td class="text-right text-monospace">
-        <span class="mr-5">{{ dataset["# records"] }}</span>
+        <span class="mr-5">{{ dataset["n_records"] | default(0) }}</span>
       </td>
       <td class="small localtime">{{ dataset['modified'] }}</td>
     </tr>

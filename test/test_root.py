@@ -9,9 +9,9 @@ class Root(base.Base):
     "Test the root API endpoint."
 
     def test_root_data(self):
-        "Get API root JSON."
+        "Get root information."
         url = f"{base.SETTINGS['ROOT_URL']}"
-        response = self.session.get(url)
+        response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
 

@@ -59,7 +59,7 @@
   "$schema": "{{ config['VEGA_LITE_SCHEMA_URL'] }}",
   "title": "dataset['title']",
   "data": {
-    "url": "{{ url_for('dataset.serve', iuid=dataset['_id'], ext='csv', _external=True) }}",
+    "url": "{{ url_for('api_dataset.content', iuid=dataset['_id'], ext='csv', _external=True) }}",
     "format": {"type": "csv"}
   }
 }

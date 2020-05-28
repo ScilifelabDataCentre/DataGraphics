@@ -123,7 +123,8 @@ def register():
             site = flask.current_app.config["SITE_NAME"]
             message = flask_mail.Message(f"{site} user account pending",
                                          recipients=emails)
-            url = utils.url_for(".display", username=user["username"])
+            url = flask.url_for(".display", username=user["username"],
+                                _external=True)
             message.body = f"To enable the user account, go to {url}"
             utils.mail.send(message)
             utils.get_logger().info(f"pending user {user['username']}")
@@ -439,9 +440,10 @@ def send_password_code(user, action):
     site = flask.current_app.config["SITE_NAME"]
     message = flask_mail.Message(f"{site} user account {action}",
                                  recipients=[user["email"]])
-    url = utils.url_for(".password",
+    url = flask.url_for(".password",
                         username=user["username"],
-                        code=user["password"][len("code:"):])
+                        code=user["password"][len("code:"):],
+                        _external=True)
     message.body = f"To set your password, go to {url}"
     utils.mail.send(message)
 

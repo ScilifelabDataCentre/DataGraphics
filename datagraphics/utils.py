@@ -182,10 +182,6 @@ def get_time(offset=None):
     instant = instant.isoformat()
     return instant[:17] + "{:06.3f}".format(float(instant[17:])) + "Z"
 
-def url_for(endpoint, **values):
-    "Same as 'flask.url_for', but with '_external' set to True."
-    return flask.url_for(endpoint, _external=True, **values)
-
 def referrer(url=None):
     """Return the URL for the referring page ('referer').
     Return the given URL if no referring page; the home page if none given.

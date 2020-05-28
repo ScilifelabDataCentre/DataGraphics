@@ -4,7 +4,6 @@ import json
 
 import couchdb2
 import flask
-from flask_cors import cross_origin
 import jsonschema
 
 import datagraphics.dataset
@@ -165,9 +164,8 @@ def private(iuid):
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>.<ext>")
-@cross_origin()
-def serve(iuid, ext):
-    "Return the JSON or JavaScript specification of the Vega-Lite graphic."
+def download(iuid, ext):
+    "Download the JSON or JavaScript specification of the Vega-Lite graphic."
     try:
         graphic = get_graphic(iuid)
     except ValueError as error:
@@ -178,7 +176,8 @@ def serve(iuid, ext):
         return flask.redirect(utils.referrer())
     dataset = get_dataset(graphic)
     if not dataset:
-        flask.abort(403, description="View access to dataset not allowed.")
+        utils.flash_error("View access to dataset not allowed.")
+        return flask.redirect(utils.referrer())
     spec = graphic["specification"]
     if utils.to_bool(flask.request.args.get("inline")):
         outfile = flask.g.db.get_attachment(dataset, "data.json")
@@ -188,13 +187,15 @@ def serve(iuid, ext):
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
     elif ext == "js":
         spec = json.dumps(spec)
-        divid = flask.request.args.get("divid") or "graphic"
-        response = flask.make_response(f"vegaEmbed('#{divid}', {spec});")
+        id = flask.request.args.get("id") or "graphic"
+        response = flask.make_response(f"vegaEmbed('#{id}', {spec});")
         response.headers.set("Content-Type", constants.JS_MIMETYPE)
-    if utils.to_bool(flask.request.args.get("download")):
-        slug = utils.slugify(graphic['title'])
-        response.headers.set("Content-Disposition", "attachment", 
-                             filename=f"{slug}.{ext}")
+    else:
+        utils.flash_error("Invalid file type requested.")
+        return flask.redirect(utils.referrer())
+    slug = utils.slugify(graphic['title'])
+    response.headers.set("Content-Disposition", "attachment", 
+                         filename=f"{slug}.{ext}")
     return response
 
 @blueprint.route("/<iuid:iuid>/logs")
@@ -223,7 +224,7 @@ class GraphicSaver(EntitySaver):
     def set_dataset(self, dataset):
         if not datagraphics.dataset.allow_view(dataset):
             raise ValueError("View access to dataset not allowed.")
-        if not dataset["meta"] or not dataset["meta"]["# records"]:
+        if not dataset["meta"] or not dataset["meta"]["n_records"]:
             raise ValueError("Cannot create graphics for empty dataset.")
         self.doc["dataset"] = dataset["_id"]
 
@@ -238,7 +239,7 @@ class GraphicSaver(EntitySaver):
         # the rest of the items in the order specified in the input.
         spec = {"$schema": flask.current_app.config['VEGA_LITE_SCHEMA_URL']}
         spec["title"] = self.doc["title"]
-        spec["data"] = {"url": flask.url_for("dataset.serve",
+        spec["data"] = {"url": flask.url_for("api_dataset.content",
                                              iuid=self.doc["dataset"],
                                              ext="csv",
                                              _external=True),

@@ -9,9 +9,9 @@ class About(base.Base):
     "Test the about API endpoint."
 
     def test_software(self):
-        "Get software API JSON."
+        "Get software information."
         url = f"{base.SETTINGS['ROOT_URL']}/about/software"
-        response = self.session.get(url)
+        response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
 

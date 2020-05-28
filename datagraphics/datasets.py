@@ -45,38 +45,101 @@ def user(username):
                                  datasets=datasets,
                                  show_public=True)
 
+@blueprint.route("/all")
+def all():
+    "Display list of datasets."
+    if not flask.g.am_admin:
+        utils.flash_error("Not logged in as admin.")
+        return flask.redirect(flask.url_for("home"))
+    datasets = get_datasets_all(full=True)
+    return flask.render_template("datasets/all.html", datasets=datasets)
+
 def get_datasets_owner(username, full=False):
-    "Get the datasets owned by the given user."
+    """Get the datasets owned by the given user.
+    If full is True, as docs.
+    If full is False, as list of tuples (iuid, title, modified).
+    """
     view = flask.g.db.view("datasets", "owner_modified",
-                           startkey=(username,"ZZZZZZ"),
+                           startkey=(username, "ZZZZZZ"),
                            endkey=(username, ""),
                            include_docs=full,
                            reduce=False,
                            descending=True)
-    result = []
     if full:
+        result = []
         for row in view:
             flask.g.cache[row.doc["_id"]] = row.doc
             result.append(row.doc)
+        return result
     else:
-        for row in view:
-            result.append((row.id, row.value, row.key[1]))
-    return result
+        return [(row.id, row.value, row.key[1]) for row in view]
+
+def count_datasets_owner(username):
+    "Return the number of datasets owned by the given user."
+    view = flask.g.db.view("datasets", "owner_modified",
+                           startkey=(username, ""),
+                           endkey=(username, "ZZZZZZ"),
+                           reduce=True)
+    rows = list(view)
+    if rows:
+        return rows[0].value
+    else:
+        return 0
 
 def get_datasets_public(full=False):
-    "Get the public datasets."
+    """Get the public datasets.
+    If full is True, as docs.
+    If full is False, as list of tuples (iuid, title, modified).
+    """
     view = flask.g.db.view("datasets", "public_modified",
+                           include_docs=full,
                            startkey="ZZZZZZ",
                            endkey="",
+                           reduce=False,
+                           descending=True)
+    if full:
+        result = []
+        for row in view:
+            flask.g.cache[row.doc["_id"]] = row.doc
+            result.append(row.doc)
+            return result
+    else:
+        return [(row.id, row.value, row.key[1]) for row in view]
+
+def count_datasets_public():
+    "Return the number of public datasets."
+    view = flask.g.db.view("datasets", "public_modified", reduce=True)
+    rows = list(view)
+    if rows:
+        return rows[0].value
+    else:
+        return 0
+
+def get_datasets_all(full=False):
+    """Get all datasets.
+    If full is True, as docs.
+    If full is False, as list of tuples (iuid, title, owner, modified).
+    """
+    view = flask.g.db.view("datasets", "owner_modified",
+                           startkey=("ZZZZZZ", "ZZZZZZ"),
+                           endkey=("", ""),
                            include_docs=full,
                            reduce=False,
                            descending=True)
-    result = []
     if full:
+        result = []
         for row in view:
             flask.g.cache[row.doc["_id"]] = row.doc
             result.append(row.doc)
+        return result
     else:
-        for row in view:
-            result.append((row.id, row.value, row.key))
-    return result
+        return [(row.id, row.value, row.key[0], row.key[1]) for row in view]
+
+def count_datasets_all():
+    "Return the number of datasets."
+    view = flask.g.db.view("datasets", "owner_modified", reduce=True)
+    rows = list(view)
+    if rows:
+        return rows[0].value
+    else:
+        return 0

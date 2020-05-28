@@ -52,6 +52,10 @@
                  href="{{ url_for('datasets.display') }}">My datasets</a>
               <a class="dropdown-item"
                  href="{{ url_for('datasets.public') }}">Public datasets</a>
+              {% if g.am_admin %}
+              <a class="dropdown-item"
+                 href="{{ url_for('datasets.all') }}">All datasets</a>
+              {% endif %}
             </div>
           </li>
           <li class="nav-item dropdown">

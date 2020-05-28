@@ -11,18 +11,18 @@
 
 {% block meta %}
 <div>
-  <a href="{{ url_for('.serve', iuid=graphic['_id'], ext='json', download=True) }}"
-     title="Download graphic specification."
+  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='json') }}"
+     title="Download the graphic specification."
      class="badge badge-pill badge-primary">JSON file</a>
 </div>
 <div>
-  <a href="{{ url_for('.serve', iuid=graphic['_id'], ext='js', download=True) }}"
-     title="Download graphic JavaScript code."
+  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js') }}"
+     title="Download the graphic JavaScript code."
      class="badge badge-pill badge-primary">JavaScript file</a>
 </div>
 <div>
-  <a href="{{ url_for('.serve', iuid=graphic['_id'], ext='js', download=True, inline=True) }}"
-     title="Download graphic JavaScript code."
+  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js', inline=True) }}"
+     title="Download the graphic JavaScript code."
      class="badge badge-pill badge-primary">JavaScript file, data inlined</a>
 </div>
 {% endblock %}
@@ -62,9 +62,7 @@
 </p>
 <div class="collapse" id="collapseSpecification">
   <div class="card card-body">
-    <pre>
-      {{ graphic['specification'] | tojson(indent=2) }}
-    </pre>
+    <pre>{{ graphic['specification'] | tojson(indent=2) }}</pre>
   </div>
 </div>
 {% endblock %} {# block main #}

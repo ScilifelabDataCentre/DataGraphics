@@ -3,11 +3,11 @@
 import csv
 import io
 import json
+import http.client
 import statistics
 
 import couchdb2
 import flask
-from flask_cors import cross_origin
 
 import datagraphics.user
 from datagraphics import constants
@@ -29,7 +29,8 @@ def init(app):
 
 DESIGN_DOC = {
     "views": {
-        "public_modified": {"map": "function(doc) {if (doc.doctype !== 'dataset' || !doc.public) return; emit(doc.modified, doc.title);}"},
+        "public_modified": {"reduce": "_count",
+                            "map": "function(doc) {if (doc.doctype !== 'dataset' || !doc.public) return; emit(doc.modified, doc.title);}"},
         "owner_modified": {"reduce": "_count",
                            "map": "function(doc) {if (doc.doctype !== 'dataset') return; emit([doc.owner, doc.modified], doc.title);}"},
         "file_size": {"reduce": "_sum",
@@ -177,16 +178,20 @@ def private(iuid):
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>.<ext>")
-@cross_origin()
-def serve(iuid, ext):
-    "Return the content of the dataset as JSON or CSV."
+def download(iuid, ext):
+    """Download the content of the dataset as JSON or CSV file.
+    This is for use in the HTML pages, not for API calls.
+    """
     try:
         dataset = get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.referrer())
     if not allow_view(dataset):
-        utils.flash_error("View access to dataset not allowed.")
+        utils.flash_error("View access to dataset is not allowed.")
+        return flask.redirect(utils.referrer())
+    if not dataset.get("_attachments", None):
+        utils.flash_error("Dataset does not contain any data.")
         return flask.redirect(utils.referrer())
     if ext == "json":
         outfile = flask.g.db.get_attachment(dataset, "data.json")
@@ -197,11 +202,11 @@ def serve(iuid, ext):
         response = flask.make_response(outfile.read())
         response.headers.set("Content-Type", constants.CSV_MIMETYPE)
     else:
-        raise ValueError("invalid data format specified")
-    if utils.to_bool(flask.request.args.get("download")):
-        slug = utils.slugify(dataset['title'])
-        response.headers.set("Content-Disposition", "attachment", 
-                             filename=f"{slug}.{ext}")
+        utils.flash_error("Invalid file type requested.")
+        return flask.redirect(utils.referrer())
+    slug = utils.slugify(dataset['title'])
+    response.headers.set("Content-Disposition", "attachment", 
+                         filename=f"{slug}.{ext}")
     return response
 
 @blueprint.route("/<iuid:iuid>/logs")
@@ -228,7 +233,7 @@ class DatasetSaver(EntitySaver):
     DOCTYPE = constants.DOCTYPE_DATASET
 
     def initialize(self):
-        super(self).initialize()
+        super().initialize()
         self.doc["meta"] = {}
 
     def set_data(self, infile=None, content_type=None):
@@ -246,7 +251,7 @@ class DatasetSaver(EntitySaver):
         else:
             raise ValueError("Cannot handle data file of type"
                              f" {infile.content_type}.")
-        self.doc["# records"] = len(data)
+        self.doc["n_records"] = len(data)
         self.update_meta(data)
 
         json_content = json.dumps(data)
@@ -378,10 +383,10 @@ class DatasetSaver(EntitySaver):
     def update_meta(self, data):
         "Update the 'meta' entry given the data."
         for key, meta in self.doc["meta"].items():
-            meta["# null"] = len([r[key] for r in data if r[key] is None])
+            meta["n_null"] = len([r[key] for r in data if r[key] is None])
             if meta["type"] in ("string", "integer"):
                 distinct = set(r[key] for r in data if r[key] is not None)
-                meta["# distinct"] = len(distinct)
+                meta["n_distinct"] = len(distinct)
                 try:
                     meta["min"] = min(distinct)
                 except ValueError:
@@ -413,8 +418,8 @@ class DatasetSaver(EntitySaver):
                 except statistics.StatisticsError:
                     meta["stdev"] = None
             elif meta["type"] == "boolean":
-                meta["# true"] = len([r[key] for r in data if r[key] is True])
-                meta["# false"] = len([r[key] for r in data if r[key] is False])
+                meta["n_true"] = len([r[key] for r in data if r[key] is True])
+                meta["n_false"] = len([r[key] for r in data if r[key] is False])
 
     def remove_data(self):
         "Remove the data."

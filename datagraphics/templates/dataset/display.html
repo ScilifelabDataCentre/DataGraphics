@@ -7,7 +7,7 @@
 {{ macros.access_symbol(dataset) }}
 {% endif %}
 {{ macros.dataset_symbol() }}{{ dataset['title']  }}
-<span class="small text-muted ml-4">{{ dataset['# records'] }} records</span>
+<span class="small text-muted ml-4">{{ dataset['n_records'] }} records</span>
 {% endblock %}
 
 {% block meta %}
@@ -16,13 +16,13 @@
      class="badge badge-dark">API</a>
 </div>
 <div>
-  <a href="{{ url_for('.serve', iuid=dataset['_id'], ext='json', download=True) }}"
-     title="Download dataset content."
+  <a href="{{ url_for('.download', iuid=dataset['_id'], ext='json') }}"
+     title="Download the dataset content."
      class="badge badge-pill badge-primary">JSON file</a>
 </div>
 <div>
-  <a href="{{ url_for('.serve', iuid=dataset['_id'], ext='csv', download=True) }}"
-     title="Download dataset content."
+  <a href="{{ url_for('.download', iuid=dataset['_id'], ext='csv') }}"
+     title="Download the dataset content."
      class="badge badge-pill badge-primary">CSV file</a>
 </div>
 {% endblock %} {# block meta #}
@@ -32,50 +32,12 @@
   {{ dataset['description'] | markdown }}
 </div>
 <div class="card">
-  <div class="card-header">
-    <h5>Data field properties</h5>
-  </div>
+  <div class="card-header">Graphics visualizing the dataset</div>
   <div class="card-body">
-    <table class="table table-sm">
+    <table id="graphics" 
+           class="table table-sm table-borderless table-hover mb-0">
       <tr>
-        <th>Field</th>
-        <th>Type</th>
-        <th># null</th>
-        <th># distinct</th>
-        <th>Min</th>
-        <th>Max</th>
-        <th>Mean</th>
-        <th>Median</th>
-        <th>Stdev</th>
-        <th># true</th>
-        <th># false</th>
-      </tr>
-      {% for key, meta in dataset['meta'].items() %}
-      <tr>
-        <th>{{ key }}</th>
-        <td>{{ meta['type'] }}</td>
-        <td>{{ meta['# null'] }}</td>
-        <td>{{ meta['# distinct'] | default('-') }}</td>
-        <td>{{ meta.get('min') | float_default('-') }}</td>
-        <td>{{ meta.get('max') | float_default('-') }}</td>
-        <td>{{ meta.get('mean') | float_default('-') }}</td>
-        <td>{{ meta.get('median') | float_default('-') }}</td>
-        <td>{{ meta.get('stdev') | float_default('-') }}</td>
-        <td>{{ meta['# true'] | default('-') }}</td>
-        <td>{{ meta['# false'] | default('-') }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-  </div>
-</div>
-<div class="card mt-4">
-  <div class="card-header">
-    <h5>Graphics visualizing the dataset</h5>
-  </div>
-  <div class="card-body">
-    <table id="graphics" class="table table-sm">
-      <tr>
-        <th></th>
+        <th>Access</th>
         <th>Graphic</th>
         <th>Modified</th>
         <th>Owner</th>
@@ -96,6 +58,41 @@
           {{ dataset['owner'] }}
           {% endif %}
         </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<div class="card mt-3">
+  <div class="card-header">Data field properties</div>
+  <div class="card-body">
+    <table class="table table-sm table-borderless table-hover mb-0">
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th># null</th>
+        <th># distinct</th>
+        <th>Min</th>
+        <th>Max</th>
+        <th>Mean</th>
+        <th>Median</th>
+        <th>Stdev</th>
+        <th># true</th>
+        <th># false</th>
+      </tr>
+      {% for key, meta in dataset['meta'].items() %}
+      <tr>
+        <th>{{ key }}</th>
+        <td>{{ meta['type'] }}</td>
+        <td>{{ meta['n_null'] }}</td>
+        <td>{{ meta['n_distinct'] | default('-') }}</td>
+        <td>{{ meta.get('min') | float_default('-') }}</td>
+        <td>{{ meta.get('max') | float_default('-') }}</td>
+        <td>{{ meta.get('mean') | float_default('-') }}</td>
+        <td>{{ meta.get('median') | float_default('-') }}</td>
+        <td>{{ meta.get('stdev') | float_default('-') }}</td>
+        <td>{{ meta['n_true'] | default('-') }}</td>
+        <td>{{ meta['n_false'] | default('-') }}</td>
       </tr>
       {% endfor %}
     </table>
