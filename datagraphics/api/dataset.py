@@ -129,7 +129,7 @@ def content(iuid, ext):
 def set_content_links(dataset):
     "Convert the '_attachments' item to links to contents."
     try:
-        atts = dataset["_attachments"]
+        atts = dataset.pop("_attachments")
     except KeyError:
         return
     dataset["content"] = {
