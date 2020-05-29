@@ -14,7 +14,7 @@ provided by the
 ## API usage
 
 For an example of how to use the API to update dataset contents, see
-
+[example_dataset_update.py](https://github.com/pekrau/DataGraphics/blob/master/datagraphics/api/example_dataset_update.py)
 
 ## Installation
 
