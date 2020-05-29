@@ -75,14 +75,17 @@
 </table>
 {%- endmacro %}
 
-{% macro graphics_table(graphics, show_public=False) -%}
+{% macro graphics_table(graphics, show_public=False, show_owner=False) -%}
 <table id="graphics" class="table table-sm">
   <thead>
     <tr>
       {% if show_public %}
-      <th width="5%"></th>
+      <th>Access</th>
       {% endif %}
       <th>Graphic</th>
+      {% if show_owner %}
+      <th>Owner</th>
+      {% endif %}
       <th>Modified</th>
       <th>Dataset</th>
       <th>Modified</th>
@@ -98,9 +101,22 @@
         <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
           {{ graphic_symbol() }}{{ graphic['title'] }}</a>
       </td>
+      {% if show_owner %}
+      <td>
+        {% if g.am_admin %}
+        <a href="{{ url_for('user.display', username=graphic['owner']) }}">
+          {{ graphic['owner'] }}</a>
+        {% else %}
+        {{ graphic['owner'] }}
+        {% endif %}
+      </td>
+      {% endif %}
       <td class="small localtime">{{ graphic['modified'] }}</td>
       {% if graphic['dataset'] %}
       <td>
+        {% if show_public %}
+        {{ access_symbol(graphic['dataset']) }}
+        {% endif %}
         <a href="{{ url_for('dataset.display', iuid=graphic['dataset']['_id']) }}">
           {{ dataset_symbol() }}{{ graphic['dataset']['title'] }}
         </a>
@@ -109,7 +125,7 @@
       {% else %}
       <td class="text-danger"
           title="Dataset does not exist, or view access to it is not allowed.">
-        inaccessible
+        Inaccessible
       </td>
       <td>-</td>
       {% endif %}

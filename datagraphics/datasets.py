@@ -92,9 +92,9 @@ def get_datasets_public(full=False):
     If full is False, as list of tuples (iuid, title, modified).
     """
     view = flask.g.db.view("datasets", "public_modified",
-                           include_docs=full,
                            startkey="ZZZZZZ",
                            endkey="",
+                           include_docs=full,
                            reduce=False,
                            descending=True)
     if full:

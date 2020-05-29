@@ -39,6 +39,7 @@
 </div>
 {% elif dataset %}
 <p class="lead">
+  Dataset
   {{ macros.access_symbol(dataset) }}
   <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
     {{ macros.dataset_symbol() }}{{ dataset['title'] }}</a>

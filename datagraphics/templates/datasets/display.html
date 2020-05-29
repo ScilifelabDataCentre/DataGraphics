@@ -31,7 +31,7 @@ Datasets
 {% endblock %} {# block meta #}
 
 {% block main %}
-{{ macros.datasets_table(datasets, show_public=show_public) }}
+{{ macros.datasets_table(datasets, show_public=show_public, show_owner=True) }}
 {% endblock %} {# block main #}
 
 {% block actions %}
@@ -48,7 +48,7 @@ Datasets
     $("#datasets").DataTable( {
       pagingType: "full_numbers",
       pageLength: 25,
-      order: [[{{ 3 + show_public }}, "desc"]]
+      order: [[{{ 4 + show_public }}, "desc"]]
     });
   });
 </script>

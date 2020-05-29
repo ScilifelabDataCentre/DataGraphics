@@ -68,6 +68,10 @@
                  href="{{ url_for('graphics.display') }}">My graphics</a>
               <a class="dropdown-item"
                  href="{{ url_for('graphics.public') }}">Public graphics</a>
+              {% if g.am_admin %}
+              <a class="dropdown-item"
+                 href="{{ url_for('graphics.all') }}">All graphics</a>
+              {% endif %}
             </div>
           </li>
           {% else %}

@@ -17,7 +17,7 @@ Graphics
 {% endblock %}
 
 {% block main %}
-{{ macros.graphics_table(graphics, show_public=show_public) }}
+{{ macros.graphics_table(graphics, show_public=show_public, show_owner=True) }}
 {% endblock %} {# block main #}
 
 {% block javascript %}
@@ -26,7 +26,7 @@ Graphics
     $("#graphics").DataTable( {
       pagingType: "full_numbers",
       pageLength: 25,
-      order: [[{{ 1 + show_public }}, "desc"]]
+      order: [[{{ 2 + show_public }}, "desc"]]
     });
   });
 </script>

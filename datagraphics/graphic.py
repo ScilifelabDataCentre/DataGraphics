@@ -22,7 +22,8 @@ def init(app):
 
 DESIGN_DOC = {
     "views": {
-        "public_modified": {"map": "function(doc) {if (doc.doctype !== 'graphic' || !doc.public) return; emit(doc.modified, doc.title);}"},
+        "public_modified": {"reduce": "_count",
+                            "map": "function(doc) {if (doc.doctype !== 'graphic' || !doc.public) return; emit(doc.modified, doc.title);}"},
         "owner_modified": {"reduce": "_count",
                            "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit([doc.owner, doc.modified], doc.title);}"},
         "dataset": {"map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}"}
@@ -224,7 +225,7 @@ class GraphicSaver(EntitySaver):
     def set_dataset(self, dataset):
         if not datagraphics.dataset.allow_view(dataset):
             raise ValueError("View access to dataset not allowed.")
-        if not dataset["meta"] or not dataset["meta"]["n_records"]:
+        if not dataset["meta"] or not dataset["n_records"]:
             raise ValueError("Cannot create graphics for empty dataset.")
         self.doc["dataset"] = dataset["_id"]
 
