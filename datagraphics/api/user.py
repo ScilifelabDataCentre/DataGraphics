@@ -3,11 +3,14 @@
 import http.client
 
 import flask
+from flask_cors import CORS
 
 import datagraphics.user
 from datagraphics import utils
 
 blueprint = flask.Blueprint("api_user", __name__)
+
+CORS(blueprint, supports_credentials=True)
 
 @blueprint.route("/")
 def all():

@@ -15,6 +15,7 @@ import datagraphics.api.about
 import datagraphics.api.root
 import datagraphics.api.dataset
 import datagraphics.api.datasets
+import datagraphics.api.graphic
 import datagraphics.api.user
 
 from datagraphics import constants
@@ -83,6 +84,8 @@ app.register_blueprint(datagraphics.api.dataset.blueprint,
                        url_prefix="/api/dataset")
 app.register_blueprint(datagraphics.api.datasets.blueprint,
                        url_prefix="/api/datasets")
+app.register_blueprint(datagraphics.api.graphic.blueprint,
+                       url_prefix="/api/graphic")
 app.register_blueprint(datagraphics.api.user.blueprint,
                        url_prefix="/api/user")
 

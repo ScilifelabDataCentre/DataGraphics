@@ -1,6 +1,7 @@
 import http.client
 
 import flask
+from flask_cors import CORS
 
 from datagraphics.datasets import (get_datasets_public,
                                    get_datasets_all,
@@ -9,6 +10,8 @@ import datagraphics.user
 from datagraphics import utils
 
 blueprint = flask.Blueprint("api_datasets", __name__)
+
+CORS(blueprint, supports_credentials=True)
 
 @blueprint.route("/public")
 def public():

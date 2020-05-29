@@ -178,5 +178,6 @@ class EntitySaver(AttachmentsSaver):
 
     def set_public(self, public=None):
         if public is None:
-            public = utils.to_bool(flask.request.form.get("public"))
-        self.doc["public"] = public
+            self.doc["public"] = utils.to_bool(flask.request.form.get("public"))
+        else:
+            self.doc["public"] = bool(public)

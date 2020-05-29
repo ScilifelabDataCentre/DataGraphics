@@ -1,6 +1,7 @@
 "About API endpoints."
 
 import flask
+from flask_cors import CORS
 
 from datagraphics import utils
 
@@ -9,6 +10,8 @@ from datagraphics.datasets import (count_datasets_public,
                                     count_datasets_all)
 
 blueprint = flask.Blueprint("api", __name__)
+
+CORS(blueprint, supports_credentials=True)
 
 @blueprint.route("")
 def root():

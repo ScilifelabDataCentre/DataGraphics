@@ -11,6 +11,10 @@
 
 {% block meta %}
 <div>
+  <a href="{{ url_for('api_graphic.serve', iuid=graphic['_id']) }}"
+     class="badge badge-dark">API</a>
+</div>
+<div>
   <a href="{{ url_for('.download', iuid=graphic['_id'], ext='json') }}"
      title="Download the graphic specification."
      class="badge badge-pill badge-primary">JSON file</a>

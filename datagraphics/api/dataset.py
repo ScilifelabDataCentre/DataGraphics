@@ -4,7 +4,7 @@ import io
 import http.client
 
 import flask
-from flask_cors import cross_origin
+from flask_cors import CORS
 
 from datagraphics.dataset import (DatasetSaver,
                                   get_dataset,
@@ -17,6 +17,8 @@ from datagraphics import constants
 
 blueprint = flask.Blueprint("api_dataset", __name__)
 
+CORS(blueprint, supports_credentials=True)
+
 @blueprint.route("/", methods=["POST"])
 def create():
     "Create an empty dataset."
@@ -28,13 +30,15 @@ def create():
             saver.set_title(data.get("title"))
             saver.set_description(data.get("description"))
             saver.set_public(False)
-    except ValueError:
-        flask.abort(http.client.BAD_REQUEST)
+    except ValueError as error:
+        return str(error), http.client.BAD_REQUEST
     return flask.jsonify(utils.get_json(**saver.doc))
 
-@blueprint.route("/<iuid:iuid>", methods=["GET", "DELETE"])
+@blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
-    "Return dataset information, or delete the dataset."
+    """Return dataset information, update it, or delete it.
+    The content of the dataset cannot be update via this endpoint.
+    """
     try:
         dataset = get_dataset(iuid)
     except ValueError as error:
@@ -43,22 +47,32 @@ def serve(iuid):
     if utils.http_GET():
         if not allow_view(dataset):
             flask.abort(http.client.FORBIDDEN)
-        result = utils.get_json(**dataset)
-        atts = result.pop("_attachments", None)
-        if atts:
-            result["content"] = {
-                "csv": {"href": flask.url_for("api_dataset.content",
-                                              iuid=dataset["_id"],
-                                              ext="csv",
-                                              _external=True),
-                        "size": atts["data.csv"]["length"]},
-                "json": {"href": flask.url_for("api_dataset.content",
-                                               iuid=dataset["_id"],
-                                               ext="json",
-                                               _external=True),
-                         "size": atts["data.json"]["length"]}
-            }
-        return flask.jsonify(result)
+        set_content_links(dataset)
+        return flask.jsonify(utils.get_json(**dataset))
+
+    elif utils.http_POST(csrf=False):
+        if not allow_edit(dataset):
+            flask.abort(http.client.FORBIDDEN)
+        try:
+            data = flask.request.get_json()
+            with DatasetSaver(dataset) as saver:
+                try:
+                    saver.set_title(data["title"])
+                except KeyError:
+                    pass
+                try:
+                    saver.set_title(data["description"])
+                except KeyError:
+                    pass
+                try:
+                    saver.set_title(data["public"])
+                except KeyError:
+                    pass
+        except ValueError as error:
+            return str(error), http.client.BAD_REQUEST
+        dataset = saver.doc
+        set_content_links(dataset)
+        return flask.jsonify(utils.get_json(**dataset))
 
     elif utils.http_DELETE():
         if not possible_delete(dataset):
@@ -71,7 +85,6 @@ def serve(iuid):
         return "", http.client.NO_CONTENT
 
 @blueprint.route("/<iuid:iuid>.<ext>", methods=["GET", "PUT"])
-@cross_origin()
 def content(iuid, ext):
     "Fetch or update the content of the dataset as JSON or CSV file."
     try:
@@ -110,5 +123,24 @@ def content(iuid, ext):
                 saver.set_data(infile=io.BytesIO(flask.request.data),
                                content_type=content_type)
         except ValueError as error:
-            flask.abort(http.client.BAD_REQUEST)
+            return str(error), http.client.BAD_REQUEST
         return "", http.client.NO_CONTENT
+
+def set_content_links(dataset):
+    "Convert the '_attachments' item to links to contents."
+    try:
+        atts = dataset["_attachments"]
+    except KeyError:
+        return
+    dataset["content"] = {
+        "csv": {"href": flask.url_for("api_dataset.content",
+                                      iuid=dataset["_id"],
+                                      ext="csv",
+                                      _external=True),
+                "size": atts["data.csv"]["length"]},
+        "json": {"href": flask.url_for("api_dataset.content",
+                                       iuid=dataset["_id"],
+                                       ext="json",
+                                       _external=True),
+                 "size": atts["data.json"]["length"]}
+    }

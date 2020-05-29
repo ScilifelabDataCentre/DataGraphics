@@ -1,11 +1,14 @@
 "About API endpoints."
 
 import flask
+from flask_cors import CORS
 
 import datagraphics.about
 from datagraphics import utils
 
 blueprint = flask.Blueprint("api_about", __name__)
+
+CORS(blueprint, supports_credentials=True)
 
 @blueprint.route("/software")
 def software():
