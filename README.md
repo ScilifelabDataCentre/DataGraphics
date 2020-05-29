@@ -11,6 +11,11 @@ provided by the
 [University of Washington Interactive Data Lab](https://idl.cs.washington.edu/)
 (UW IDL).
 
+## API usage
+
+For an example of how to use the API to update dataset contents, see
+
+
 ## Installation
 
 1. Download and unpack the zipped codebase from
