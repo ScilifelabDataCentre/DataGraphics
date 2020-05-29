@@ -110,6 +110,5 @@ def content(iuid, ext):
                 saver.set_data(infile=io.BytesIO(flask.request.data),
                                content_type=content_type)
         except ValueError as error:
-            print(str(error))
             flask.abort(http.client.BAD_REQUEST)
         return "", http.client.NO_CONTENT
