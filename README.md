@@ -76,3 +76,24 @@ For an example of how to use the API to update dataset contents, see
 9. For running the Flask app in production mode, see the information
    in the Flask manual and/or the Apache, nginx, or whichever
    outward-facing web server you are using.
+
+
+## Development environment
+
+`docker-compose`, `curl`, and `sed` are needed.
+
+1. Create a settings file: `cp site/example_settings.json datagraphics/settings.json`
+2. Change the host to `db`: `sed -i 's/127.0.0.1:5984/db:5984/' datagraphics/settings.json`
+3. Start the database: `docker-compose up db`
+4. Create the database `datagraphics`: `curl -u 'couchdb_db_account:couchdb_db_account_pwd' -X PUT http://localhost:5984/datagraphics`
+5. Stop the database: `ctrl-c` or `docker-compose stop`
+6. Start the full system: `docker-compose up`
+
+The development system can be accessed at: [http://127.0.0.1:5005/](http://127.0.0.1:5005/)
+
+Port numbers on localhost can be changed in `docker-compose.yml`, e.g.:
+```
+    ports:
+      - 127.0.0.1:5000:5005
+```
+will allow you to access port 5005 in the container at port 5000 on localhost (127.0.0.1).

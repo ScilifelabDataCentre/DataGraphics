@@ -1,0 +1,24 @@
+version: "3.2"
+services:
+  db:
+    image: couchdb:2.3
+    volumes:
+      - ./couch-data:/opt/couchdb/data
+    ports:
+      - 127.0.0.1:5984:5984
+    environment:
+      - COUCHDB_USER=couchdb_db_account
+      - COUCHDB_PASSWORD=couchdb_db_account_pwd
+  backend:
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile-dev
+    depends_on:
+      - db
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: .
+        target: /code
+    ports:
+      - 127.0.0.1:5005:5005
