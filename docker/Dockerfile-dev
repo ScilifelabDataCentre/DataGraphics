@@ -1,0 +1,11 @@
+FROM python:alpine
+
+ADD ./ /code
+
+WORKDIR /code
+
+RUN pip3 install -r /code/requirements.txt
+
+ENV PYTHONPATH=/code
+
+CMD ["python3", "datagraphics/app.py"]
