@@ -135,6 +135,10 @@ def register():
 @blueprint.route("/reset", methods=["GET", "POST"])
 def reset():
     "Reset the password for a user account and send email."
+    if not flask.current_app.config["MAIL_SERVER"]:
+        utils.flash_error("Cannot reset password; no email server defined.")
+        return flask.redirect(flask.url_for("home"))
+        
     if utils.http_GET():
         email = flask.request.args.get("email") or ""
         email = email.lower()

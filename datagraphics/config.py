@@ -82,7 +82,6 @@ def init(app):
                          ("COUCHDB_USERNAME", str),
                          ("COUCHDB_PASSWORD", str),
                          ("MAIL_SERVER", str),
-                         ("MAIL_SERVER", str),
                          ("MAIL_USE_TLS", utils.to_bool),
                          ("MAIL_USERNAME", str),
                          ("MAIL_PASSWORD", str),
