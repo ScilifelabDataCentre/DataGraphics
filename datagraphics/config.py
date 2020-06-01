@@ -11,7 +11,9 @@ ROOT_DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
-    SERVER_NAME = "127.0.0.1:5005",
+    SERVER_NAME = "127.0.0.1:5005", # For URL generation.
+    SERVER_HOST = "0.0.0.0",        # For app.run()
+    SERVER_PORT = "5005",           # For app.run(); must agree with above.
     SITE_NAME = "DataGraphics",
     SITE_STATIC_DIRPATH = None,
     SITE_ICON = None,           # Filename, must be in 'SITE_STATIC_DIRPATH'
@@ -22,10 +24,10 @@ DEFAULT_SETTINGS = dict(
     LOG_FILEPATH = None,
     LOG_ROTATING = 0,           # Number of backup rotated log files, if any.
     LOG_FORMAT = "%(levelname)-10s %(asctime)s %(message)s",
-    HOST_LOGO = None,           # Filename, must be in 'SITE_STATIC_DIRPATH'
+    HOST_LOGO = None,           # Filename, must be in 'SITE_STATIC_DIRPATH'.
     HOST_NAME = None,
     HOST_URL = None,
-    SECRET_KEY = None,          # Must be set in 'settings.json'
+    SECRET_KEY = None,          # Must be set in 'settings.json'.
     SALT_LENGTH = 12,
     COUCHDB_URL = "http://127.0.0.1:5984/",
     COUCHDB_USERNAME = None,
