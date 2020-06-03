@@ -3,6 +3,7 @@
 import flask
 from flask_cors import CORS
 
+from datagraphics import constants
 from datagraphics import utils
 
 from datagraphics.datasets import (count_datasets_public,
@@ -16,11 +17,9 @@ CORS(blueprint, supports_credentials=True)
 @blueprint.route("")
 def root():
     "API root; links to other resources."
-    items = {
-        "about": {
-            "software": {"href": flask.url_for("api_about.software",
-                                               _external=True)}
-        }
+    items = {"version": constants.VERSION}
+    items["about"] = {"software": {"href": flask.url_for("api_about.software",
+                                                         _external=True)}
     }
     items["datasets"] = {"public": 
                          {"count": count_datasets_public(),
