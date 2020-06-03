@@ -13,32 +13,11 @@ from datagraphics import utils
 from datagraphics.saver import BaseSaver
 
 def init(app):
-    """Initialize; update CouchDB design document.
-    Create the admin user specified in the settings file, if any.
-    """
+    "Initialize; update CouchDB design document."
     db = utils.get_db(app=app)
     logger = utils.get_logger(app)
     if db.put_design("users", DESIGN_DOC):
         logger.info("Updated users design document.")
-    if app.config["ADMIN_USER"]:
-        with app.app_context():
-            flask.g.db = db
-            user = get_user(username=app.config["ADMIN_USER"]["username"])
-            if user is None:
-                try:
-                    with UserSaver() as saver:
-                        saver.set_username(app.config["ADMIN_USER"]["username"])
-                        saver.set_email(app.config["ADMIN_USER"]["email"])
-                        saver.set_role(constants.ADMIN)
-                        saver.set_status(constants.ENABLED)
-                        saver.set_password(app.config["ADMIN_USER"]["password"])
-                    logger.info("Created admin user " +
-                                app.config["ADMIN_USER"]["username"])
-                except ValueError as error:
-                    logger.error("Could not create admin user; misconfiguration.")
-            else:
-                logger.info(f"Admin user {app.config['ADMIN_USER']['username']}"
-                            " already exists.")
 
 DESIGN_DOC = {
     "views": {
@@ -53,7 +32,26 @@ blueprint = flask.Blueprint("user", __name__)
 
 @blueprint.route("/login", methods=["GET", "POST"])
 def login():
-    "Login to a user account."
+    """Login to a user account.
+    Creates the admin user specified in the settings.json, if not done.
+    """
+    app = flask.current_app
+    if app.config.get("ADMIN_USER"):
+        user = get_user(username=app.config["ADMIN_USER"]["username"])
+        if user is None:
+            try:
+                with UserSaver() as saver:
+                    saver.set_username(app.config["ADMIN_USER"]["username"])
+                    saver.set_email(app.config["ADMIN_USER"]["email"])
+                    saver.set_role(constants.ADMIN)
+                    saver.set_status(constants.ENABLED)
+                    saver.set_password(app.config["ADMIN_USER"]["password"])
+                utils.get_logger().info("Created admin user " +
+                                        app.config["ADMIN_USER"]["username"])
+            except ValueError as error:
+                utils.get_logger().error("Could not create admin user;"
+                                         " misconfiguration.")
+
     if utils.http_GET():
         return flask.render_template("user/login.html",
                                      next=flask.request.args.get("next"))
