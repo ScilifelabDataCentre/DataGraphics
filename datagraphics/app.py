@@ -1,6 +1,7 @@
 "Serve data and graphics on the web using Vega-Lite graphics."
 
 import flask
+import jinja2.utils
 
 import datagraphics.about
 import datagraphics.config
@@ -22,7 +23,6 @@ from datagraphics import constants
 from datagraphics import utils
 
 app = flask.Flask(__name__)
-# flask_cors.CORS(app)
 
 # Get the configuration and initialize modules (database).
 datagraphics.config.init(app)
@@ -66,6 +66,24 @@ def home():
         return flask.redirect(flask.url_for("api_root"))
     else:
         return flask.render_template("home.html")
+
+@app.route("/debug")
+@utils.admin_required
+def debug():
+    "Return some debug info for admin."
+    result = [f"<h1>Debug  {constants.VERSION}</h2>"]
+    result.append("<h2>headers</h2>")
+    result.append("<table>")
+    for key, value in sorted(flask.request.headers.items()):
+        result.append(f"<tr><td>{key}</td><td>{value}</td></tr>")
+    result.append("</table>")
+    result.append("<h2>environ</h2>")
+    result.append("<table>")
+    for key, value in sorted(flask.request.environ.items()):
+        result.append(f"<tr><td>{key}</td><td>{value}</td></tr>")
+    result.append("</table>")
+    return jinja2.utils.Markup("\n".join(result))
+
 
 # Set up the URL map.
 app.register_blueprint(datagraphics.about.blueprint, url_prefix="/about")

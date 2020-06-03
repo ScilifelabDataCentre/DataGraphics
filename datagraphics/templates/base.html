@@ -96,6 +96,8 @@
                  href="{{ url_for('user.register') }}">Register user</a>
               <a class="dropdown-item"
                  href="{{ url_for('about.settings') }}">Settings</a>
+              <a class="dropdown-item"
+                 href="{{ url_for('debug') }}">Debug</a>
             </div>
           </li>
           {% endif %} {# if g.am_admin #}
@@ -211,7 +213,7 @@
           <div class="small">Server execution time {{ g.timer.milliseconds }} ms</div>
           {% endif %}
         </div>
-        <div class="col-md offset-md-4 text-right">
+        <div class="col-md offset-md-4 text-right small">
           <a href="https://github.com/pekrau/DataGraphics">DataGraphics</a>
 	  version {{ constants.VERSION }}
         </div>
