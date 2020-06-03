@@ -102,7 +102,7 @@ def get_datasets_public(full=False):
         for row in view:
             flask.g.cache[row.doc["_id"]] = row.doc
             result.append(row.doc)
-            return result
+        return result
     else:
         return [(row.id, row.value, row.key[1]) for row in view]
 
