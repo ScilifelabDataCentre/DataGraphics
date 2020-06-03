@@ -23,6 +23,20 @@
       </small>
     </div>
   </div>
+  {% if g.am_admin %}
+  <div class="form-group row">
+    <label for="owner"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Owner</label>
+    <div class="col-md">
+      <input type="text" id="owner" name="owner"
+             class="form-control" aria-describedby="ownerHelp">
+      <small id="ownerHelp" class="form-text text-muted">
+        Change owner of the dataset.
+      </small>
+    </div>
+  </div>
+  {% endif %}
   <div class="form-group row">
     <label for="description"
 	   class="col-md-2 col-form-label text-right font-weight-bold">

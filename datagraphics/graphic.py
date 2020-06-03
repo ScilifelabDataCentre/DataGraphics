@@ -89,6 +89,8 @@ def edit(iuid):
         try:
             with GraphicSaver(graphic) as saver:
                 saver.set_title()
+                if flask.g.am_admin:
+                    saver.change_owner()
                 saver.set_description()
                 saver.set_specification()
         except ValueError as error:
