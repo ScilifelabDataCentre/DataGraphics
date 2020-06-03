@@ -153,7 +153,10 @@
 <script src="https://cdn.jsdelivr.net/npm/vega-lite@{{ config['VEGA_LITE_VERSION'] }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@{{ config['VEGA_EMBED_VERSION'] }}"></script>
 <script type="text/javascript">
-  vegaEmbed('#graphic', {{ graphic['specification'] | tojson(indent=2) }});
+vegaEmbed('#graphic',
+  {{ graphic['specification'] | tojson(indent=2) }},
+  {downloadFileName: '{{ slug }}'}
+);
 </script>
 {% endif %}
 {% endblock %}

@@ -16,9 +16,9 @@ Graphics
 {% endif %}
 {% endblock %}
 
-{% block main %}
+{% block supermain %}
 {{ macros.graphics_table(graphics, show_public=False) }}
-{% endblock %} {# block main #}
+{% endblock %}
 
 {% block javascript %}
 <script>
@@ -26,7 +26,7 @@ Graphics
     $("#graphics").DataTable( {
       pagingType: "full_numbers",
       pageLength: 25,
-      order: [[1, "desc"]]
+      order: [[2, "desc"]]
     });
   });
 </script>

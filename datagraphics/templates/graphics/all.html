@@ -4,9 +4,9 @@
 
 {% block body_title %}All graphics{% endblock %}
 
-{% block main %}
+{% block supermain %}
 {{ macros.graphics_table(graphics, show_public=True, show_owner=True) }}
-{% endblock %} {# block main #}
+{% endblock %}
 
 {% block javascript %}
 <script>
@@ -14,7 +14,7 @@
     $("#graphics").DataTable( {
       pagingType: "full_numbers",
       pageLength: 25,
-      order: [[3, "desc"]]
+      order: [[4, "desc"]]
     });
   });
 </script>
