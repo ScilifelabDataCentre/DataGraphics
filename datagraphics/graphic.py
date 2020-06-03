@@ -62,6 +62,7 @@ def display(iuid):
         return flask.redirect(utils.referrer())
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
+                                 slug=utils.slugify(graphic['title']),
                                  dataset=get_dataset(graphic),
                                  allow_edit=allow_edit(graphic),
                                  allow_delete=allow_delete(graphic))

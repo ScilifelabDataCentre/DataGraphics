@@ -7,9 +7,9 @@ User <a href="{{ url_for('user.display', username=user['username']) }}">
   {{ user['username'] }}</a> graphics
 {% endblock %}
 
-{% block main %}
+{% block supermain %}
 {{ macros.graphics_table(graphics, show_public=True) }}
-{% endblock %} {# block main #}
+{% endblock %}
 
 {% block javascript %}
 <script>
@@ -17,7 +17,7 @@ User <a href="{{ url_for('user.display', username=user['username']) }}">
     $("#graphics").DataTable( {
       pagingType: "full_numbers",
       pageLength: 25,
-      order: [[2, "desc"]]
+      order: [[3, "desc"]]
     });
   });
 </script>

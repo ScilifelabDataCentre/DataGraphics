@@ -30,17 +30,22 @@ Datasets
 {% endif %}
 {% endblock %} {# block meta #}
 
-{% block main %}
-{{ macros.datasets_table(datasets, show_public=show_public, show_owner=True) }}
-{% endblock %} {# block main #}
-
-{% block actions %}
+{% block supermain %}
 {% if g.current_user %}
-<div class="mb-2">
-  {% include 'dataset/create.html' %}
+<div class="row">
+  <div class="col-md-10"> {# instead of block main #}
+    {{ macros.datasets_table(datasets, show_public=show_public, show_owner=True) }}
+  </div>
+  <div class="col-md-2">
+    <div class="mb-2"> {# instead of block actions #}
+      {% include 'dataset/create.html' %}
+    </div>
+  </div>
 </div>
+{% else %}
+{{ macros.datasets_table(datasets, show_public=show_public, show_owner=True) }}
 {% endif %} {# if g.current_user #}
-{% endblock %} {# block actions #}
+{% endblock %} {# block supermain #}
 
 {% block javascript %}
 <script>
