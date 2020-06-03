@@ -165,7 +165,19 @@ class EntitySaver(AttachmentsSaver):
     def initialize(self):
         self.doc["owner"] = flask.g.current_user["username"]
 
+    def change_owner(self, owner=None):
+        "Change the owner."
+        if not flask.g.am_admin:
+            raise ValueError("You must be admin to set owner.")
+        if not owner:
+            owner = flask.request.form.get("owner")
+        if not owner: return
+        if not datagraphics.user.get_user(owner):
+            raise ValueError(f"No user account '{owner}' to set as owner.")
+        self.doc["owner"] = owner
+
     def set_title(self, title=None):
+        "Set the title."
         if title is None:
             title = flask.request.form.get("title")
         self.doc["title"] = title or "Untitled"

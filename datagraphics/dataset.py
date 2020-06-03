@@ -99,6 +99,8 @@ def edit(iuid):
         try:
             with DatasetSaver(dataset) as saver:
                 saver.set_title()
+                if flask.g.am_admin:
+                    saver.change_owner()
                 saver.set_description()
                 saver.set_public(False)
                 saver.set_data()
