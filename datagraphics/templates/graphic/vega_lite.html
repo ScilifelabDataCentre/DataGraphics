@@ -1,0 +1,9 @@
+<script src="https://cdn.jsdelivr.net/npm/vega@{{ config['VEGA_VERSION'] }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@{{ config['VEGA_LITE_VERSION'] }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@{{ config['VEGA_EMBED_VERSION'] }}"></script>
+<script type="text/javascript">
+vegaEmbed('#{{ id | default('graphic') }}',
+  {{ graphic['specification'] | tojson() }},
+  {downloadFileName: "{{ slug }}"}
+);
+</script>

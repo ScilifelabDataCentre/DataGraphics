@@ -190,7 +190,11 @@ def download(iuid, ext):
     if not dataset:
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(utils.referrer())
+
     spec = graphic["specification"]
+    slug = utils.slugify(graphic['title'])
+    id = flask.request.args.get("id") or "graphic"
+
     if utils.to_bool(flask.request.args.get("inline")):
         outfile = flask.g.db.get_attachment(dataset, "data.json")
         spec["data"] = {"values": json.load(outfile)}
@@ -199,13 +203,18 @@ def download(iuid, ext):
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
     elif ext == "js":
         spec = json.dumps(spec)
-        id = flask.request.args.get("id") or "graphic"
         response = flask.make_response(f"vegaEmbed('#{id}', {spec});")
         response.headers.set("Content-Type", constants.JS_MIMETYPE)
+    elif ext == "html":
+        html = flask.render_template("graphic/vega_lite.html",
+                                     graphic=graphic,
+                                     id=id,
+                                     slug=slug)
+        response = flask.make_response(html)
+        response.headers.set("Content-Type", constants.HTML_MIMETYPE)
     else:
         utils.flash_error("Invalid file type requested.")
         return flask.redirect(utils.referrer())
-    slug = utils.slugify(graphic['title'])
     response.headers.set("Content-Disposition", "attachment", 
                          filename=f"{slug}.{ext}")
     return response

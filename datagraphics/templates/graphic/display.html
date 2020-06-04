@@ -83,6 +83,11 @@
      title="Download the graphic JavaScript code."
      class="badge badge-pill badge-primary">JavaScript file, data inlined</a>
 </div>
+<div>
+  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='html') }}"
+     title="Download the graphic HTML code."
+     class="badge badge-pill badge-primary">HTML file</a>
+</div>
 {% endblock %} {# block links #}
 
 {% block actions %}
@@ -162,14 +167,6 @@
 
 {% block javascript %}
 {% if dataset %}
-<script src="https://cdn.jsdelivr.net/npm/vega@{{ config['VEGA_VERSION'] }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@{{ config['VEGA_LITE_VERSION'] }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-embed@{{ config['VEGA_EMBED_VERSION'] }}"></script>
-<script type="text/javascript">
-vegaEmbed('#graphic',
-  {{ graphic['specification'] | tojson(indent=2) }},
-  {downloadFileName: '{{ slug }}'}
-);
-</script>
+{% include 'graphic/vega_lite.html' %}
 {% endif %}
 {% endblock %}
