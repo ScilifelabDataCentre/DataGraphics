@@ -41,7 +41,7 @@
 	   class="col-md-2 col-form-label text-right font-weight-bold">
       Description</label>
     <div class="col-md">
-      <textarea id="description" name="description" rows="6"
+      <textarea id="description" name="description" rows="4"
                 class="form-control"
                 aria-describedby="descriptionHelp"
                 >{{ graphic['description'] or '' }}</textarea>
@@ -77,6 +77,16 @@
     </div>
   </div>
 </form>
+{% if graphic['error'] %}
+<div class="card">
+  <div class="card-header text-white bg-danger">
+    <h5>Vega-Lite error</h5>
+  </div>
+  <div class="card-body">
+    <pre>{{ graphic['error'] }}</pre>
+  </div>
+</div>
+{% endif %}
 {% endblock %} {# block main #}
 
 {% block actions %}
