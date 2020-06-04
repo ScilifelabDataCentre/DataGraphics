@@ -88,7 +88,7 @@ def count_graphics_owner(username):
     else:
         return 0
 
-def get_graphics_public(full=False):
+def get_graphics_public(full=False, limit=None):
     """Get the public graphics.
     If full is True, as docs.
     If full is False, as list of tuples (iuid, title, modified).
@@ -96,6 +96,7 @@ def get_graphics_public(full=False):
     view = flask.g.db.view("graphics", "public_modified",
                            startkey="ZZZZZZ",
                            endkey="",
+                           limit=limit,
                            include_docs=full,
                            reduce=False,
                            descending=True)
@@ -108,7 +109,7 @@ def get_graphics_public(full=False):
             result.append(graphic)
         return result
     else:
-        return [(row.id, row.value, row.key[1]) for row in view]
+        return [(row.id, row.value, row.key) for row in view]
 
 def count_graphics_public():
     "Return the number of public graphics."
@@ -142,7 +143,7 @@ def get_graphics_all(full=False):
         return [(row.id, row.value, row.key[0], row.key[1]) for row in view]
 
 def count_graphics_all():
-    "Return the number of graphics."
+    "Return the total number of graphics."
     view = flask.g.db.view("graphics", "owner_modified", reduce=True)
     rows = list(view)
     if rows:

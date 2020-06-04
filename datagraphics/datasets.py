@@ -86,7 +86,7 @@ def count_datasets_owner(username):
     else:
         return 0
 
-def get_datasets_public(full=False):
+def get_datasets_public(full=False, limit=None):
     """Get the public datasets.
     If full is True, as docs.
     If full is False, as list of tuples (iuid, title, modified).
@@ -94,6 +94,7 @@ def get_datasets_public(full=False):
     view = flask.g.db.view("datasets", "public_modified",
                            startkey="ZZZZZZ",
                            endkey="",
+                           limit=limit,
                            include_docs=full,
                            reduce=False,
                            descending=True)
@@ -104,7 +105,7 @@ def get_datasets_public(full=False):
             result.append(row.doc)
         return result
     else:
-        return [(row.id, row.value, row.key[1]) for row in view]
+        return [(row.id, row.value, row.key) for row in view]
 
 def count_datasets_public():
     "Return the number of public datasets."
@@ -136,7 +137,7 @@ def get_datasets_all(full=False):
         return [(row.id, row.value, row.key[0], row.key[1]) for row in view]
 
 def count_datasets_all():
-    "Return the number of datasets."
+    "Return the total number of datasets."
     view = flask.g.db.view("datasets", "owner_modified", reduce=True)
     rows = list(view)
     if rows:
