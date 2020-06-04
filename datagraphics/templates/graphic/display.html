@@ -14,22 +14,7 @@
   <a href="{{ url_for('api_graphic.serve', iuid=graphic['_id']) }}"
      class="badge badge-dark">API</a>
 </div>
-<div>
-  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='json') }}"
-     title="Download the graphic specification."
-     class="badge badge-pill badge-primary">JSON file</a>
-</div>
-<div>
-  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js') }}"
-     title="Download the graphic JavaScript code."
-     class="badge badge-pill badge-primary">JavaScript file</a>
-</div>
-<div>
-  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js', inline=True) }}"
-     title="Download the graphic JavaScript code."
-     class="badge badge-pill badge-primary">JavaScript file, data inlined</a>
-</div>
-{% endblock %}
+{% endblock %} {# block meta #}
 
 {% block main %}
 {% if graphic['error'] %}
@@ -42,16 +27,26 @@
   </div>
 </div>
 {% elif dataset %}
-<p class="lead">
-  Dataset
-  {{ macros.access_symbol(dataset) }}
-  <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
-    {{ macros.dataset_symbol() }}{{ dataset['title'] }}</a>
-</p>
-<div id="graphic">
+<div id="graphic"></div>
+<div class="row">
+  <div class="col-md">
+      Dataset
+      {{ macros.access_symbol(dataset) }}
+      <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
+        {{ macros.dataset_symbol() }}{{ dataset['title'] }}</a>
+  </div>
+  {% if other_graphics %}
+  <div class="col-md">
+    Other graphics:
+    {% for other in other_graphics %}
+    <a href="{{ url_for('graphic.display', iuid=other['_id']) }}">
+      {{ macros.graphic_symbol() }}{{ other['title'] }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
 {% else %}
-<p class="lead text-danger">
+<p class="text-danger">
   Dataset does not exist, or view access to it is not allowed.
 </p>
 {% endif %}
@@ -71,6 +66,24 @@
   </div>
 </div>
 {% endblock %} {# block main #}
+
+{% block links %}
+<div>
+  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='json') }}"
+     title="Download the graphic specification."
+     class="badge badge-pill badge-primary">JSON file</a>
+</div>
+<div>
+  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js') }}"
+     title="Download the graphic JavaScript code."
+     class="badge badge-pill badge-primary">JavaScript file</a>
+</div>
+<div>
+  <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js', inline=True) }}"
+     title="Download the graphic JavaScript code."
+     class="badge badge-pill badge-primary">JavaScript file, data inlined</a>
+</div>
+{% endblock %} {# block links #}
 
 {% block actions %}
 {% if allow_edit %}

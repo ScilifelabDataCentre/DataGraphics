@@ -65,7 +65,13 @@ def home():
     if utils.accept_json():
         return flask.redirect(flask.url_for("api_root"))
     else:
-        return flask.render_template("home.html")
+        datasets = datagraphics.datasets.get_datasets_public(
+            limit=flask.current_app.config["MAX_HOME_LIST_ITEMS"])
+        graphics = datagraphics.graphics.get_graphics_public(
+            limit=flask.current_app.config["MAX_HOME_LIST_ITEMS"])
+        return flask.render_template("home.html",
+                                     datasets=datasets,
+                                     graphics=graphics)
 
 @app.route("/debug")
 @utils.admin_required

@@ -13,8 +13,55 @@
 </div>
 {% endblock %} {# block meta #}
 
-{% block actions %}
-<div class="mb-2">
-  {% include 'dataset/create.html' %}
+{% block supermain %}
+<div class="row">
+  <div class="col-md">
+    <div class="card">
+      <div class="card-header">
+        {% if g.current_user %}
+        Public datasets (most recently changed)
+        {% else %}
+        Datasets (most recently changed)
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <table class="table table-sm table-borderless">
+          {% for iuid, title, modified in datasets %}
+          <tr>
+            <td>
+              <a href="{{ url_for('dataset.display', iuid=iuid)}}">
+                {{ macros.dataset_symbol() }}{{ title }}</a>
+            </td>
+            <td class="localtime small">{{ modified }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md">
+    <div class="card">
+      <div class="card-header">
+        {% if g.current_user %}
+        Public graphics (most recently changed)
+        {% else %}
+        Graphics (most recently changed)
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <table class="table table-sm table-borderless">
+          {% for iuid, title, modified in graphics %}
+          <tr>
+            <td>
+              <a href="{{ url_for('graphic.display', iuid=iuid)}}">
+                {{ macros.graphic_symbol() }}{{ title }}</a>
+            </td>
+            <td class="localtime small">{{ modified }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
-{% endblock %} {# block actions #}
+{% endblock %} {# block supermain #}

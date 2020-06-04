@@ -60,10 +60,18 @@ def display(iuid):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
+    dataset = get_dataset(graphic)
+    if dataset:
+        other_graphics = [gr 
+                          for gr in datagraphics.dataset.get_graphics(dataset)
+                          if gr["_id"] != graphic["_id"]]
+    else:
+        other_graphics = []
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
-                                 dataset=get_dataset(graphic),
+                                 dataset=dataset,
+                                 other_graphics=other_graphics,
                                  allow_edit=allow_edit(graphic),
                                  allow_delete=allow_delete(graphic))
 
@@ -283,19 +291,19 @@ def allow_view(graphic):
     if graphic.get("public"): return True
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == graphic["owner"]
+    return flask.g.current_user["username"] == graphic["owner"]
 
 def allow_edit(graphic):
     "Is the current user allowed to edit the graphic?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == graphic["owner"]
+    return flask.g.current_user["username"] == graphic["owner"]
 
 def allow_delete(graphic):
     "Is the current user allowed to delete the graphic?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == graphic["owner"]
+    return flask.g.current_user["username"] == graphic["owner"]
 
 def get_dataset(graphic):
     "Get the dataset for the graphic, if allowed. Else None."

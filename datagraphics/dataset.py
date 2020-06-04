@@ -467,19 +467,19 @@ def allow_view(dataset):
     if dataset.get("public"): return True
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == dataset["owner"]
+    return flask.g.current_user["username"] == dataset["owner"]
 
 def allow_edit(dataset):
     "Is the current user allowed to edit the dataset?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == dataset["owner"]
+    return flask.g.current_user["username"] == dataset["owner"]
 
 def allow_delete(dataset):
     "Is the current user allowed to delete the dataset?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == dataset["owner"]
+    return flask.g.current_user["username"] == dataset["owner"]
 
 def possible_delete(dataset):
     "Is it possible to delete the dataset?"
