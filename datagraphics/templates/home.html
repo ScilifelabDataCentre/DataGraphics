@@ -32,7 +32,7 @@
               <a href="{{ url_for('dataset.display', iuid=iuid)}}">
                 {{ macros.dataset_symbol() }}{{ title }}</a>
             </td>
-            <td class="localtime">{{ modified }}</td>
+            <td class="localtime small">{{ modified }}</td>
           </tr>
           {% endfor %}
         </table>
@@ -56,7 +56,7 @@
               <a href="{{ url_for('graphic.display', iuid=iuid)}}">
                 {{ macros.graphic_symbol() }}{{ title }}</a>
             </td>
-            <td class="localtime">{{ modified }}</td>
+            <td class="localtime small">{{ modified }}</td>
           </tr>
           {% endfor %}
         </table>

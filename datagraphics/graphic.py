@@ -60,10 +60,18 @@ def display(iuid):
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(utils.referrer())
+    dataset = get_dataset(graphic)
+    if dataset:
+        other_graphics = [gr 
+                          for gr in datagraphics.dataset.get_graphics(dataset)
+                          if gr["_id"] != graphic["_id"]]
+    else:
+        other_graphics = []
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
-                                 dataset=get_dataset(graphic),
+                                 dataset=dataset,
+                                 other_graphics=other_graphics,
                                  allow_edit=allow_edit(graphic),
                                  allow_delete=allow_delete(graphic))
 
