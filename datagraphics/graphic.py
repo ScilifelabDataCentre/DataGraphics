@@ -291,19 +291,19 @@ def allow_view(graphic):
     if graphic.get("public"): return True
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == graphic["owner"]
+    return flask.g.current_user["username"] == graphic["owner"]
 
 def allow_edit(graphic):
     "Is the current user allowed to edit the graphic?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == graphic["owner"]
+    return flask.g.current_user["username"] == graphic["owner"]
 
 def allow_delete(graphic):
     "Is the current user allowed to delete the graphic?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.current_user["username"] == graphic["owner"]
+    return flask.g.current_user["username"] == graphic["owner"]
 
 def get_dataset(graphic):
     "Get the dataset for the graphic, if allowed. Else None."
