@@ -10,6 +10,7 @@ import couchdb2
 import flask
 
 import datagraphics.user
+import datagraphics.graphic
 from datagraphics import constants
 from datagraphics import utils
 
@@ -68,10 +69,12 @@ def display(iuid):
         return flask.redirect(utils.referrer())
     storage = sum([s['length'] 
                    for s in dataset.get('_attachments', {}).values()])
+    skeleton_graphic = datagraphics.graphic.get_skeleton_graphic()
     return flask.render_template("dataset/display.html",
                                  dataset=dataset,
                                  graphics=get_graphics(dataset),
                                  storage=storage,
+                                 skeleton_graphic=skeleton_graphic,
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset))
