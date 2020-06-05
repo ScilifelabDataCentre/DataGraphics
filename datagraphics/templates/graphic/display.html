@@ -30,18 +30,30 @@
 <div id="graphic"></div>
 <div class="row">
   <div class="col-md">
-      Dataset
-      {{ macros.access_symbol(dataset) }}
-      <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
-        {{ macros.dataset_symbol() }}{{ dataset['title'] }}</a>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Dataset</h5>
+        <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
+          {{ macros.dataset_symbol() }}{{ dataset['title'] }}</a>
+        <span class="localtime small ml-3" title="Modified">
+          {{ dataset['modified'] }}</span>
+      </div>
+    </div>
   </div>
   {% if other_graphics %}
   <div class="col-md">
-    Other graphics:
-    {% for other in other_graphics %}
-    <a href="{{ url_for('graphic.display', iuid=other['_id']) }}">
-      {{ macros.graphic_symbol() }}{{ other['title'] }}</a>
-    {% endfor %}
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Other graphics for same dataset</h5>
+        {% for other in other_graphics %}
+        <a href="{{ url_for('graphic.display', iuid=other['_id']) }}">
+          {{ macros.graphic_symbol() }}{{ other['title'] }}</a>
+        <span class="localtime small ml-3" title="Modified">
+          {{ other['modified'] }}</span>
+        <br>
+        {% endfor %}
+      </div>
+    </div>
   </div>
   {% endif %}
 </div>
@@ -167,6 +179,6 @@
 
 {% block javascript %}
 {% if dataset %}
-{% include 'graphic/vega_lite.html' %}
+{% include 'graphic/vega_lite_inline.html' %}
 {% endif %}
 {% endblock %}
