@@ -99,12 +99,12 @@
 {% block links %}
 <div>
   <a href="{{ url_for('.download', iuid=dataset['_id'], ext='json') }}"
-     title="Download the dataset content."
+     title="Download the dataset content in JSON format."
      class="badge badge-pill badge-primary">JSON file</a>
 </div>
 <div>
   <a href="{{ url_for('.download', iuid=dataset['_id'], ext='csv') }}"
-     title="Download the dataset content."
+     title="Download the dataset content in CSV format."
      class="badge badge-pill badge-primary">CSV file</a>
 </div>
 {% endblock %} {# block links #}

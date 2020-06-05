@@ -203,7 +203,8 @@ def download(iuid, ext):
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
     elif ext == "js":
         spec = json.dumps(spec)
-        response = flask.make_response(f"vegaEmbed('#{id}', {spec});")
+        response = flask.make_response(f'vegaEmbed("#{id}", {spec},'
+                                       f' {{downloadFileName: "{slug}"}});')
         response.headers.set("Content-Type", constants.JS_MIMETYPE)
     elif ext == "html":
         html = flask.render_template("graphic/vega_lite.html",
