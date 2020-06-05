@@ -47,11 +47,11 @@
         </td>
         <td class="small localtime">{{ graphic['modified'] }}</td>
         <td>
-          {% if am_admin_or_self(username=dataset['owner']) %}
-          <a href="{{ url_for('user.display', username=dataset['owner']) }}">
-            {{ dataset['owner'] }}</a>
+          {% if am_admin_or_self(username=graphic['owner']) %}
+          <a href="{{ url_for('user.display', username=graphic['owner']) }}">
+            {{ graphic['owner'] }}</a>
           {% else %}
-          {{ dataset['owner'] }}
+          {{ graphic['owner'] }}
           {% endif %}
         </td>
       </tr>
