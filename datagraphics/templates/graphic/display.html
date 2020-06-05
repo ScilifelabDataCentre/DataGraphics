@@ -70,23 +70,23 @@
 {% block links %}
 <div>
   <a href="{{ url_for('.download', iuid=graphic['_id'], ext='json') }}"
-     title="Download the graphic specification."
+     title="Download the Vega-Lite JSON specification for the graphic."
      class="badge badge-pill badge-primary">JSON file</a>
 </div>
 <div>
   <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js') }}"
-     title="Download the graphic JavaScript code."
-     class="badge badge-pill badge-primary">JavaScript file</a>
+     title="Download the JavaScript code for the graphic."
+     class="badge badge-pill badge-primary">JavaScript code</a>
 </div>
 <div>
   <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js', inline=True) }}"
-     title="Download the graphic JavaScript code."
-     class="badge badge-pill badge-primary">JavaScript file, data inlined</a>
+     title="Download the JavaScript code for the graphic with the data included."
+     class="badge badge-pill badge-primary">JavaScript code, data inlined</a>
 </div>
 <div>
   <a href="{{ url_for('.download', iuid=graphic['_id'], ext='html') }}"
-     title="Download the graphic HTML code."
-     class="badge badge-pill badge-primary">HTML file</a>
+     title="Download the HTML code fragment for inserting the graph in a web page."
+     class="badge badge-pill badge-primary">HTML code</a>
 </div>
 {% endblock %} {# block links #}
 

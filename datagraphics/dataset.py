@@ -102,7 +102,6 @@ def edit(iuid):
                 if flask.g.am_admin:
                     saver.change_owner()
                 saver.set_description()
-                saver.set_public(False)
                 saver.set_data()
         except ValueError as error:
             utils.flash_error(str(error))
