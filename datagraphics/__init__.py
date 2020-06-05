@@ -5,14 +5,14 @@ import os.path
 import re
 import string
 
-__version__ = "0.3.21"
+__version__ = "0.3.22"
 
 class Constants:
     VERSION     = __version__
 
-    BOOTSTRAP_VERSION  = "4.3.1"
-    JQUERY_VERSION     = "3.3.1"
-    DATATABLES_VERSION = "1.10.18"
+    BOOTSTRAP_VERSION  = "4.3.1"   # Hardwired in HTML code.
+    JQUERY_VERSION     = "3.3.1"   # Hardwired in HTML code.
+    DATATABLES_VERSION = "1.10.18" # Hardwired in HTML code.
 
     NAME_RX  = re.compile(r"^[a-z][a-z0-9_-]*$", re.I)
     IUID_RX  = re.compile(r"^[a-f0-9]{32,32}$", re.I)

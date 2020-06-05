@@ -261,11 +261,14 @@ class GraphicSaver(EntitySaver):
         # the rest of the items in the order specified in the input.
         spec = {"$schema": flask.current_app.config['VEGA_LITE_SCHEMA_URL']}
         spec["title"] = self.doc["title"]
-        spec["data"] = {"url": flask.url_for("api_dataset.content",
-                                             iuid=self.doc["dataset"],
-                                             ext="csv",
-                                             _external=True),
-                        "format": {"type": "csv"}
+        spec["data"] = {
+            "url": flask.url_for("api_dataset.content",
+                                 iuid=self.doc["dataset"],
+                                 ext="csv",
+                                 _external=True),
+            "format": {"type": "csv"},
+            "width": flask.current_app.config["GRAPHIC_DEFAULT_WIDTH"],
+            "height": flask.current_app.config["GRAPHIC_DEFAULT_HEIGHT"]
         }
         specification.pop("$schema", None)
         specification.pop("title", None)

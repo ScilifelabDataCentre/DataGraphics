@@ -53,6 +53,8 @@ DEFAULT_SETTINGS = dict(
     VEGA_EMBED_VERSION   = "6.8.0",
     VEGA_LITE_URL        = "https://vega.github.io/vega-lite/",
     VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v4.json",
+    GRAPHIC_DEFAULT_WIDTH = "container",
+    GRAPHIC_DEFAULT_HEIGHT = 400,
 )
 
 def init(app):

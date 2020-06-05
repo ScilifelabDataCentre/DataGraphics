@@ -396,7 +396,7 @@ class DatasetSaver(EntitySaver):
                     meta["max"] = max(distinct)
                 except ValueError:
                     meta["max"] = None
-            elif meta["type"] == "number":
+            if meta["type"] in ("integer", "number"):
                 values = [r[key] for r in data if r[key] is not None]
                 try:
                     meta["min"] = min(values)
@@ -418,7 +418,7 @@ class DatasetSaver(EntitySaver):
                     meta["stdev"] = statistics.stdev(values)
                 except statistics.StatisticsError:
                     meta["stdev"] = None
-            elif meta["type"] == "boolean":
+            if meta["type"] == "boolean":
                 meta["n_true"] = len([r[key] for r in data if r[key] is True])
                 meta["n_false"] = len([r[key] for r in data if r[key] is False])
 
