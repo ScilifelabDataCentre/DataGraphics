@@ -1,4 +1,7 @@
+<!-- The graphic will be rendered in this div element in the HTML page. -->
+<div id="{{ id }}"></div>
+<!-- Add the code below to the JavaScript section of the HTML page. -->
 <script src="https://cdn.jsdelivr.net/npm/vega@{{ constants.VEGA_VERSION }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-lite@{{ constants.VEGA_LITE_VERSION }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@{{ constants.VEGA_EMBED_VERSION }}"></script>
-<script src="{{ url_for('graphic.download', iuid=graphic['_id'], ext='js', _external=True) }}"></script>
+<script src="{{ url_for('graphic.download', iuid=graphic['_id'], ext='js', _external=True, id=id) }}"></script>
