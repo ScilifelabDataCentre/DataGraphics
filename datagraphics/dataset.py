@@ -121,7 +121,7 @@ def edit(iuid):
         for log in utils.get_logs(dataset["_id"], cleanup=False):
             flask.g.db.delete(log)
         utils.flash_message("The dataset was deleted.")
-        return flask.redirect(flask.url_for("home"))
+        return flask.redirect(flask.url_for("datasets.display"))
 
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
