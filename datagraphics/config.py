@@ -48,11 +48,8 @@ DEFAULT_SETTINGS = dict(
     USER_ENABLE_IMMEDIATELY = False,
     USER_ENABLE_EMAIL_WHITELIST = [], # List of regexp's
     ADMIN_USER = {},                  # Keys: username, email, password
-    VEGA_VERSION         = "5.12.1",
-    VEGA_LITE_VERSION    = "4.12.2",  # Must match file in 'static'!
-    VEGA_EMBED_VERSION   = "6.8.0",
-    VEGA_LITE_URL        = "https://vega.github.io/vega-lite/",
-    VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v4.json",
+    GRAPHIC_DEFAULT_WIDTH = "container",
+    GRAPHIC_DEFAULT_HEIGHT = 400,
 )
 
 def init(app):
@@ -101,6 +98,6 @@ def init(app):
 
     # Read in JSON Schema for Vega-Lite from file in 'static'.
     filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            f"static/v{app.config['VEGA_LITE_VERSION']}.json")
+                            f"static/v{constants.VEGA_LITE_VERSION}.json")
     with open(filepath) as f:
         app.config['VEGA_LITE_SCHEMA'] = json.load(f)

@@ -55,15 +55,7 @@
               <textarea id="specification" name="specification" rows="14"
                         class="form-control"
                         aria-describedby="specificationHelp"
->{
-  "$schema": "{{ config['VEGA_LITE_SCHEMA_URL'] }}",
-  "title": "dataset['title']",
-  "data": {
-    "url": "{{ url_for('api_dataset.content', iuid=dataset['_id'], ext='csv', _external=True) }}",
-    "format": {"type": "csv"}
-  }
-}
-</textarea>
+>{{ skeleton_graphic | tojson(indent=2) }}</textarea>
               <small id="specificationHelp" class="form-text text-muted">
                 Specification of the graphic using
                 <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> JSON.

@@ -10,6 +10,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from datagraphics import constants
 from datagraphics import utils
+from datagraphics.datasets import count_datasets_owner
+from datagraphics.graphics import count_graphics_owner
 from datagraphics.saver import BaseSaver
 
 def init(app):
@@ -219,8 +221,8 @@ def display(username):
     if not am_admin_or_self(user):
         utils.flash_error("Access not allowed.")
         return flask.redirect(flask.url_for("home"))
-    user["count"] = {"datasets": count_user_datasets(user),
-                     "graphics": count_user_graphics(user)}
+    user["count"] = {"datasets": count_datasets_owner(username),
+                     "graphics": count_graphics_owner(username)}
     return flask.render_template("user/display.html", user=user)
 
 @blueprint.route("/display/<name:username>/edit",
@@ -430,8 +432,8 @@ def get_users(role=None, status=None):
     if status is not None:
         result = [d for d in result if d["status"] == status]
     for user in result:
-        user["count"] = {"datasets": count_user_datasets(user),
-                         "graphics": count_user_graphics(user)}
+        user["count"] = {"datasets": count_datasets_owner(user["username"]),
+                         "graphics": count_graphics_owner(user["username"])}
         user["storage"] = get_storage(user["username"])
     return result
 
@@ -474,7 +476,8 @@ def send_password_code(user, action):
 
 def is_empty(user):
     "Is the given user account empty? No data associated with it."
-    return not get_user_datasets(user) and not get_user_graphics(user)
+    return count_datasets_owner(user["username"]) == 0 and \
+        count_graphics_owner(user["username"]) == 0
 
 def am_admin_or_self(user=None, username=None):
     "Is the current user admin, or the same as the given user?"
@@ -490,50 +493,6 @@ def am_admin_and_not_self(user):
         return flask.g.current_user["username"] != user["username"]
     return False
 
-def get_user_datasets(user):
-    "Get the datasets owned by the user."
-    result = []
-    for row in flask.g.db.view("datasets", "owner_modified",
-                               startkey=[user["username"]],
-                               endkey=[user["username"], "ZZZZZZ"],
-                               include_docs=True):
-        flask.g.cache[row.doc["_id"]] = row.doc
-        result.append(row.doc)
-    return result
-
-def count_user_datasets(user):
-    "Return the number of datasets owned by the user."
-    rows = list(flask.g.db.view("datasets", "owner_modified",
-                                startkey=[user["username"]],
-                                endkey=[user["username"], "ZZZZZZ"],
-                                reduce=True))
-    if rows:
-        return rows[0].value
-    else:
-        return 0
-    
-def get_user_graphics(user):
-    "Get the graphics owned by the user."
-    result = []
-    for row in flask.g.db.view("graphics", "owner_modified",
-                               startkey=[user["username"]],
-                               endkey=[user["username"], "ZZZZZZ"],
-                               include_docs=True):
-        flask.g.cache[row.doc["_id"]] = row.doc
-        result.append(row.doc)
-    return result
-    
-def count_user_graphics(user):
-    "Return the number of datasets owned by the user."
-    rows = list(flask.g.db.view("graphics", "owner_modified",
-                                startkey=[user["username"]],
-                                endkey=[user["username"], "ZZZZZZ"],
-                                reduce=True))
-    if rows:
-        return rows[0].value
-    else:
-        return 0
-    
 def get_storage(username):
     "Return the sum of attachments file sizes for the given user."
     rows = list(flask.g.db.view("datasets", "file_size",

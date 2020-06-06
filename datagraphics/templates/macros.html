@@ -53,6 +53,7 @@
       {% if show_owner %}
       <th>Owner</th>
       {% endif %}
+      <th># graphics</th>
       <th># fields</th>
       <th># records</th>
       <th>Modified</th>
@@ -78,6 +79,9 @@
         {% endif %}
       </td>
       {% endif %}
+      <td class="text-right text-monospace">
+        <span class="mr-5">{{ dataset["count_graphics"] | default(0) }}</span>
+      </td>
       <td class="text-right text-monospace">
         <span class="mr-5">{{ dataset["meta"].keys() | length }}</span>
       </td>

@@ -10,6 +10,7 @@ import couchdb2
 import flask
 
 import datagraphics.user
+import datagraphics.graphic
 from datagraphics import constants
 from datagraphics import utils
 
@@ -68,10 +69,12 @@ def display(iuid):
         return flask.redirect(utils.referrer())
     storage = sum([s['length'] 
                    for s in dataset.get('_attachments', {}).values()])
+    skeleton_graphic = datagraphics.graphic.get_skeleton_graphic()
     return flask.render_template("dataset/display.html",
                                  dataset=dataset,
                                  graphics=get_graphics(dataset),
                                  storage=storage,
+                                 skeleton_graphic=skeleton_graphic,
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset))
@@ -118,7 +121,7 @@ def edit(iuid):
         for log in utils.get_logs(dataset["_id"], cleanup=False):
             flask.g.db.delete(log)
         utils.flash_message("The dataset was deleted.")
-        return flask.redirect(flask.url_for("home"))
+        return flask.redirect(flask.url_for("datasets.display"))
 
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
@@ -396,7 +399,7 @@ class DatasetSaver(EntitySaver):
                     meta["max"] = max(distinct)
                 except ValueError:
                     meta["max"] = None
-            elif meta["type"] == "number":
+            if meta["type"] in ("integer", "number"):
                 values = [r[key] for r in data if r[key] is not None]
                 try:
                     meta["min"] = min(values)
@@ -418,7 +421,7 @@ class DatasetSaver(EntitySaver):
                     meta["stdev"] = statistics.stdev(values)
                 except statistics.StatisticsError:
                     meta["stdev"] = None
-            elif meta["type"] == "boolean":
+            if meta["type"] == "boolean":
                 meta["n_true"] = len([r[key] for r in data if r[key] is True])
                 meta["n_false"] = len([r[key] for r in data if r[key] is False])
 

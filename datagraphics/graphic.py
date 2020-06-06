@@ -26,7 +26,8 @@ DESIGN_DOC = {
                             "map": "function(doc) {if (doc.doctype !== 'graphic' || !doc.public) return; emit(doc.modified, doc.title);}"},
         "owner_modified": {"reduce": "_count",
                            "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit([doc.owner, doc.modified], doc.title);}"},
-        "dataset": {"map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}"}
+        "dataset": {"reduce": "_count",
+                    "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}"}
     }
 }
 
@@ -67,6 +68,7 @@ def display(iuid):
                           if gr["_id"] != graphic["_id"]]
     else:
         other_graphics = []
+    skeleton_graphic = get_skeleton_graphic(graphic)
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
@@ -115,7 +117,8 @@ def edit(iuid):
         for log in utils.get_logs(graphic["_id"], cleanup=False):
             flask.g.db.delete(log)
         utils.flash_message("The graphic was deleted.")
-        return flask.redirect(flask.url_for("home"))
+        return flask.redirect(
+            flask.url_for("dataset.display", iuid=graphic["dataset"]))
 
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
@@ -259,14 +262,8 @@ class GraphicSaver(EntitySaver):
         # Ensure that the fixed items stay put.
         # A bit complicated; to keep fixed items at the top, and
         # the rest of the items in the order specified in the input.
-        spec = {"$schema": flask.current_app.config['VEGA_LITE_SCHEMA_URL']}
-        spec["title"] = self.doc["title"]
-        spec["data"] = {"url": flask.url_for("api_dataset.content",
-                                             iuid=self.doc["dataset"],
-                                             ext="csv",
-                                             _external=True),
-                        "format": {"type": "csv"}
-        }
+        spec = get_skeleton_graphic(self.doc, specification)
+        # These items must always be kept sane; don't allow user to mess up.
         specification.pop("$schema", None)
         specification.pop("title", None)
         specification.pop("data", None)
@@ -295,6 +292,29 @@ def get_graphic(iuid):
         raise ValueError(f"Database entry {iuid} is not a graphic.")
     flask.g.cache[iuid] = doc
     return doc
+
+def get_skeleton_graphic(graphic=None, specification=None):
+    """Return a fresh basic graphic definition, excluding width and height
+    if given in the 'specification' dictionary argument.
+    """
+    result = {"$schema": constants.VEGA_LITE_SCHEMA_URL}
+    if graphic:
+        result["title"] = graphic["title"]
+        url = flask.url_for("api_dataset.content",
+                            iuid=graphic["dataset"],
+                            ext="csv",
+                            _external=True)
+    else:
+        result["title"] = None
+        url = None
+    result["data"] = {"url": url, "format": {"type": "csv"} }
+    # Set width and height only if not already in 'specification'
+    specification = specification or {}
+    if "width" not in specification:
+        result["width"] = flask.current_app.config["GRAPHIC_DEFAULT_WIDTH"]
+    if "height" not in specification:
+        result["height"] = flask.current_app.config["GRAPHIC_DEFAULT_HEIGHT"]
+    return result
 
 def allow_view(graphic):
     "Is the current user allowed to view the graphic?"
