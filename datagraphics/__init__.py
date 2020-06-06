@@ -5,14 +5,26 @@ import os.path
 import re
 import string
 
-__version__ = "0.3.24"
+__version__ = "0.3.25"
 
 class Constants:
-    VERSION     = __version__
+    VERSION = __version__
+    URL     = "https://github.com/pekrau/DataGraphics"
 
-    BOOTSTRAP_VERSION  = "4.3.1"   # Hardwired in HTML code.
-    JQUERY_VERSION     = "3.3.1"   # Hardwired in HTML code.
-    DATATABLES_VERSION = "1.10.18" # Hardwired in HTML code.
+    # Currently, these are hardwired; configurability is not meaningful.
+    BOOTSTRAP_VERSION    = "4.3.1"
+    BOOTSTRAP_URL        = "https://getbootstrap.com/"
+    JQUERY_VERSION       = "3.3.1"
+    JQUERY_URL           = "https://jquery.com/"
+    DATATABLES_VERSION   = "1.10.18"
+    DATATABLES_URL       = "https://datatables.net/"
+    VEGA_VERSION         = "5.12.1"
+    VEGA_URL             = "https://vega.github.io/vega/"
+    VEGA_LITE_VERSION    = "4.12.2"  # Must match file in 'static'!
+    VEGA_LITE_URL        = "https://vega.github.io/vega-lite/"
+    VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v4.json"
+    VEGA_EMBED_VERSION   = "6.8.0"
+    VEGA_EMBED_URL       = "https://github.com/vega/vega-embed"
 
     NAME_RX  = re.compile(r"^[a-z][a-z0-9_-]*$", re.I)
     IUID_RX  = re.compile(r"^[a-f0-9]{32,32}$", re.I)

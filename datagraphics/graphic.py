@@ -295,7 +295,7 @@ def get_skeleton_graphic(graphic=None, specification=None):
     """Return a fresh basic graphic definition, excluding width and height
     if given in the 'specification' dictionary argument.
     """
-    result = {"$schema": flask.current_app.config['VEGA_LITE_SCHEMA_URL']}
+    result = {"$schema": constants.VEGA_LITE_SCHEMA_URL}
     if graphic:
         result["title"] = graphic["title"]
         url = flask.url_for("api_dataset.content",
