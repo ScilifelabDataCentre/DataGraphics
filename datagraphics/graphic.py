@@ -116,7 +116,8 @@ def edit(iuid):
         for log in utils.get_logs(graphic["_id"], cleanup=False):
             flask.g.db.delete(log)
         utils.flash_message("The graphic was deleted.")
-        return flask.redirect(flask.url_for("home"))
+        return flask.redirect(
+            flask.url_for("dataset.display", iuid=graphic["dataset"]))
 
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
