@@ -68,8 +68,10 @@ def get_datasets_owner(username, full=False):
     if full:
         result = []
         for row in view:
-            flask.g.cache[row.doc["_id"]] = row.doc
-            result.append(row.doc)
+            dataset = row.doc
+            dataset["count_graphics"] = count_graphics(dataset["_id"])
+            flask.g.cache[dataset["_id"]] = dataset
+            result.append(dataset)
         return result
     else:
         return [(row.id, row.value, row.key[1]) for row in view]
@@ -101,8 +103,10 @@ def get_datasets_public(full=False, limit=None):
     if full:
         result = []
         for row in view:
-            flask.g.cache[row.doc["_id"]] = row.doc
-            result.append(row.doc)
+            dataset = row.doc
+            dataset["count_graphics"] = count_graphics(dataset["_id"])
+            flask.g.cache[dataset["_id"]] = dataset
+            result.append(dataset)
         return result
     else:
         return [(row.id, row.value, row.key) for row in view]
@@ -130,8 +134,10 @@ def get_datasets_all(full=False):
     if full:
         result = []
         for row in view:
-            flask.g.cache[row.doc["_id"]] = row.doc
-            result.append(row.doc)
+            dataset = row.doc
+            dataset["count_graphics"] = count_graphics(dataset["_id"])
+            flask.g.cache[dataset["_id"]] = dataset
+            result.append(dataset)
         return result
     else:
         return [(row.id, row.value, row.key[0], row.key[1]) for row in view]
@@ -139,6 +145,17 @@ def get_datasets_all(full=False):
 def count_datasets_all():
     "Return the total number of datasets."
     view = flask.g.db.view("datasets", "owner_modified", reduce=True)
+    rows = list(view)
+    if rows:
+        return rows[0].value
+    else:
+        return 0
+
+def count_graphics(dataset_iuid):
+    "Return the number of graphics for the dataset given by its iuid."
+    view = flask.g.db.view("graphics", "dataset",
+                           key=dataset_iuid,
+                           reduce=True)
     rows = list(view)
     if rows:
         return rows[0].value
