@@ -26,27 +26,17 @@
   <div class="card-body">
     <table id="graphics" 
            class="table table-sm table-borderless table-hover mb-0">
-      <tr>
-        {% if g.current_user %}
-        <th>Access</th>
-        {% endif %}
-        <th style="width:60%;">Graphic</th>
-        <th>Modified</th>
-        <th>Owner</th>
-      </tr>
       {% for graphic in graphics %}
       <tr>
-        {% if g.current_user %}
-        <td>
+        <td style="width:70%">
+          {% if g.current_user %}
           {{ macros.access_symbol(graphic) }}
-        </td>
-        {% endif %}
-        <td>
+          {% endif %}
           <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
+            {{ macros.graphic_symbol() }}
             {{ graphic['title'] }}</a>
         </td>
-        <td class="small localtime">{{ graphic['modified'] }}</td>
-        <td>
+        <td title="Owner">
           {% if am_admin_or_self(username=graphic['owner']) %}
           <a href="{{ url_for('user.display', username=graphic['owner']) }}">
             {{ graphic['owner'] }}</a>
@@ -54,6 +44,8 @@
           {{ graphic['owner'] }}
           {% endif %}
         </td>
+        <td title="Modified" class="small localtime">
+          {{ graphic['modified'] }}</td>
       </tr>
       {% endfor %}
     </table>
@@ -62,7 +54,7 @@
 <div class="card mt-3">
   <div class="card-header">Data field properties</div>
   <div class="card-body">
-    <table class="table table-sm table-borderless table-hover mb-0">
+    <table class="table table-sm mb-0">
       <tr>
         <th>Field</th>
         <th>Type</th>

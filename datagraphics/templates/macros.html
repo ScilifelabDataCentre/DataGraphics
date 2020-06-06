@@ -3,7 +3,7 @@
 {%- endmacro %}
 
 {% macro graphic_symbol() -%}
-<span title="Binder">{{ ':chart_increasing:' | emojize }}</span>&nbsp;
+<span title="Graphic">{{ ':chart_increasing:' | emojize }}</span>&nbsp;
 {%- endmacro %}
 
 {% macro public_symbol() -%}
@@ -19,7 +19,7 @@
 {%- endmacro %}
 
 {% macro ok_symbol() -%}
-<span title="Error">{{ ':heavy_check_mark:' | emojize }}</span>&nbsp;
+<span title="OK">{{ ':heavy_check_mark:' | emojize }}</span>&nbsp;
 {%- endmacro %}
 
 {% macro access_symbol(item) -%}
@@ -36,10 +36,6 @@
 {% else %}
 {{ ok_symbol() }}
 {% endif %}
-{%- endmacro %}
-
-{% macro download_symbol() -%}
-<span title="Download file">{{ ':inbox_tray:' | emojize }}</span>&nbsp;
 {%- endmacro %}
 
 {% macro datasets_table(datasets, show_public=False, show_owner=False) -%}
