@@ -1,5 +1,14 @@
 {% extends 'base.html' %}
 
+{% block style %}
+<style type="text/css">
+.graphic_wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+}
+</style>
+{% endblock %}
+
 {% block head_title %}{{ graphic['title'] }}{% endblock %}
 
 {% block body_title %}
@@ -27,16 +36,33 @@
   </div>
 </div>
 {% elif dataset %}
-<div id="graphic"></div>
+<div class="graphic_wrapper">
+  <div id="graphic"></div>
+</div>
 <div class="row">
   <div class="col-md">
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Dataset</h5>
-        <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
-          {{ macros.dataset_symbol() }}{{ dataset['title'] }}</a>
-        <span class="localtime small ml-3" title="Modified">
-          {{ dataset['modified'] }}</span>
+        <table class="table table-sm table-borderless my-0">
+          <tr>
+            <td>
+              <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
+                {{ macros.dataset_symbol() }}{{ dataset['title'] }}</a>
+            </td>
+            <td class="text-right">
+              <span class="localtime small" title="Modified">
+                {{ dataset['modified'] }}</span>
+            </td>
+          </tr>
+        </table>
+        {% if g.current_user and g.current_user["username"] == graphic["owner"] and dataset["owner"] != graphic["owner"] %}
+        <p class="text-danger">
+          The dataset is not owned by you. This graphic may become invalid
+          if the user of the dataset deletes it or make it
+          inaccessible.
+        </p>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -45,13 +71,20 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Other graphics for same dataset</h5>
-        {% for other in other_graphics %}
-        <a href="{{ url_for('graphic.display', iuid=other['_id']) }}">
-          {{ macros.graphic_symbol() }}{{ other['title'] }}</a>
-        <span class="localtime small ml-3" title="Modified">
-          {{ other['modified'] }}</span>
-        <br>
-        {% endfor %}
+        <table class="table table-sm table-borderless my-0">
+          {% for other in other_graphics %}
+          <tr>
+            <td>
+              <a href="{{ url_for('graphic.display', iuid=other['_id']) }}">
+                {{ macros.graphic_symbol() }}{{ other['title'] }}</a>
+            </td>
+            <td class="text-right">
+              <span class="localtime small" title="Modified">
+                {{ other['modified'] }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
       </div>
     </div>
   </div>
