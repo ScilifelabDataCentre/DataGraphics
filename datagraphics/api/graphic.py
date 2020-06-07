@@ -80,7 +80,7 @@ def serve(iuid):
                     pass
         except ValueError as error:
             return str(error), http.client.BAD_REQUEST
-        return flask.jsonify(utils.get_json(**saver.doc))
+        return flask.redirect(flask.url_for(".serve", iuid=iuid))
 
     elif utils.http_DELETE():
         if not allow_delete(graphic):

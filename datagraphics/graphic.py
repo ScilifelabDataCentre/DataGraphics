@@ -259,13 +259,12 @@ class GraphicSaver(EntitySaver):
             specification = flask.request.form.get("specification") or ""
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
-        # Ensure that the fixed items stay put.
-        # A bit complicated; to keep fixed items at the top, and
-        # the rest of the items in the order specified in the input.
+        # Ensure that items '$schema' and 'data' are kept fixed.
+        # A bit complicated in order to keep fixed items at the top,
+        # and the rest of the items in the order specified in the input.
         spec = get_skeleton_graphic(self.doc, specification)
-        # These items must always be kept sane; don't allow user to mess up.
+        # Items '$schema' and 'data' may not be set by the user.
         specification.pop("$schema", None)
-        specification.pop("title", None)
         specification.pop("data", None)
         spec.update(specification)
         try:
@@ -299,13 +298,11 @@ def get_skeleton_graphic(graphic=None, specification=None):
     """
     result = {"$schema": constants.VEGA_LITE_SCHEMA_URL}
     if graphic:
-        result["title"] = graphic["title"]
         url = flask.url_for("api_dataset.content",
                             iuid=graphic["dataset"],
                             ext="csv",
                             _external=True)
     else:
-        result["title"] = None
         url = None
     result["data"] = {"url": url, "format": {"type": "csv"} }
     # Set width and height only if not already in 'specification'
