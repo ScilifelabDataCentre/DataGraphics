@@ -36,7 +36,9 @@ def create():
             saver.set_specification(data.get("specification"))
     except ValueError as error:
         return str(error), http.client.BAD_REQUEST
-    return flask.jsonify(utils.get_json(**saver.doc))
+    graphic = saver.doc
+    fixup_dataset(graphic)
+    return flask.jsonify(utils.get_json(**graphic))
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
@@ -49,12 +51,8 @@ def serve(iuid):
     if utils.http_GET():
         if not allow_view(graphic):
             flask.abort(http.client.FORBIDDEN)
-        result = utils.get_json(**graphic)
-        result["dataset"] = {"iuid": result["dataset"],
-                             "href": flask.url_for("api_dataset.serve",
-                                                   iuid=result["dataset"],
-                                                   _external=True)}
-        return flask.jsonify(result)
+        fixup_dataset(graphic)
+        return flask.jsonify(utils.get_json(**graphic))
 
     elif utils.http_POST(csrf=False):
         if not allow_edit(graphic):
@@ -67,11 +65,11 @@ def serve(iuid):
                 except KeyError:
                     pass
                 try:
-                    saver.set_title(data["description"])
+                    saver.set_description(data["description"])
                 except KeyError:
                     pass
                 try:
-                    saver.set_title(data["public"])
+                    saver.set_public(data["public"])
                 except KeyError:
                     pass
                 try:
@@ -89,3 +87,10 @@ def serve(iuid):
         for log in utils.get_logs(graphic["_id"], cleanup=False):
             flask.g.db.delete(log)
         return "", http.client.NO_CONTENT
+
+def fixup_dataset(graphic):
+    "Convert dataset IUID to href and IUID."
+    graphic["dataset"] = {"iuid": graphic["dataset"],
+                          "href": flask.url_for("api_dataset.serve",
+                                                iuid=graphic["dataset"],
+                                                _external=True)}
