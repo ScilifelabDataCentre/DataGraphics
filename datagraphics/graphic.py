@@ -47,7 +47,7 @@ def create():
             saver.set_specification()
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>")
@@ -60,7 +60,7 @@ def display(iuid):
         return flask.redirect(flask.url_for("home"))
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     dataset = get_dataset(graphic)
     if dataset:
         other_graphics = [gr 
@@ -85,7 +85,7 @@ def edit(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
 
     if utils.http_GET():
         if not allow_edit(graphic):
@@ -106,7 +106,7 @@ def edit(iuid):
                 saver.set_specification()
         except ValueError as error:
             utils.flash_error(str(error))
-            return flask.redirect(utils.referrer())
+            return flask.redirect(utils.url_referrer())
         return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
     elif utils.http_DELETE():
@@ -128,7 +128,7 @@ def copy(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(flask.url_for(".display", iuid=iuid))
@@ -141,7 +141,7 @@ def copy(iuid):
             saver.set_specification(graphic["specification"])
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>/public", methods=["POST"])
@@ -152,7 +152,7 @@ def public(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if allow_edit(graphic):
         if not graphic["public"]:
             with GraphicSaver(graphic) as saver:
@@ -169,7 +169,7 @@ def private(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if allow_edit(graphic):
         if graphic["public"]:
             with GraphicSaver(graphic) as saver:
@@ -185,14 +185,14 @@ def download(iuid, ext):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     dataset = get_dataset(graphic)
     if not dataset:
         utils.flash_error("View access to dataset not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
 
     spec = graphic["specification"]
     slug = utils.slugify(graphic['title'])
@@ -218,7 +218,7 @@ def download(iuid, ext):
         response.headers.set("Content-Type", constants.HTML_MIMETYPE)
     else:
         utils.flash_error("Invalid file type requested.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     response.headers.set("Content-Disposition", "attachment", 
                          filename=f"{slug}.{ext}")
     return response
@@ -230,10 +230,10 @@ def logs(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     return flask.render_template(
         "logs.html",
         title=f"Graphic {graphic['title']}",

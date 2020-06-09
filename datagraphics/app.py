@@ -45,7 +45,8 @@ def setup_template_context():
     "Add useful stuff to the global context of Jinja2 templates."
     return dict(constants=constants,
                 csrf_token=utils.csrf_token,
-                am_admin_or_self=datagraphics.user.am_admin_or_self)
+                am_admin_or_self=datagraphics.user.am_admin_or_self,
+                url_referrer=utils.url_referrer)
 
 @app.before_request
 def prepare():

@@ -182,7 +182,7 @@ def get_time(offset=None):
     instant = instant.isoformat()
     return instant[:17] + "{:06.3f}".format(float(instant[17:])) + "Z"
 
-def referrer(url=None):
+def url_referrer(url=None):
     """Return the URL for the referring page ('referer').
     Return the given URL if no referring page; the home page if none given.
     """
