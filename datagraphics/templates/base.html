@@ -54,6 +54,10 @@
               {% if g.am_admin %}
               <a class="dropdown-item"
                  href="{{ url_for('datasets.all') }}">All datasets</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item"
+                 href="{{ url_for('dataset.create') }}">
+                Create dataset</a>
               {% endif %}
             </div>
           </li>

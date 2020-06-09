@@ -1,14 +1,5 @@
 {% extends 'base.html' %}
 
-{% block style %}
-<style type="text/css">
-.graphic_wrapper {
-  max-width: 100%;
-  overflow-x: auto;
-}
-</style>
-{% endblock %}
-
 {% block head_title %}{{ graphic['title'] }}{% endblock %}
 
 {% block body_title %}
@@ -36,9 +27,7 @@
   </div>
 </div>
 {% elif dataset %}
-<div class="graphic_wrapper">
-  <div id="graphic"></div>
-</div>
+<div id="graphic" style="max-width:100%; overflow-x:auto;"></div>
 <div class="row">
   <div class="col-md">
     <div class="card">

@@ -24,6 +24,7 @@
 <div class="card">
   <div class="card-header">Graphics visualizing the dataset</div>
   <div class="card-body">
+    {% if graphics %}
     <table id="graphics" 
            class="table table-sm table-borderless table-hover mb-0">
       {% for graphic in graphics %}
@@ -49,6 +50,9 @@
       </tr>
       {% endfor %}
     </table>
+    {% else %}
+    <i>None</i>
+    {% endif %}
   </div>
 </div>
 <div class="card mt-3">
@@ -155,7 +159,7 @@
 </div>
 {% if dataset['meta'] %}
 <div class="mt-2">
-  {% include 'graphic/create.html' %}
+  {% include 'graphic/create_modal.html' %}
 </div>
 {% endif %}
 {% endif %} {# if g.current_user #}

@@ -41,7 +41,7 @@
 	   class="col-md-2 col-form-label text-right font-weight-bold">
       Description</label>
     <div class="col-md">
-      <textarea id="description" name="description" rows="4"
+      <textarea id="description" name="description" rows="2"
                 class="form-control"
                 aria-describedby="descriptionHelp"
                 >{{ graphic['description'] or '' }}</textarea>
@@ -55,7 +55,7 @@
 	   class="col-md-2 col-form-label text-right font-weight-bold">
       Specification</label>
     <div class="col-md">
-      <textarea id="specification" name="specification" rows="14"
+      <textarea id="specification" name="specification" rows="20"
                 class="form-control"
                 aria-describedby="specificationHelp"
                 >{{ graphic['specification'] | tojson(indent=2)}}</textarea>
@@ -64,9 +64,9 @@
         <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> JSON.
         <br>
         <strong>
-          The items <code>$schema</code>, <code>title</code>
-          and <code>data</code> are fixed, and attempts to change them
-          will be overruled when saving.
+          The items <code>$schema</code> and <code>data</code> are
+          fixed, and attempts to change them will be overwritten when
+          saving.
         </strong>
       </small>
     </div>

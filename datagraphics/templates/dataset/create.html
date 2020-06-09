@@ -1,71 +1,62 @@
-{# Button and modal for creating a dataset. #}
+{% extends 'base.html' %}
 
-<button type="button" class="btn btn-primary btn-sm btn-block"
-        data-toggle="modal" data-target="#createDatasetModal">
-  Create dataset
-</button>
+{% block head_title %}Create dataset{% endblock %}
 
-<div class="modal fade" id="createDatasetModal" tabindex="-1" role="dialog"
-     aria-labelledby="createDatasetModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <form action="{{ url_for('dataset.create') }}"
-            enctype="multipart/form-data"
-            method="POST">
-        {{ csrf_token() }}
-        <div class="modal-header">
-          <h5 class="modal-title" id="createDatasetModalLabel">Create dataset</h5>
-          <button type="button" class="close" data-dismiss="modal"
-                  aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group row">
-            <label for="title"
-	           class="col-md-2 col-form-label text-right font-weight-bold">
-              Title</label>
-            <div class="col-md">
-              <input type="text" id="title" name="title"
-                     class="form-control" aria-describedby="titleHelp">
-              <small id="titleHelp" class="form-text text-muted">
-                Single-line descriptive title for the dataset.
-              </small>
-            </div>
-          </div>
-          <div class="form-group row">
-            <label for="description"
-	           class="col-md-2 col-form-label text-right font-weight-bold">
-              Description</label>
-            <div class="col-md">
-              <textarea id="description" name="description" rows="10"
-                        class="form-control"
-                        aria-describedby="textHelp"></textarea>
-              <small id="descriptionHelp" class="form-text text-muted">
-                Description of the dataset. Formatted using Markdown.
-              </small>
-            </div>
-          </div>
-          <div class="form-group row">
-            <label for="file"
-	           class="col-md-2 col-form-label text-right font-weight-bold">
-              File</label>
-            <div class="col-md">
-              <input type="file" id="file" name="file"
-	             class="form-control-file"
-	             aria-describedby="fileHelp">
-              <small id="fileHelp" class="form-text text-muted">
-                File containing the dataset itself. JSON or CSV format.
-              </small>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary"
-                  data-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create dataset</button>
-        </div>
-      </form>
+{% block body_title %}Create dataset{% endblock %}
+
+{% block main %}
+<form action="{{ url_for('.create') }}"
+      enctype="multipart/form-data"
+      method="POST">
+  {{ csrf_token() }}
+  <div class="form-group row">
+    <label for="title"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Title</label>
+    <div class="col-md">
+      <input type="text" id="title" name="title"
+             class="form-control" aria-describedby="titleHelp">
+      <small id="titleHelp" class="form-text text-muted">
+        Single-line descriptive title for the dataset.
+      </small>
     </div>
   </div>
+  <div class="form-group row">
+    <label for="description"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Description</label>
+    <div class="col-md">
+      <textarea id="description" name="description" rows="10"
+                class="form-control"
+                aria-describedby="textHelp"></textarea>
+      <small id="descriptionHelp" class="form-text text-muted">
+        Description of the dataset. Formatted using Markdown.
+      </small>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="file"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      File</label>
+    <div class="col-md">
+      <input type="file" id="file" name="file"
+	     class="form-control-file" aria-describedby="fileHelp">
+      <small id="fileHelp" class="form-text text-muted">
+        File containing the dataset itself. JSON or CSV format.
+      </small>
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-md-3 offset-md-2">
+      <button type="submit" class="btn btn-block btn-primary">Create</button>
+    </div>
+  </div>
+</form>
+{% endblock %} {# block main #}
+
+{% block actions %}
+<div class="mt-2">
+  <a href="{{ url_for('datasets.user', username=g.current_user['username']) }}"
+     class="btn btn-block btn-secondary">Cancel</a>
 </div>
+{% endblock %}

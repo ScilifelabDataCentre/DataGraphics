@@ -18,6 +18,15 @@ User <a href="{{ url_for('user.display', username=user['username']) }}">
 {{ macros.datasets_table(datasets, show_public=True) }}
 {% endblock %} {# block main #}
 
+{% block actions %}
+<div>
+  <form action="{{ url_for('dataset.create') }}">
+    <button type="submit" class="btn btn-block btn-sm btn-primary">
+      Create dataset</button>
+  </form>
+</div>
+{% endblock %}
+
 {% block javascript %}
 <script>
   $(function() {

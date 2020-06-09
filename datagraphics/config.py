@@ -48,7 +48,7 @@ DEFAULT_SETTINGS = dict(
     USER_ENABLE_IMMEDIATELY = False,
     USER_ENABLE_EMAIL_WHITELIST = [], # List of regexp's
     ADMIN_USER = {},                  # Keys: username, email, password
-    GRAPHIC_DEFAULT_WIDTH = "container",
+    GRAPHIC_DEFAULT_WIDTH = 600,
     GRAPHIC_DEFAULT_HEIGHT = 400,
 )
 

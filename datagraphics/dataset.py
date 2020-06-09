@@ -41,20 +41,24 @@ DESIGN_DOC = {
 
 blueprint = flask.Blueprint("dataset", __name__)
 
-@blueprint.route("/", methods=["POST"])
+@blueprint.route("/", methods=["GET", "POST"])
 @utils.login_required
 def create():
     "Create a new dataset."
-    try:
-        with DatasetSaver() as saver:
-            saver.set_title()
-            saver.set_description()
-            saver.set_public(False)
-            saver.set_data()
-    except ValueError as error:
-        utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
-    return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
+    if utils.http_GET():
+        return flask.render_template("dataset/create.html")
+
+    elif utils.http_POST():
+        try:
+            with DatasetSaver() as saver:
+                saver.set_title()
+                saver.set_description()
+                saver.set_public(False)
+                saver.set_data()
+        except ValueError as error:
+            utils.flash_error(str(error))
+            return flask.redirect(utils.referrer())
+        return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>")
 def display(iuid):
