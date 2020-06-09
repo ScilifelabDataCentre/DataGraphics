@@ -3,9 +3,7 @@
 {% block head_title %}{{ dataset['title'] }}{% endblock %}
 
 {% block body_title %}
-{% if g.current_user %}
 {{ macros.access_symbol(dataset) }}
-{% endif %}
 {{ dataset['title']  }}
 <span class="small text-muted ml-4">{{ dataset['n_records'] }} records</span>
 {% endblock %}
@@ -26,13 +24,11 @@
   <div class="card-body">
     {% if graphics %}
     <table id="graphics" 
-           class="table table-sm table-borderless table-hover mb-0">
+           class="table table-sm table-borderless table-hover my-0">
       {% for graphic in graphics %}
       <tr>
         <td style="width:70%">
-          {% if g.current_user %}
           {{ macros.access_symbol(graphic) }}
-          {% endif %}
           <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
             {{ graphic['title'] }}</a>
         </td>
@@ -57,7 +53,7 @@
 <div class="card mt-3">
   <div class="card-header">Data field properties</div>
   <div class="card-body">
-    <table class="table table-sm mb-0">
+    <table class="table table-sm my-0">
       <tr>
         <th>Field</th>
         <th>Type</th>
@@ -158,7 +154,12 @@
 </div>
 {% if dataset['meta'] %}
 <div class="mt-2">
-  {% include 'graphic/create_modal.html' %}
+  <form action="{{ url_for('graphic.create') }}"
+	method="GET">
+    <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
+    <button type="submit" class="btn btn-sm btn-block btn-primary">
+      Create graphic</button>
+  </form>
 </div>
 {% endif %}
 {% endif %} {# if g.current_user #}

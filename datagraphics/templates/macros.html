@@ -7,10 +7,12 @@
 {%- endmacro %}
 
 {% macro access_symbol(item) -%}
+{% if g.current_user %}
 {% if item.get('public') %}
 {{ public_symbol() }}
 {% else %}
 {{ private_symbol() }}
+{% endif %}
 {% endif %}
 {%- endmacro %}
 

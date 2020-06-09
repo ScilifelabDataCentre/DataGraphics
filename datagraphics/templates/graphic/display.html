@@ -3,9 +3,7 @@
 {% block head_title %}{{ graphic['title'] }}{% endblock %}
 
 {% block body_title %}
-{% if g.current_user %}
 {{ macros.access_symbol(graphic) }}
-{% endif %}
 {{ graphic['title']  }}
 {% endblock %}
 
@@ -31,9 +29,9 @@
 <div class="row">
   <div class="col-md">
     <div class="card">
+      <div class="card-header">Dataset</div>
       <div class="card-body">
-        <h5 class="card-title">Dataset</h5>
-        <table class="table table-sm table-borderless my-0">
+        <table class="table table-sm table-borderless table-hover my-0">
           <tr>
             <td>
               {{ macros.access_symbol(dataset) }}
@@ -59,9 +57,9 @@
   {% if other_graphics %}
   <div class="col-md">
     <div class="card">
+      <div class="card-header">Other graphics for same dataset</div>
       <div class="card-body">
-        <h5 class="card-title">Other graphics for same dataset</h5>
-        <table class="table table-sm table-borderless my-0">
+        <table class="table table-sm table-borderless table-hover my-0">
           {% for other in other_graphics %}
           <tr>
             <td>

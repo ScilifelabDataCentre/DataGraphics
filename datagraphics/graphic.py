@@ -33,22 +33,45 @@ DESIGN_DOC = {
 
 blueprint = flask.Blueprint("graphic", __name__)
 
-@blueprint.route("/", methods=["POST"])
+@blueprint.route("/", methods=["GET", "POST"])
 @utils.login_required
 def create():
-    "Create a new graphic."
+    "Create a new graphic for dataset given as form argument."
     try:
-        with GraphicSaver() as saver:
-            saver.set_title()
-            saver.set_description()
-            saver.set_public(False)
-            saver.set_dataset(datagraphics.dataset.get_dataset(
-                flask.request.form.get("dataset")))
-            saver.set_specification()
+        iuid = flask.request.values.get("dataset")
+        if not iuid:
+            raise ValueError("No dataset IUID provided.")
+        dataset = datagraphics.dataset.get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
+        return flask.redirect(flask.url_for("home"))
+    if not datagraphics.dataset.allow_view(dataset):
+        utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(utils.url_referrer())
-    return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
+
+    if utils.http_GET():
+        graphic = {"$schema": constants.VEGA_LITE_SCHEMA_URL,
+                   "data": {"url": flask.url_for("api_dataset.content",
+                                                 iuid=dataset["_id"],
+                                                 ext="csv",
+                                                 _external=True),
+                            "format": {"type": "csv"}}}
+        return flask.render_template("graphic/create.html",
+                                     dataset=dataset,
+                                     graphic=graphic)
+
+    elif utils.http_POST():
+        try:
+            with GraphicSaver() as saver:
+                saver.set_dataset(dataset)
+                saver.set_title()
+                saver.set_description()
+                saver.set_public(False)
+                saver.set_specification()
+        except ValueError as error:
+            utils.flash_error(str(error))
+            return flask.redirect(utils.url_referrer())
+        return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>")
 def display(iuid):
@@ -262,7 +285,7 @@ class GraphicSaver(EntitySaver):
         # Ensure that items '$schema' and 'data' are kept fixed.
         # A bit complicated in order to keep fixed items at the top,
         # and the rest of the items in the order specified in the input.
-        spec = get_skeleton_graphic(self.doc, specification)
+        spec = get_skeleton_graphic(self.doc)
         # Items '$schema' and 'data' may not be set by the user.
         specification.pop("$schema", None)
         specification.pop("data", None)
@@ -292,10 +315,8 @@ def get_graphic(iuid):
     flask.g.cache[iuid] = doc
     return doc
 
-def get_skeleton_graphic(graphic=None, specification=None):
-    """Return a fresh basic graphic definition, excluding width and height
-    if given in the 'specification' dictionary argument.
-    """
+def get_skeleton_graphic(graphic=None):
+    "Return a fresh basic graphic definition."
     result = {"$schema": constants.VEGA_LITE_SCHEMA_URL}
     if graphic:
         url = flask.url_for("api_dataset.content",
@@ -305,12 +326,6 @@ def get_skeleton_graphic(graphic=None, specification=None):
     else:
         url = None
     result["data"] = {"url": url, "format": {"type": "csv"} }
-    # Set width and height only if not already in 'specification'
-    specification = specification or {}
-    if "width" not in specification:
-        result["width"] = flask.current_app.config["GRAPHIC_DEFAULT_WIDTH"]
-    if "height" not in specification:
-        result["height"] = flask.current_app.config["GRAPHIC_DEFAULT_HEIGHT"]
     return result
 
 def allow_view(graphic):
