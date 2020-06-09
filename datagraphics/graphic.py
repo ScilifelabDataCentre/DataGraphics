@@ -91,7 +91,6 @@ def display(iuid):
                           if gr["_id"] != graphic["_id"]]
     else:
         other_graphics = []
-    skeleton_graphic = get_skeleton_graphic(graphic)
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
@@ -283,21 +282,20 @@ class GraphicSaver(EntitySaver):
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
         # Ensure that items '$schema' and 'data' are kept fixed.
-        # A bit complicated in order to keep fixed items at the top,
-        # and the rest of the items in the order specified in the input.
-        spec = get_skeleton_graphic(self.doc)
-        # Items '$schema' and 'data' may not be set by the user.
-        specification.pop("$schema", None)
-        specification.pop("data", None)
-        spec.update(specification)
+        specification["$schema"] = constants.VEGA_LITE_SCHEMA_URL
+        specification["data"] = {"url": flask.url_for("api_dataset.content",
+                                                      iuid=self.doc["dataset"],
+                                                      ext="csv",
+                                                      _external=True),
+                                 "format": {"type": "csv"}}
         try:
-            utils.validate_vega_lite(spec)
+            utils.validate_vega_lite(specification)
         except jsonschema.ValidationError as error:
             self.doc["error"] = str(error)
         else:
             self.doc["error"] = None
         # Save it, even if incorrect Vega-Lite.
-        self.doc["specification"] = spec
+        self.doc["specification"] = specification
 
 # Utility functions
 
@@ -314,19 +312,6 @@ def get_graphic(iuid):
         raise ValueError(f"Database entry {iuid} is not a graphic.")
     flask.g.cache[iuid] = doc
     return doc
-
-def get_skeleton_graphic(graphic=None):
-    "Return a fresh basic graphic definition."
-    result = {"$schema": constants.VEGA_LITE_SCHEMA_URL}
-    if graphic:
-        url = flask.url_for("api_dataset.content",
-                            iuid=graphic["dataset"],
-                            ext="csv",
-                            _external=True)
-    else:
-        url = None
-    result["data"] = {"url": url, "format": {"type": "csv"} }
-    return result
 
 def allow_view(graphic):
     "Is the current user allowed to view the graphic?"

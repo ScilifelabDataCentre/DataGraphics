@@ -10,7 +10,6 @@ import couchdb2
 import flask
 
 import datagraphics.user
-import datagraphics.graphic
 from datagraphics import constants
 from datagraphics import utils
 
@@ -73,12 +72,10 @@ def display(iuid):
         return flask.redirect(utils.url_referrer())
     storage = sum([s['length'] 
                    for s in dataset.get('_attachments', {}).values()])
-    skeleton_graphic = datagraphics.graphic.get_skeleton_graphic()
     return flask.render_template("dataset/display.html",
                                  dataset=dataset,
                                  graphics=get_graphics(dataset),
                                  storage=storage,
-                                 skeleton_graphic=skeleton_graphic,
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset))
@@ -456,7 +453,7 @@ def get_dataset(iuid):
 
 def get_graphics(dataset):
     """Get the graphics entities the dataset is used for.
-    Exclude those not allowed to view.
+    Exclude those this user is not allowed to view.
     """
     from datagraphics.graphic import allow_view
     result = []
