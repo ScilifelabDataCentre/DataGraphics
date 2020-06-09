@@ -6,7 +6,7 @@
 {% if g.current_user %}
 {{ macros.access_symbol(graphic) }}
 {% endif %}
-{{ macros.graphic_symbol() }}{{ graphic['title']  }}
+{{ graphic['title']  }}
 {% endblock %}
 
 {% block meta %}
@@ -38,7 +38,7 @@
             <td>
               {{ macros.access_symbol(dataset) }}
               <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
-                {{ macros.dataset_symbol() }}{{ dataset['title'] }}</a>
+                {{ dataset['title'] }}</a>
             </td>
             <td class="text-right">
               <span class="localtime small" title="Modified">
@@ -67,7 +67,7 @@
             <td>
               {{ macros.access_symbol(other) }}
               <a href="{{ url_for('graphic.display', iuid=other['_id']) }}">
-                {{ macros.graphic_symbol() }}{{ other['title'] }}</a>
+                {{ other['title'] }}</a>
             </td>
             <td class="text-right">
               <span class="localtime small" title="Modified">

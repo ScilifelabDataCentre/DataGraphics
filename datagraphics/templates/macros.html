@@ -1,11 +1,3 @@
-{% macro dataset_symbol() -%}
-<span title="Dataset">{{ ':file_cabinet:' | emojize }}</span>&nbsp;
-{%- endmacro %}
-
-{% macro graphic_symbol() -%}
-<span title="Graphic">{{ ':chart_increasing:' | emojize }}</span>&nbsp;
-{%- endmacro %}
-
 {% macro public_symbol() -%}
 <span title="Public">{{ ':earth_africa:' | emojize }}</span>&nbsp;
 {%- endmacro %}
@@ -14,20 +6,20 @@
 <span title="Private">{{ ':locked:' | emojize }}</span>&nbsp;
 {%- endmacro %}
 
-{% macro error_symbol() -%}
-<span title="Error">{{ ':cross_mark:' | emojize }}</span>&nbsp;
-{%- endmacro %}
-
-{% macro ok_symbol() -%}
-<span title="OK">{{ ':heavy_check_mark:' | emojize }}</span>&nbsp;
-{%- endmacro %}
-
 {% macro access_symbol(item) -%}
 {% if item.get('public') %}
 {{ public_symbol() }}
 {% else %}
 {{ private_symbol() }}
 {% endif %}
+{%- endmacro %}
+
+{% macro error_symbol() -%}
+<span title="Error">{{ ':cross_mark:' | emojize }}</span>&nbsp;
+{%- endmacro %}
+
+{% macro ok_symbol() -%}
+<span title="OK">{{ ':heavy_check_mark:' | emojize }}</span>&nbsp;
 {%- endmacro %}
 
 {% macro status_symbol(item) -%}
@@ -63,7 +55,7 @@
       {% endif %}
       <td>
         <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
-          {{ dataset_symbol() }}{{ dataset['title'] }}</a>
+          {{ dataset['title'] }}</a>
       </td>
       {% if show_owner %}
       <td>
@@ -116,7 +108,7 @@
       {% endif %}
       <td>
         <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
-          {{ graphic_symbol() }}{{ graphic['title'] }}</a>
+          {{ graphic['title'] }}</a>
       </td>
       <td>{{ status_symbol(graphic) }}</td>
       {% if show_owner %}
@@ -136,7 +128,7 @@
         {{ access_symbol(graphic['dataset']) }}
         {% endif %}
         <a href="{{ url_for('dataset.display', iuid=graphic['dataset']['_id']) }}">
-          {{ dataset_symbol() }}{{ graphic['dataset']['title'] }}
+          {{ graphic['dataset']['title'] }}
         </a>
       </td>
       <td class="small localtime">{{ graphic['dataset']['modified'] }}</td>
