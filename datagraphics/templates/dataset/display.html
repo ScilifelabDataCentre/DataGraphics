@@ -64,8 +64,6 @@
         <th>Mean</th>
         <th>Median</th>
         <th>Stdev</th>
-        <th># true</th>
-        <th># false</th>
       </tr>
       {% for key, meta in dataset['meta'].items() %}
       <tr>
@@ -78,8 +76,6 @@
         <td>{{ meta.get('mean') | float_default('-') }}</td>
         <td>{{ meta.get('median') | float_default('-') }}</td>
         <td>{{ meta.get('stdev') | float_default('-') }}</td>
-        <td>{{ meta['n_true'] | default('-') }}</td>
-        <td>{{ meta['n_false'] | default('-') }}</td>
       </tr>
       {% endfor %}
     </table>

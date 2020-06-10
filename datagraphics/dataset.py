@@ -422,9 +422,6 @@ class DatasetSaver(EntitySaver):
                     meta["stdev"] = statistics.stdev(values)
                 except statistics.StatisticsError:
                     meta["stdev"] = None
-            if meta["type"] == "boolean":
-                meta["n_true"] = len([r[key] for r in data if r[key] is True])
-                meta["n_false"] = len([r[key] for r in data if r[key] is False])
 
     def remove_data(self):
         "Remove the data."

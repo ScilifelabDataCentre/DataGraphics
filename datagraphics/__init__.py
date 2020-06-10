@@ -5,7 +5,7 @@ import os.path
 import re
 import string
 
-__version__ = "0.4.3"
+__version__ = "0.4.4"
 
 class Constants:
     VERSION = __version__
@@ -47,7 +47,7 @@ class Constants:
     PENDING  = "pending"
     ENABLED  = "enabled"
     DISABLED = "disabled"
-    USER_STATUSES = [PENDING, ENABLED, DISABLED]
+    USER_STATUSES = (PENDING, ENABLED, DISABLED)
 
     # Content types
     HTML_MIMETYPE = "text/html"
