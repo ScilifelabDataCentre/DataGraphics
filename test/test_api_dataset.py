@@ -32,17 +32,27 @@ class Dataset(api_base.Base):
         self.check_schema(response)
 
     def test_create_dataset(self):
-        "Create and delete a dataset."
+        "Create, update and delete a dataset."
         url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/"
         title = "My title"
         description = "My description."
         # Create the dataset.
         response = self.POST(url, json={"title": title,
-                                        "description": description})
+                                        "description": description,
+                                        "public": False})
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
         self.assertEqual(dataset["title"], title)
         self.assertEqual(dataset["description"], description)
+        self.assertEqual(dataset["public"], False)
+        # Update the dataset metadata.
+        title = "New title"
+        response = self.POST(dataset["$id"], json={"title": title,
+                                                   "public": True})
+        self.assertEqual(response.status_code, http.client.OK)
+        dataset = self.check_schema(response)
+        self.assertEqual(dataset["title"], title)
+        self.assertEqual(dataset["public"], True)
         # Delete the dataset.
         url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.DELETE(url)

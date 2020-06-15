@@ -31,7 +31,7 @@ def create():
         with GraphicSaver() as saver:
             saver.set_title(data.get("title"))
             saver.set_description(data.get("description"))
-            saver.set_public(False)
+            saver.set_public(data.get("public"))
             saver.set_dataset(dataset)
             saver.set_specification(data.get("specification"))
     except ValueError as error:

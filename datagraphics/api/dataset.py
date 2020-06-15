@@ -8,6 +8,7 @@ from flask_cors import CORS
 
 from datagraphics.dataset import (DatasetSaver,
                                   get_dataset,
+                                  get_graphics,
                                   allow_view,
                                   allow_edit,
                                   possible_delete,
@@ -29,7 +30,7 @@ def create():
         with DatasetSaver() as saver:
             saver.set_title(data.get("title"))
             saver.set_description(data.get("description"))
-            saver.set_public(False)
+            saver.set_public(data.get("public"))
     except ValueError as error:
         return str(error), http.client.BAD_REQUEST
     return flask.jsonify(utils.get_json(**saver.doc))
@@ -48,6 +49,7 @@ def serve(iuid):
         if not allow_view(dataset):
             flask.abort(http.client.FORBIDDEN)
         set_content_links(dataset)
+        set_graphics_links(dataset)
         return flask.jsonify(utils.get_json(**dataset))
 
     elif utils.http_POST(csrf=False):
@@ -72,6 +74,7 @@ def serve(iuid):
             return str(error), http.client.BAD_REQUEST
         dataset = saver.doc
         set_content_links(dataset)
+        set_graphics_links(dataset)
         return flask.jsonify(utils.get_json(**dataset))
 
     elif utils.http_DELETE():
@@ -144,3 +147,12 @@ def set_content_links(dataset):
                                        _external=True),
                  "size": atts["data.json"]["length"]}
     }
+
+def set_graphics_links(dataset):
+    "Add the links to the graphics for the dataset."
+    dataset["graphics"] = [{"title": g["title"],
+                            "modified": g["modified"],
+                            "href": flask.url_for("api_graphic.serve",
+                                                  iuid=g["_id"],
+                                                  _external=True)}
+                           for g in get_graphics(dataset)]
