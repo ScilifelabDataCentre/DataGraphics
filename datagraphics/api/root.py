@@ -7,8 +7,11 @@ from datagraphics import constants
 from datagraphics import utils
 
 from datagraphics.datasets import (count_datasets_public,
-                                    count_datasets_owner,
-                                    count_datasets_all)
+                                   count_datasets_owner,
+                                   count_datasets_all)
+from datagraphics.graphics import (count_graphics_public,
+                                   count_graphics_owner,
+                                   count_graphics_all)
 
 blueprint = flask.Blueprint("api", __name__)
 
@@ -24,12 +27,19 @@ def root():
     items["datasets"] = {"public": 
                          {"count": count_datasets_public(),
                           "href": flask.url_for("api_datasets.public",
-                                                 _external=True)}}
-    items["graphics"] = []
+                                                _external=True)}}
+    items["graphics"] = {"public": 
+                         {"count": count_graphics_public(),
+                          "href": flask.url_for("api_graphics.public",
+                                                _external=True)}}
     if flask.g.current_user:
         username = flask.g.current_user["username"]
         items["datasets"]["owner"] = {"count": count_datasets_owner(username),
                                       "href": flask.url_for("api_datasets.user",
+                                                            username=username,
+                                                            _external=True)}
+        items["graphics"]["owner"] = {"count": count_graphics_owner(username),
+                                      "href": flask.url_for("api_graphics.user",
                                                             username=username,
                                                             _external=True)}
         items["user"] = {
@@ -41,6 +51,9 @@ def root():
     if flask.g.am_admin:
         items["datasets"]["all"] = {"count": count_datasets_all(),
                                     "href": flask.url_for("api_datasets.all",
+                                                          _external=True)}
+        items["graphics"]["all"] = {"count": count_graphics_all(),
+                                    "href": flask.url_for("api_graphics.all",
                                                           _external=True)}
         items["users"] = {
             "href": flask.url_for("api_user.all", _external=True)
