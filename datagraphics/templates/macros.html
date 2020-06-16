@@ -1,3 +1,27 @@
+{% macro dataset_link(dataset=None, iuid=None, title=None, access=False) -%}
+{% if dataset %}
+  <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
+    {{ dataset['title'] }}</a>
+  {% if access %}
+  {{ access_symbol(dataset) }}
+  {% endif %}
+{% else %}
+  <a href="{{ url_for('dataset.display', iuid=iuid) }}">{{ title }}</a>
+{% endif %}
+{%- endmacro %}
+
+{% macro graphic_link(graphic=None, iuid=None, title=None, access=False) -%}
+{% if graphic %}
+  <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
+    {{ graphic['title'] }}</a>
+  {% if access %}
+  {{ access_symbol(graphic) }}
+  {% endif %}
+{% else %}
+  <a href="{{ url_for('graphic.display', iuid=iuid) }}">{{ title }}</a>
+{% endif %}
+{%- endmacro %}
+
 {% macro public_symbol() -%}
 <span title="Public">{{ ':earth_africa:' | emojize }}</span>&nbsp;
 {%- endmacro %}
@@ -36,10 +60,10 @@
 <table id="datasets" class="table table-sm">
   <thead>
     <tr>
+      <th>Dataset</th>
       {% if show_public %}
       <th>Access</th>
       {% endif %}
-      <th>Dataset</th>
       {% if show_owner %}
       <th>Owner</th>
       {% endif %}
@@ -52,13 +76,10 @@
   <tbody>
     {% for dataset in datasets %}
     <tr>
+      <td>{{ dataset_link(dataset) }}</td>
       {% if show_public %}
       <td>{{ access_symbol(dataset) }}</td>
       {% endif %}
-      <td>
-        <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
-          {{ dataset['title'] }}</a>
-      </td>
       {% if show_owner %}
       <td>
         {% if g.am_admin %}
@@ -89,10 +110,10 @@
 <table id="graphics" class="table table-sm">
   <thead>
     <tr>
+      <th>Graphic</th>
       {% if show_public %}
       <th>Access</th>
       {% endif %}
-      <th>Graphic</th>
       <th>Status</th>
       {% if show_owner %}
       <th>Owner</th>
@@ -105,13 +126,10 @@
   <tbody>
     {% for graphic in graphics %}
     <tr>
+      <td>{{ graphic_link(graphic) }}</td>
       {% if show_public %}
       <td>{{ access_symbol(graphic) }}</td>
       {% endif %}
-      <td>
-        <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
-          {{ graphic['title'] }}</a>
-      </td>
       <td>{{ status_symbol(graphic) }}</td>
       {% if show_owner %}
       <td>

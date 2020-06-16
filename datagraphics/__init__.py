@@ -5,7 +5,7 @@ import os.path
 import re
 import string
 
-__version__ = "0.4.6"
+__version__ = "0.4.7"
 
 class Constants:
     VERSION = __version__
@@ -20,7 +20,7 @@ class Constants:
     DATATABLES_URL       = "https://datatables.net/"
     VEGA_VERSION         = "5.12.1"
     VEGA_URL             = "https://vega.github.io/vega/"
-    VEGA_LITE_VERSION    = "4.12.2"  # Must match file in 'static'!
+    VEGA_LITE_VERSION    = "4.12.2"  # Must match schema file in 'static'.
     VEGA_LITE_URL        = "https://vega.github.io/vega-lite/"
     VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v4.json"
     VEGA_EMBED_VERSION   = "6.8.0"

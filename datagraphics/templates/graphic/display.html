@@ -3,8 +3,8 @@
 {% block head_title %}{{ graphic['title'] }}{% endblock %}
 
 {% block body_title %}
-{{ macros.access_symbol(graphic) }}
 {{ graphic['title']  }}
+{{ macros.access_symbol(graphic) }}
 {% endblock %}
 
 {% block meta %}
@@ -33,11 +33,7 @@
       <div class="card-body">
         <table class="table table-sm table-borderless table-hover my-0">
           <tr>
-            <td>
-              {{ macros.access_symbol(dataset) }}
-              <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
-                {{ dataset['title'] }}</a>
-            </td>
+            <td>{{ macros.dataset_link(dataset, access=True) }}</td>
             <td class="text-right">
               <span class="localtime small" title="Modified">
                 {{ dataset['modified'] }}</span>
@@ -62,11 +58,7 @@
         <table class="table table-sm table-borderless table-hover my-0">
           {% for other in other_graphics %}
           <tr>
-            <td>
-              {{ macros.access_symbol(other) }}
-              <a href="{{ url_for('graphic.display', iuid=other['_id']) }}">
-                {{ other['title'] }}</a>
-            </td>
+            <td>{{ macros.graphic_link(other, access=True) }}</td>
             <td class="text-right">
               <span class="localtime small" title="Modified">
                 {{ other['modified'] }}</span>

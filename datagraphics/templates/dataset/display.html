@@ -3,9 +3,8 @@
 {% block head_title %}{{ dataset['title'] }}{% endblock %}
 
 {% block body_title %}
-{{ macros.access_symbol(dataset) }}
 {{ dataset['title']  }}
-<span class="small text-muted ml-4">{{ dataset['n_records'] }} records</span>
+{{ macros.access_symbol(dataset) }}
 {% endblock %}
 
 {% block meta %}
@@ -28,9 +27,7 @@
       {% for graphic in graphics %}
       <tr>
         <td style="width:70%">
-          {{ macros.access_symbol(graphic) }}
-          <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
-            {{ graphic['title'] }}</a>
+          {{ macros.graphic_link(graphic, access=True) }}
         </td>
         <td title="Owner">
           {% if am_admin_or_self(username=graphic['owner']) %}
@@ -51,7 +48,9 @@
   </div>
 </div>
 <div class="card mt-3">
-  <div class="card-header">Data field properties</div>
+  <div class="card-header">
+    Dataset contains <strong>{{ dataset['n_records'] }} records</strong>
+  </div>
   <div class="card-body">
     <table class="table table-sm my-0">
       <tr>

@@ -29,10 +29,7 @@
         <table class="table table-sm table-borderless table-hover my-0">
           {% for iuid, title, modified in datasets %}
           <tr>
-            <td>
-              <a href="{{ url_for('dataset.display', iuid=iuid)}}">
-                {{ title }}</a>
-            </td>
+            <td>{{ macros.dataset_link(iuid=iuid, title=title) }}</td>
             <td class="localtime small">{{ modified }}</td>
           </tr>
           {% endfor %}
@@ -53,10 +50,7 @@
         <table class="table table-sm table-borderless table-hover my-0">
           {% for iuid, title, modified in graphics %}
           <tr>
-            <td>
-              <a href="{{ url_for('graphic.display', iuid=iuid)}}">
-                {{ title }}</a>
-            </td>
+            <td>{{ macros.graphic_link(iuid=iuid, title=title) }}</td>
             <td class="localtime small">{{ modified }}</td>
           </tr>
           {% endfor %}
