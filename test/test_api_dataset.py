@@ -4,6 +4,7 @@ import collections
 import csv
 import http.client
 import io
+import json
 
 import api_base
 
@@ -36,15 +37,16 @@ class Dataset(api_base.Base):
         url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/"
         title = "My title"
         description = "My description."
+
         # Create the dataset.
         response = self.POST(url, json={"title": title,
-                                        "description": description,
-                                        "public": False})
+                                        "description": description})
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
         self.assertEqual(dataset["title"], title)
         self.assertEqual(dataset["description"], description)
         self.assertEqual(dataset["public"], False)
+
         # Update the dataset metadata.
         title = "New title"
         response = self.POST(dataset["$id"], json={"title": title,
@@ -53,9 +55,9 @@ class Dataset(api_base.Base):
         dataset = self.check_schema(response)
         self.assertEqual(dataset["title"], title)
         self.assertEqual(dataset["public"], True)
+
         # Delete the dataset.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
-        response = self.DELETE(url)
+        response = self.DELETE(dataset["$id"])
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
         
     def test_upload_json_dataset(self):

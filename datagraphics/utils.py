@@ -290,12 +290,13 @@ def get_json(**data):
     result = {"$id": flask.request.url,
               "timestamp": get_time()}
     try:
-        result["iuid"] = data.pop("_id")
+        result["iuid"] = data["_id"]
     except KeyError:
         pass
-    data.pop("_rev", None)
-    data.pop("doctype", None)
     result.update(data)
+    result.pop("_id", None)
+    result.pop("_rev", None)
+    result.pop("doctype", None)
     return result
 
 

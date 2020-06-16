@@ -33,7 +33,11 @@ def create():
             saver.set_public(data.get("public"))
     except ValueError as error:
         return str(error), http.client.BAD_REQUEST
-    return flask.jsonify(utils.get_json(**saver.doc))
+    dataset = saver.doc
+    dataset["$id"] = flask.url_for("api_dataset.serve",
+                                   iuid=dataset["_id"],
+                                   _external=True)
+    return flask.jsonify(utils.get_json(**dataset))
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
@@ -63,11 +67,11 @@ def serve(iuid):
                 except KeyError:
                     pass
                 try:
-                    saver.set_title(data["description"])
+                    saver.set_description(data["description"])
                 except KeyError:
                     pass
                 try:
-                    saver.set_title(data["public"])
+                    saver.set_public(data["public"])
                 except KeyError:
                     pass
         except ValueError as error:
