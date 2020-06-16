@@ -278,7 +278,7 @@ class GraphicSaver(EntitySaver):
     def set_specification(self, specification=None):
         "Set the Vega-Lite JSON specification."
         if specification is None:
-            specification = flask.request.form.get("specification") or ""
+            specification = flask.request.form.get("specification") or "{}"
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
         # Ensure that items '$schema' and 'data' are kept fixed.
@@ -301,6 +301,8 @@ class GraphicSaver(EntitySaver):
 
 def get_graphic(iuid):
     "Get the graphic given its IUID."
+    if not iuid:
+        raise ValueError("No IUID given for graphic.")
     try:
         try:
             doc = flask.g.cache[iuid]

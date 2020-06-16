@@ -43,6 +43,8 @@ class Dataset(api_base.Base):
                                         "description": description})
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
+        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        self.assertEqual(dataset["$id"], url)
         self.assertEqual(dataset["title"], title)
         self.assertEqual(dataset["description"], description)
         self.assertEqual(dataset["public"], False)

@@ -37,6 +37,9 @@ def create():
     except ValueError as error:
         return str(error), http.client.BAD_REQUEST
     graphic = saver.doc
+    graphic["$id"] = flask.url_for("api_graphic.serve",
+                                   iuid=graphic["_id"],
+                                   _external=True)
     fixup_dataset(graphic)
     return flask.jsonify(utils.get_json(**graphic))
 
@@ -59,7 +62,7 @@ def serve(iuid):
             flask.abort(http.client.FORBIDDEN)
         try:
             data = flask.request.get_json()
-            with GraphicsSaver(graphic) as saver:
+            with GraphicSaver(graphic) as saver:
                 try:
                     saver.set_title(data["title"])
                 except KeyError:

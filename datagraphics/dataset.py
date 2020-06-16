@@ -436,6 +436,8 @@ class DatasetSaver(EntitySaver):
 
 def get_dataset(iuid):
     "Get the dataset given its IUID."
+    if not iuid:
+        raise ValueError("No IUID given for dataset.")
     try:
         try:
             doc = flask.g.cache[iuid]
