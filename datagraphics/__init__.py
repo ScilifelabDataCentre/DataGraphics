@@ -5,7 +5,7 @@ import os.path
 import re
 import string
 
-__version__ = "0.4.9"
+__version__ = "0.4.10"
 
 class Constants:
     VERSION = __version__
@@ -25,10 +25,17 @@ class Constants:
     VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v4.json"
     VEGA_EMBED_VERSION   = "6.8.0"
     VEGA_EMBED_URL       = "https://github.com/vega/vega-embed"
+    VEGA_LITE_TYPES      = ("quantitative", "temporal",
+                            "ordinal", "nominal", "geojson")
 
+    IUID_RX  = re.compile(r"^[a-f0-9]{32,32}$")
     NAME_RX  = re.compile(r"^[a-z][a-z0-9_-]*$", re.I)
-    IUID_RX  = re.compile(r"^[a-f0-9]{32,32}$", re.I)
     EMAIL_RX = re.compile(r"^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$")
+    YEAR_RX  = re.compile(r"^[1-9]\d\d\d$", re.ASCII)
+    DATE_RX  = re.compile(r"^[1-9]\d\d\d-\d\d-\d\d$", re.ASCII)
+    DATETIME_RX = re.compile(r"^[1-9]\d\d\d-\d\d-\d\d \d\d:\d\d(:\d\d)?$",
+                             re.ASCII)
+    TIME_RX  = re.compile(r"^\d\d:\d\d(:\d\d)?$", re.ASCII)
 
     SLUG_CHARS = frozenset(string.ascii_letters + string.digits + "-")
 

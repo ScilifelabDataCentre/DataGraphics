@@ -19,6 +19,10 @@ TYPE_NAME_MAP = {int: "integer",
                  float: "number",
                  bool: "boolean",
                  str: "string"}
+VEGA_LITE_TYPES_MAP = {"integer": ["quantitative"],
+                       "number": ["quantitative"],
+                       "boolean": ["nominal"],
+                       "string": ["nominal"]}
 
 def init(app):
     "Initialize; update CouchDB design document."
@@ -107,6 +111,7 @@ def edit(iuid):
                     saver.change_owner()
                 saver.set_description()
                 saver.set_data()
+                saver.set_vega_lite_types()
         except ValueError as error:
             utils.flash_error(str(error))
         return flask.redirect(flask.url_for(".display", iuid=iuid))
@@ -143,6 +148,7 @@ def copy(iuid):
             saver.set_public(False)
             saver.set_data(flask.g.db.get_attachment(dataset, "data.json"),
                            content_type=constants.JSON_MIMETYPE)
+            saver.set_vega_lite_types(dataset["meta"])
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
@@ -285,8 +291,8 @@ class DatasetSaver(EntitySaver):
 
     def get_json_data(self, infile):
         """Return the data from the given JSON infile.
-        If there is a 'meta' entry for the dataset, check against types it.
-        Otherwise set it. Update the 'meta' entries.
+        If there is a 'meta' entry for the dataset, check against its types.
+        Otherwise create the 'meta' entry.
         """
         data = json.load(infile)
         if not data:
@@ -298,6 +304,7 @@ class DatasetSaver(EntitySaver):
             raise ValueError("Empty first record in JSON data.")
         if not isinstance(first, dict):
             raise ValueError(f"JSON data record 0 '{first}' is not an object.")
+
         meta = self.doc["meta"]
         if not meta:
             # The 'meta' entry for the dataset has not been set.
@@ -310,7 +317,9 @@ class DatasetSaver(EntitySaver):
                 except KeyError:
                     raise ValueError(f"JSON data item 0 '{first}'"
                                      " contains illegal type")
-        # Check data homogeneity, and set 'null' in 'meta'.
+                meta[key]["vega_lite_types"] = VEGA_LITE_TYPES_MAP[meta[key]["type"]]
+
+        # Check data homogeneity.
         TYPE_OBJECT_MAP = dict((n, o) for o, n in TYPE_NAME_MAP.items())
         keys = list(meta.keys())
         for pos, record in enumerate(data):
@@ -329,9 +338,9 @@ class DatasetSaver(EntitySaver):
         return data
 
     def get_csv_data(self, infile):
-        """Retun the data frin the given CSV infile.
-        If there is a 'meta' entry for the dataset, check against types it.
-        Otherwise set it. Update the 'meta' entries.
+        """Return the data from the given CSV infile.
+        If there is a 'meta' entry for the dataset, check against its types.
+        Otherwise create the 'meta' entry.
         """
         reader = csv.DictReader(io.StringIO(infile.read().decode("utf-8")))
         data = list(reader)
@@ -369,7 +378,9 @@ class DatasetSaver(EntitySaver):
                             meta[key]["type"] = "boolean"
                         except ValueError:
                             meta[key]["type"] = "string"
-        # Convert values; checks homogeneity and set 'null' in 'meta'.
+                meta[key]["vega_lite_types"] = VEGA_LITE_TYPES_MAP[meta[key]["type"]]
+
+        # Convert values; check data homogeneity.
         keys = list(meta.keys())
         for pos, record in enumerate(data):
             for key, value in record.items():
@@ -377,11 +388,11 @@ class DatasetSaver(EntitySaver):
                     try:
                         record[key] = TYPE_OBJECT_MAP[meta[key]["type"]](value)
                     except ValueError:
-                        raise ValueError(f"JSON data record {pos} '{record}'"
+                        raise ValueError(f"CSV data record {pos} '{record}'"
                                          " contains wrong type.")
                 elif meta[key]["type"] != "string":
                     # An empty string is a string when type is 'string'.
-                    # Otherwise None.
+                    # Otherwise the value is set as None.
                     record[key] = None
         return data
 
@@ -423,14 +434,15 @@ class DatasetSaver(EntitySaver):
                 except statistics.StatisticsError:
                     meta["stdev"] = None
 
-    def remove_data(self):
-        "Remove the data."
-        for filename in list(self.doc.get("_attachments", {}).keys()):
-            self.delete_attachment(filename)
-        for meta in self.doc["meta"].valuess():
-            for item in ("distinct", "min", "max", "mean", "media", "stdev"):
-                meta.pop(item, None)
-
+    def set_vega_lite_types(self, orig_meta=None):
+        "Set the Vega-Lite types for the data fields."
+        for key, meta in self.doc["meta"].items():
+            if orig_meta:
+                types = orig_meta[key].get("vega_lite_types") or []
+            else:
+                types = flask.request.form.getlist(f"vega_lite_types_{key}")
+            meta["vega_lite_types"] = [t for t in types
+                                       if t in constants.VEGA_LITE_TYPES]
 
 # Utility functions
 

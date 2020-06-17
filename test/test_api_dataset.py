@@ -4,7 +4,6 @@ import collections
 import csv
 import http.client
 import io
-import json
 
 import api_base
 
@@ -49,7 +48,7 @@ class Dataset(api_base.Base):
         self.assertEqual(dataset["description"], description)
         self.assertEqual(dataset["public"], False)
 
-        # Update the dataset metadata.
+        # Update the dataset information.
         title = "New title"
         response = self.POST(dataset["$id"], json={"title": title,
                                                    "public": True})
@@ -108,6 +107,12 @@ class Dataset(api_base.Base):
         self.assertEqual(dataset["n_records"], len(data))
         self.assertEqual(len(dataset["meta"].keys()), len(data[0].keys()))
         self.assertEqual(sorted(dataset["meta"].keys()), sorted(data[0].keys()))
+        self.assertEqual(dataset["meta"]["col1"]["type"], "integer")
+        self.assertEqual(dataset["meta"]["col1"]["vega_lite_types"],
+                         ["quantitative"])
+        self.assertEqual(dataset["meta"]["col2"]["type"], "string")
+        self.assertEqual(dataset["meta"]["col2"]["vega_lite_types"],
+                         ["nominal"])
 
         # Delete the dataset.
         url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
@@ -151,6 +156,12 @@ class Dataset(api_base.Base):
         self.assertEqual(dataset["n_records"], len(data))
         self.assertEqual(len(dataset["meta"].keys()), len(data[0].keys()))
         self.assertEqual(sorted(dataset["meta"].keys()), sorted(data[0].keys()))
+        self.assertEqual(dataset["meta"]["col1"]["type"], "integer")
+        self.assertEqual(dataset["meta"]["col1"]["vega_lite_types"],
+                         ["quantitative"])
+        self.assertEqual(dataset["meta"]["col2"]["type"], "string")
+        self.assertEqual(dataset["meta"]["col2"]["vega_lite_types"],
+                         ["nominal"])
 
         # Update data, and upload as CSV.
         data.append({"col1": 4, "col2": "stuff"})

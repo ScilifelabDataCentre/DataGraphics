@@ -51,6 +51,35 @@
     </div>
   </div>
   <div class="form-group row">
+    <label for="vega_lite_types"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Vega-Lite types</label>
+    <div class="col-md">
+      <table class="table table-borderless table-sm" id="vega_lite_types">
+        {% for key, meta in dataset['meta'].items() %}
+        {% set types = meta.get('vega_lite_types', []) %}
+        <tr>
+          <th>{{ key }}</th>
+          <td>
+            {% for type in constants.VEGA_LITE_TYPES %}
+            <div class="form-check form-check-inline">
+              <input type="checkbox" name="vega_lite_types_{{ key }}"
+                     class="form-check-input" value="{{ type }}"
+                     {{ type in types and 'checked' or '' }}>
+              <label class="form-check-label" 
+                     for="vega_lite_types_{{ key }}">{{ type }}</label>
+            </div>
+            {% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      <small id="vega_lite_typesHelp" class="form-text text-muted">
+        Vega-Lite types set for the data fields.
+      </small>
+    </div>
+  </div>
+  <div class="form-group row">
     <label for="file"
            class="col-md-2 col-form-label text-right font-weight-bold">
       File</label>
