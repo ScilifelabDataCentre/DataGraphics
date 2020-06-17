@@ -33,22 +33,45 @@ DESIGN_DOC = {
 
 blueprint = flask.Blueprint("graphic", __name__)
 
-@blueprint.route("/", methods=["POST"])
+@blueprint.route("/", methods=["GET", "POST"])
 @utils.login_required
 def create():
-    "Create a new graphic."
+    "Create a new graphic for dataset given as form argument."
     try:
-        with GraphicSaver() as saver:
-            saver.set_title()
-            saver.set_description()
-            saver.set_public(False)
-            saver.set_dataset(datagraphics.dataset.get_dataset(
-                flask.request.form.get("dataset")))
-            saver.set_specification()
+        iuid = flask.request.values.get("dataset")
+        if not iuid:
+            raise ValueError("No dataset IUID provided.")
+        dataset = datagraphics.dataset.get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
-    return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
+        return flask.redirect(flask.url_for("home"))
+    if not datagraphics.dataset.allow_view(dataset):
+        utils.flash_error("View access to dataset not allowed.")
+        return flask.redirect(utils.url_referrer())
+
+    if utils.http_GET():
+        graphic = {"$schema": constants.VEGA_LITE_SCHEMA_URL,
+                   "data": {"url": flask.url_for("api_dataset.content",
+                                                 iuid=dataset["_id"],
+                                                 ext="csv",
+                                                 _external=True),
+                            "format": {"type": "csv"}}}
+        return flask.render_template("graphic/create.html",
+                                     dataset=dataset,
+                                     graphic=graphic)
+
+    elif utils.http_POST():
+        try:
+            with GraphicSaver() as saver:
+                saver.set_dataset(dataset)
+                saver.set_title()
+                saver.set_description()
+                saver.set_public(False)
+                saver.set_specification()
+        except ValueError as error:
+            utils.flash_error(str(error))
+            return flask.redirect(utils.url_referrer())
+        return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>")
 def display(iuid):
@@ -60,7 +83,7 @@ def display(iuid):
         return flask.redirect(flask.url_for("home"))
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     dataset = get_dataset(graphic)
     if dataset:
         other_graphics = [gr 
@@ -68,7 +91,6 @@ def display(iuid):
                           if gr["_id"] != graphic["_id"]]
     else:
         other_graphics = []
-    skeleton_graphic = get_skeleton_graphic(graphic)
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
@@ -85,7 +107,7 @@ def edit(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
 
     if utils.http_GET():
         if not allow_edit(graphic):
@@ -106,7 +128,7 @@ def edit(iuid):
                 saver.set_specification()
         except ValueError as error:
             utils.flash_error(str(error))
-            return flask.redirect(utils.referrer())
+            return flask.redirect(utils.url_referrer())
         return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
     elif utils.http_DELETE():
@@ -128,7 +150,7 @@ def copy(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
         return flask.redirect(flask.url_for(".display", iuid=iuid))
@@ -141,7 +163,7 @@ def copy(iuid):
             saver.set_specification(graphic["specification"])
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>/public", methods=["POST"])
@@ -152,7 +174,7 @@ def public(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if allow_edit(graphic):
         if not graphic["public"]:
             with GraphicSaver(graphic) as saver:
@@ -169,7 +191,7 @@ def private(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if allow_edit(graphic):
         if graphic["public"]:
             with GraphicSaver(graphic) as saver:
@@ -185,14 +207,14 @@ def download(iuid, ext):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     dataset = get_dataset(graphic)
     if not dataset:
         utils.flash_error("View access to dataset not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
 
     spec = graphic["specification"]
     slug = utils.slugify(graphic['title'])
@@ -218,7 +240,7 @@ def download(iuid, ext):
         response.headers.set("Content-Type", constants.HTML_MIMETYPE)
     else:
         utils.flash_error("Invalid file type requested.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     response.headers.set("Content-Disposition", "attachment", 
                          filename=f"{slug}.{ext}")
     return response
@@ -230,10 +252,10 @@ def logs(iuid):
         graphic = get_graphic(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(graphic):
         utils.flash_error("View access to graphic not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     return flask.render_template(
         "logs.html",
         title=f"Graphic {graphic['title']}",
@@ -256,30 +278,31 @@ class GraphicSaver(EntitySaver):
     def set_specification(self, specification=None):
         "Set the Vega-Lite JSON specification."
         if specification is None:
-            specification = flask.request.form.get("specification") or ""
+            specification = flask.request.form.get("specification") or "{}"
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
         # Ensure that items '$schema' and 'data' are kept fixed.
-        # A bit complicated in order to keep fixed items at the top,
-        # and the rest of the items in the order specified in the input.
-        spec = get_skeleton_graphic(self.doc, specification)
-        # Items '$schema' and 'data' may not be set by the user.
-        specification.pop("$schema", None)
-        specification.pop("data", None)
-        spec.update(specification)
+        specification["$schema"] = constants.VEGA_LITE_SCHEMA_URL
+        specification["data"] = {"url": flask.url_for("api_dataset.content",
+                                                      iuid=self.doc["dataset"],
+                                                      ext="csv",
+                                                      _external=True),
+                                 "format": {"type": "csv"}}
         try:
-            utils.validate_vega_lite(spec)
+            utils.validate_vega_lite(specification)
         except jsonschema.ValidationError as error:
             self.doc["error"] = str(error)
         else:
             self.doc["error"] = None
         # Save it, even if incorrect Vega-Lite.
-        self.doc["specification"] = spec
+        self.doc["specification"] = specification
 
 # Utility functions
 
 def get_graphic(iuid):
     "Get the graphic given its IUID."
+    if not iuid:
+        raise ValueError("No IUID given for graphic.")
     try:
         try:
             doc = flask.g.cache[iuid]
@@ -291,27 +314,6 @@ def get_graphic(iuid):
         raise ValueError(f"Database entry {iuid} is not a graphic.")
     flask.g.cache[iuid] = doc
     return doc
-
-def get_skeleton_graphic(graphic=None, specification=None):
-    """Return a fresh basic graphic definition, excluding width and height
-    if given in the 'specification' dictionary argument.
-    """
-    result = {"$schema": constants.VEGA_LITE_SCHEMA_URL}
-    if graphic:
-        url = flask.url_for("api_dataset.content",
-                            iuid=graphic["dataset"],
-                            ext="csv",
-                            _external=True)
-    else:
-        url = None
-    result["data"] = {"url": url, "format": {"type": "csv"} }
-    # Set width and height only if not already in 'specification'
-    specification = specification or {}
-    if "width" not in specification:
-        result["width"] = flask.current_app.config["GRAPHIC_DEFAULT_WIDTH"]
-    if "height" not in specification:
-        result["height"] = flask.current_app.config["GRAPHIC_DEFAULT_HEIGHT"]
-    return result
 
 def allow_view(graphic):
     "Is the current user allowed to view the graphic?"

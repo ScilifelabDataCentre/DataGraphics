@@ -16,6 +16,13 @@ Graphics
 {% endif %}
 {% endblock %}
 
+{% block meta %}
+<div>
+  <a href="{{ url_for('api_graphics.public') }}"
+     class="badge badge-dark">API</a>
+</div>
+{% endblock %} {# block meta #}
+
 {% block supermain %}
 {{ macros.graphics_table(graphics, show_public=False) }}
 {% endblock %}

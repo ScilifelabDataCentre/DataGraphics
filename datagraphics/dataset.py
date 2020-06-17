@@ -10,7 +10,6 @@ import couchdb2
 import flask
 
 import datagraphics.user
-import datagraphics.graphic
 from datagraphics import constants
 from datagraphics import utils
 
@@ -41,20 +40,24 @@ DESIGN_DOC = {
 
 blueprint = flask.Blueprint("dataset", __name__)
 
-@blueprint.route("/", methods=["POST"])
+@blueprint.route("/", methods=["GET", "POST"])
 @utils.login_required
 def create():
     "Create a new dataset."
-    try:
-        with DatasetSaver() as saver:
-            saver.set_title()
-            saver.set_description()
-            saver.set_public(False)
-            saver.set_data()
-    except ValueError as error:
-        utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
-    return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
+    if utils.http_GET():
+        return flask.render_template("dataset/create.html")
+
+    elif utils.http_POST():
+        try:
+            with DatasetSaver() as saver:
+                saver.set_title()
+                saver.set_description()
+                saver.set_public(False)
+                saver.set_data()
+        except ValueError as error:
+            utils.flash_error(str(error))
+            return flask.redirect(utils.url_referrer())
+        return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>")
 def display(iuid):
@@ -66,15 +69,13 @@ def display(iuid):
         return flask.redirect(flask.url_for("home"))
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     storage = sum([s['length'] 
                    for s in dataset.get('_attachments', {}).values()])
-    skeleton_graphic = datagraphics.graphic.get_skeleton_graphic()
     return flask.render_template("dataset/display.html",
                                  dataset=dataset,
                                  graphics=get_graphics(dataset),
                                  storage=storage,
-                                 skeleton_graphic=skeleton_graphic,
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset))
@@ -87,7 +88,7 @@ def edit(iuid):
         dataset = get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
 
     if utils.http_GET():
         if not allow_edit(dataset):
@@ -131,7 +132,7 @@ def copy(iuid):
         dataset = get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(flask.url_for(".display", iuid=iuid))
@@ -144,7 +145,7 @@ def copy(iuid):
                            content_type=constants.JSON_MIMETYPE)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
 @blueprint.route("/<iuid:iuid>/public", methods=["POST"])
@@ -155,7 +156,7 @@ def public(iuid):
         dataset = get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if allow_edit(dataset):
         if not dataset["public"]:
             with DatasetSaver(dataset) as saver:
@@ -172,7 +173,7 @@ def private(iuid):
         dataset = get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if allow_edit(dataset):
         if dataset["public"]:
             with DatasetSaver(dataset) as saver:
@@ -190,13 +191,13 @@ def download(iuid, ext):
         dataset = get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(dataset):
         utils.flash_error("View access to dataset is not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not dataset.get("_attachments", None):
         utils.flash_error("Dataset does not contain any data.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if ext == "json":
         outfile = flask.g.db.get_attachment(dataset, "data.json")
         response = flask.make_response(outfile.read())
@@ -207,7 +208,7 @@ def download(iuid, ext):
         response.headers.set("Content-Type", constants.CSV_MIMETYPE)
     else:
         utils.flash_error("Invalid file type requested.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     slug = utils.slugify(dataset['title'])
     response.headers.set("Content-Disposition", "attachment", 
                          filename=f"{slug}.{ext}")
@@ -220,10 +221,10 @@ def logs(iuid):
         dataset = get_dataset(iuid)
     except ValueError as error:
         utils.flash_error(str(error))
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
-        return flask.redirect(utils.referrer())
+        return flask.redirect(utils.url_referrer())
     return flask.render_template(
         "logs.html",
         title=f"Dataset {dataset['title'] or 'No title'}",
@@ -421,9 +422,6 @@ class DatasetSaver(EntitySaver):
                     meta["stdev"] = statistics.stdev(values)
                 except statistics.StatisticsError:
                     meta["stdev"] = None
-            if meta["type"] == "boolean":
-                meta["n_true"] = len([r[key] for r in data if r[key] is True])
-                meta["n_false"] = len([r[key] for r in data if r[key] is False])
 
     def remove_data(self):
         "Remove the data."
@@ -438,6 +436,8 @@ class DatasetSaver(EntitySaver):
 
 def get_dataset(iuid):
     "Get the dataset given its IUID."
+    if not iuid:
+        raise ValueError("No IUID given for dataset.")
     try:
         try:
             doc = flask.g.cache[iuid]
@@ -452,7 +452,7 @@ def get_dataset(iuid):
 
 def get_graphics(dataset):
     """Get the graphics entities the dataset is used for.
-    Exclude those not allowed to view.
+    Exclude those this user is not allowed to view.
     """
     from datagraphics.graphic import allow_view
     result = []
@@ -462,7 +462,7 @@ def get_graphics(dataset):
         if allow_view(row.doc):
             flask.g.cache[row.doc["_id"]] = row.doc
             result.append(row.doc)
-    return result
+    return sorted(result, key=lambda g: g["title"])
 
 def allow_view(dataset):
     "Is the current user allowed to view the dataset?"
@@ -484,5 +484,11 @@ def allow_delete(dataset):
     return flask.g.current_user["username"] == dataset["owner"]
 
 def possible_delete(dataset):
-    "Is it possible to delete the dataset?"
-    return not get_graphics(dataset)
+    """Is it possible to delete the dataset? 
+    Not if there is a graphic owned by the same user.
+    """
+    for row in flask.g.db.view("graphics", "dataset",
+                               key=dataset["_id"],
+                               include_docs=True):
+        if row.doc["owner"] == dataset["owner"]: return False
+    return True

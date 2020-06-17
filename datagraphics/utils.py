@@ -182,7 +182,7 @@ def get_time(offset=None):
     instant = instant.isoformat()
     return instant[:17] + "{:06.3f}".format(float(instant[17:])) + "Z"
 
-def referrer(url=None):
+def url_referrer(url=None):
     """Return the URL for the referring page ('referer').
     Return the given URL if no referring page; the home page if none given.
     """
@@ -290,12 +290,13 @@ def get_json(**data):
     result = {"$id": flask.request.url,
               "timestamp": get_time()}
     try:
-        result["iuid"] = data.pop("_id")
+        result["iuid"] = data["_id"]
     except KeyError:
         pass
-    data.pop("_rev", None)
-    data.pop("doctype", None)
     result.update(data)
+    result.pop("_id", None)
+    result.pop("_rev", None)
+    result.pop("doctype", None)
     return result
 
 

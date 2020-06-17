@@ -12,15 +12,12 @@ blueprint = flask.Blueprint("datasets", __name__)
 
 @blueprint.route("/")
 def display():
-    "Show logged-in user's datasets, or public datasets."
+    "Redirect to logged-in user's datasets, or public datasets."
     if flask.g.current_user:
-        datasets = get_datasets_owner(flask.g.current_user["username"],
-                                      full=True)
+        return flask.redirect(
+            flask.url_for(".user", username=flask.g.current_user["username"]))
     else:
-        datasets = get_datasets_public(full=True)
-    return flask.render_template("datasets/display.html",
-                                 datasets=datasets,
-                                 show_public=bool(flask.g.current_user))
+        return flask.redirect(flask.url_for(".public"))
 
 @blueprint.route("/public")
 def public():

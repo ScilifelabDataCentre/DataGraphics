@@ -1,4 +1,4 @@
-"Base class for tests."
+"Base class for API tests."
 
 import argparse
 import http.client
@@ -52,7 +52,7 @@ def run():
 
 
 class Base(unittest.TestCase):
-    "Base class for Symbasis test cases."
+    "Base class for DataGraphics API test cases."
 
     def setUp(self):
         self.schemas = {}

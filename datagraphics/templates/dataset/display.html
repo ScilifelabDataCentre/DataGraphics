@@ -3,11 +3,8 @@
 {% block head_title %}{{ dataset['title'] }}{% endblock %}
 
 {% block body_title %}
-{% if g.current_user %}
+{{ dataset['title']  }}
 {{ macros.access_symbol(dataset) }}
-{% endif %}
-{{ macros.dataset_symbol() }}{{ dataset['title']  }}
-<span class="small text-muted ml-4">{{ dataset['n_records'] }} records</span>
 {% endblock %}
 
 {% block meta %}
@@ -24,17 +21,13 @@
 <div class="card">
   <div class="card-header">Graphics visualizing the dataset</div>
   <div class="card-body">
+    {% if graphics %}
     <table id="graphics" 
-           class="table table-sm table-borderless table-hover mb-0">
+           class="table table-sm table-borderless table-hover my-0">
       {% for graphic in graphics %}
       <tr>
         <td style="width:70%">
-          {% if g.current_user %}
-          {{ macros.access_symbol(graphic) }}
-          {% endif %}
-          <a href="{{ url_for('graphic.display', iuid=graphic['_id']) }}">
-            {{ macros.graphic_symbol() }}
-            {{ graphic['title'] }}</a>
+          {{ macros.graphic_link(graphic, access=True) }}
         </td>
         <td title="Owner">
           {% if am_admin_or_self(username=graphic['owner']) %}
@@ -49,12 +42,17 @@
       </tr>
       {% endfor %}
     </table>
+    {% else %}
+    <i>None</i>
+    {% endif %}
   </div>
 </div>
 <div class="card mt-3">
-  <div class="card-header">Data field properties</div>
+  <div class="card-header">
+    Dataset contains <strong>{{ dataset['n_records'] }} records</strong>
+  </div>
   <div class="card-body">
-    <table class="table table-sm mb-0">
+    <table class="table table-sm my-0">
       <tr>
         <th>Field</th>
         <th>Type</th>
@@ -65,8 +63,6 @@
         <th>Mean</th>
         <th>Median</th>
         <th>Stdev</th>
-        <th># true</th>
-        <th># false</th>
       </tr>
       {% for key, meta in dataset['meta'].items() %}
       <tr>
@@ -79,8 +75,6 @@
         <td>{{ meta.get('mean') | float_default('-') }}</td>
         <td>{{ meta.get('median') | float_default('-') }}</td>
         <td>{{ meta.get('stdev') | float_default('-') }}</td>
-        <td>{{ meta['n_true'] | default('-') }}</td>
-        <td>{{ meta['n_false'] | default('-') }}</td>
       </tr>
       {% endfor %}
     </table>
@@ -137,7 +131,7 @@
     <input type="hidden" name="_http_method" value="DELETE">
     <button type="submit" class="btn btn-block btn-sm btn-danger"
             {% if not possible_delete %}
-            disabled title="Dataset can't be deleted; is used in a graphic."
+            disabled title="Dataset can't be deleted; it is used in a graphic owned by the user."
             {% endif %}
 	    onclick="return confirm('Really delete the dataset?')">
       Delete</button>
@@ -154,8 +148,13 @@
   </form>
 </div>
 {% if dataset['meta'] %}
-<div class="mt-2">
-  {% include 'graphic/create.html' %}
+<div class="mt-4">
+  <form action="{{ url_for('graphic.create') }}"
+	method="GET">
+    <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
+    <button type="submit" class="btn btn-sm btn-block btn-info">
+      Create graphic</button>
+  </form>
 </div>
 {% endif %}
 {% endif %} {# if g.current_user #}

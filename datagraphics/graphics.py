@@ -12,15 +12,12 @@ blueprint = flask.Blueprint("graphics", __name__)
 
 @blueprint.route("/")
 def display():
-    "Show logged-in user's graphics, or public graphics."
+    "Redirect to logged-in user's graphics, or public graphics."
     if flask.g.current_user:
-        graphics = get_graphics_owner(flask.g.current_user["username"],
-                                      full=True)
+        return flask.redirect(
+            flask.url_for(".user", username=flask.g.current_user["username"]))
     else:
-        graphics = get_graphics_public(full=True)
-    return flask.render_template("graphics/display.html",
-                                 graphics=graphics,
-                                 show_public=bool(flask.g.current_user))
+        return flask.redirect(flask.url_for(".public"))
 
 @blueprint.route("/public")
 def public():
