@@ -484,5 +484,11 @@ def allow_delete(dataset):
     return flask.g.current_user["username"] == dataset["owner"]
 
 def possible_delete(dataset):
-    "Is it possible to delete the dataset?"
-    return not get_graphics(dataset)
+    """Is it possible to delete the dataset? 
+    Not if there is a graphic owned by the same user.
+    """
+    for row in flask.g.db.view("graphics", "dataset",
+                               key=dataset["_id"],
+                               include_docs=True):
+        if row.doc["owner"] == dataset["owner"]: return False
+    return True

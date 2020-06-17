@@ -131,7 +131,7 @@
     <input type="hidden" name="_http_method" value="DELETE">
     <button type="submit" class="btn btn-block btn-sm btn-danger"
             {% if not possible_delete %}
-            disabled title="Dataset can't be deleted; is used in a graphic."
+            disabled title="Dataset can't be deleted; it is used in a graphic owned by the user."
             {% endif %}
 	    onclick="return confirm('Really delete the dataset?')">
       Delete</button>
