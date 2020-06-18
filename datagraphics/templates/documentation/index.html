@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block head_title %}Documentation{% endblock %}
+{% block body_title %}Documentation{% endblock %}
+
+{% block main %}
+<p>
+  DataGraphics is a system for serving static datasets and displaying
+  graphics (plots, charts) based on the datasets. It uses
+  <a href="{{ constants.VEGA_LITE_URL }}">Vega-Lite</a>, a JavaScript
+  library for specifying graphics using a high-level grammar in JSON.
+</p>
+<p>
+  There are two types of objects in the system:
+  <a href="{{ url_for('about.documentation', page='dataset') }}">dataset</a>
+  and
+  <a href="{{ url_for('about.documentation', page='graphic') }}">graphic</a>.
+  A graphic displays the data from a dataset. There may be more than
+  one graphic for each dataset.
+</p>
+<p>
+  A user account is required to create and edit datasets and
+  graphics. Datasets and graphics that have been set as public can be
+  viewed by anyone without logging in to the system. A user account
+  may have the role admin, which permits the user to view all entities
+  in the system.
+<p>
+  Every dataset and graphic is owned by one and only one user account.
+  The user may set a dataset or graphic as public (anyone may view) or
+  private (only the owner and the admins may view). Only the owner of
+  a dataset and graphic (and the admins) may create, edit or delete
+  the entities.
+</p>
+<p>
+  There is an API which allows datasets and graphics to be created and
+  manipulated programmatically.
+</p>
+{% endblock %}

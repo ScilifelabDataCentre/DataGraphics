@@ -4,12 +4,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block head_title %}{{ config['SITE_NAME'] }}{% endblock %}</title>
-    {% if config['SITE_ICON'] %}
-    <link rel="icon" href="{{ url_for('site.static', filename=config['SITE_ICON']) }}">
-    {% else %}
+    <title>{% block head_title %}DataGraphics{% endblock %}</title>
     <link rel="icon" href="{{ url_for('static', filename='logo32.png') }}">
-    {% endif %}
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
 	  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
 	  crossorigin="anonymous"
@@ -24,13 +20,9 @@
          style="background-color: #e8e8e8;">
       <a class="navbar-brand" href="{{ url_for('home') }}">
         <img width="32" height="32" class="d-inline-block align-top"
-	     {% if config['SITE_LOGO'] %}
-	     src="{{ url_for('site.static', filename=config['SITE_LOGO']) }}"
-	     {% else %}
 	     src="{{ url_for('static', filename='logo32.png') }}"
-             {% endif %}
-	     title="{{ config['SITE_NAME'] }}" alt="{{ config['SITE_NAME'] }}">
-        {{ config['SITE_NAME'] }}</a>
+	     title="DataGraphics" alt="DataGraphics">
+        DataGraphics</a>
       <button type="button" class="navbar-toggler navbar-toggler-right"
               data-toggle="collapse" data-target="#top_navbar"
               aria-controls="top_navbar" aria-expanded="false"
@@ -113,6 +105,8 @@
                role="button" data-toggle="dropdown"
                aria-haspopup="true" aria-expanded="false">About</a>
             <div class="dropdown-menu" aria-labelledby="navbarAbout">
+              <a class="nav-link"
+                 href="{{ url_for('about.documentation') }}">Documentation</a>
               <a class="nav-link"
                  href="{{ url_for('about.software') }}">Software</a>
 	    </div>
