@@ -5,32 +5,134 @@
 
 {% block main %}
 <p>
-  DataGraphics is a system for serving static datasets and displaying
-  graphics (plots, charts) based on the datasets. It uses
-  <a href="{{ constants.VEGA_LITE_URL }}">Vega-Lite</a>, a JavaScript
-  library for specifying graphics using a high-level grammar in JSON.
+  DataGraphics is a system for serving static <strong>datasets</strong>
+  and displaying <strong>graphics</strong> (plots, charts) that visualize
+  the datasets. It uses
+  <a href="{{ constants.VEGA_LITE_URL }}">Vega-Lite</a>,
+  a <a href="https://en.wikipedia.org/wiki/JavaScript">JavaScript</a>
+  library for specifying graphics using a high-level grammar in
+  <a href="https://en.wikipedia.org/wiki/JSON">JSON</a>.
+</p>
+
+<h4>Dataset</h4>
+<p>
+  A dataset contains data as well as some metadata describing it. It
+  is owned by a user account.
 </p>
 <p>
-  There are two types of objects in the system:
-  <a href="{{ url_for('about.documentation', page='dataset') }}">dataset</a>
-  and
-  <a href="{{ url_for('about.documentation', page='graphic') }}">graphic</a>.
-  A graphic displays the data from a dataset. There may be more than
-  one graphic for each dataset.
+  The data in a dataset consists of a list of records, where each
+  record contains key-value pairs. The data is homogenous: Each record
+  has the same fields corresponding to the same keys. The values
+  corresponding to the same key in different records must have the
+  same datatype.
 </p>
 <p>
-  A user account is required to create and edit datasets and
-  graphics. Datasets and graphics that have been set as public can be
-  viewed by anyone without logging in to the system. A user account
-  may have the role admin, which permits the user to view all entities
-  in the system.
-<p>
-  Every dataset and graphic is owned by one and only one user account.
-  The user may set a dataset or graphic as public (anyone may view) or
-  private (only the owner and the admins may view). Only the owner of
-  a dataset and graphic (and the admins) may create, edit or delete
-  the entities.
+  The datatypes allowed for the values in a record are the simple
+  datatypes in <a href="https://json-schema.org/">JSON Schema</a>:
+  <ul>
+    <li>integer</li>
+    <li>number</li>
+    <li>boolean</li>
+    <li>string</li>
+  </ul>
 </p>
+<p>
+  The keys and the datatypes of the corresponding values are determined
+  when the data is first loaded into a dataset. This metadata cannot be
+  changed once defined for a dataset.
+</p>
+<p>
+  The data contents can be downloaded from, and uploaded to, the dataset
+  as <a href="https://en.wikipedia.org/wiki/Comma-separated_values">CSV</a>
+  or <a href="https://en.wikipedia.org/wiki/JSON">JSON</a>.
+</p>
+<p>
+  A dataset is static in the sense that the data contents does not
+  change unless explicitly updated by uploading data to it. It is not
+  possible to edit or delete single records in a dataset; the update
+  operation sets the entire data contents.
+</p>
+<p>
+  The metadata of a dataset consists of a title, a description
+  (optionally using Markdown), information about the fields of the
+  data such as type and whether null values are present, and min, max,
+  mean, median, stdev, as appropriate. The title and description can
+  be edited by the owner, while the other metadata is set by the
+  system.
+</p>
+<p>
+  In addition, each field is tagged with the Veg-Lite encoding types
+  applicable for it:
+  <ul>
+    <li>quantitative</li>
+    <li>temporal</li>
+    <li>ordinal</li>
+    <li>nominal</li>
+    <li>geojson</li>
+  </ul>
+</p>
+
+<h4>Graphic</h4>
+<p>
+  A graphic is a visualization of a dataset. A dataset can be visualized
+  by any number of graphic items. It is owned by a user account.
+</p>
+<p>
+  A graphic is created for a specific dataset, which cannot be changed.
+</p>
+<p>
+  A graphic can have a different owner than the dataset it
+  uses. However, if the dataset becomes inaccessible for the owner of
+  the graphics for some reason (the dataset is deleted by its owner,
+  or is made private), the visualization of the graphic will no longer
+  be viewable.
+</p>
+<p>
+  Since a graphic refers to its dataset by a URL, changing the dataset
+  will change the content of the graphic visualization.
+</p>
+<p>
+  The specification of the visualization is written using the
+  <a href="{{ constants.VEGA_LITE_URL }}">Vega-Lite</a> high-level
+  grammar. For more information on it, follow the link.
+</p>
+
+<h4>Access rights</h4>
+<p>
+  The access setting of dataset or a graphic can be changed
+  by its owner.
+  <ul>
+    <li> A <strong>private</strong> (the default) item can be viewed
+      only by the owner of it.
+    </li>
+    <li>A <strong>public</strong> item can be viewed by anyone,
+      including anonymous (not logged-in) users.
+    </li>
+  </ul>
+</p>
+<p>
+  Regardless of private/public setting, an item can be created, edited
+  and deleted only by its owner.
+</p>
+
+<h4>User account</h4>
+<p>
+  A user account in the system is required to create and edit datasets
+  and graphics. A dataset and graphic is always owned by one and only one
+  user account.
+</p>
+<p>
+  A user account may have the role <strong>admin</strong> which
+  permits the account to view and edit almost anything in the system
+  via the web interface. This includes:
+  <ul>
+    <li> Changing ownership of items.</li>
+    <li> Creating, editing, deleting and viewing all items.</li>
+    <li> Registering, enabling or disabling other user accounts.
+  </ul>
+</p>
+
+<h4>API</h4>
 <p>
   There is an API which allows datasets and graphics to be created and
   manipulated programmatically.
