@@ -47,7 +47,7 @@ Create graphic for dataset
     <div class="col-md">
       <textarea id="specification" name="specification" rows="20"
                 class="form-control" aria-describedby="specificationHelp"
-                >{{ graphic | tojson(indent=2) }}</textarea>
+                >{{ graphic | prettyjson }}</textarea>
       <small id="specificationHelp" class="form-text text-muted">
         Specification of the graphic using
         <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> JSON.

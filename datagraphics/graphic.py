@@ -91,6 +91,7 @@ def display(iuid):
                           if gr["_id"] != graphic["_id"]]
     else:
         other_graphics = []
+    print(json.dumps(graphic["specification"], indent=2))
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
@@ -229,7 +230,9 @@ def download(iuid, ext):
     elif ext == "js":
         spec = json.dumps(spec)
         response = flask.make_response(f'vegaEmbed("#{id}", {spec},'
-                                       f' {{downloadFileName: "{slug}"}});')
+                                       f' {{downloadFileName: "{slug}"}})'
+                                       '.then(result=>console.log(result))'
+                                       '.catch(console.warn);')
         response.headers.set("Content-Type", constants.JS_MIMETYPE)
     elif ext == "html":
         html = flask.render_template("graphic/vega_lite.html",

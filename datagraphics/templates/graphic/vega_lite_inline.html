@@ -1,9 +1,7 @@
-<script src="https://cdn.jsdelivr.net/npm/vega@{{ constants.VEGA_VERSION }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-lite@{{ constants.VEGA_LITE_VERSION }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/vega-embed@{{ constants.VEGA_EMBED_VERSION }}"></script>
+{% include "graphic/vega_lite_libraries.html" %}
 <script type="text/javascript">
-vegaEmbed('#graphic',
-  {{ graphic['specification'] | tojson() }},
-  {downloadFileName: "{{ slug }}"}
-);
+  const spec = {{ graphic['specification'] | tojson() }};
+  vegaEmbed('#graphic', spec, {downloadFileName: "{{ slug }}"})
+  .then(result=>console.log(result))
+  .catch(console.warn);
 </script>
