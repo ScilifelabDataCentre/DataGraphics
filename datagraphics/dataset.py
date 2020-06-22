@@ -15,14 +15,24 @@ from datagraphics import utils
 
 from datagraphics.saver import EntitySaver
 
-TYPE_NAME_MAP = {int: "integer",
+TYPE_NAME_MAP = {int:   "integer",
                  float: "number",
-                 bool: "boolean",
-                 str: "string"}
-VEGA_LITE_TYPES_MAP = {"integer": ["quantitative"],
-                       "number": ["quantitative"],
-                       "boolean": ["nominal"],
-                       "string": ["nominal"]}
+                 bool:  "boolean",
+                 str:   "string"}
+
+TYPE_OBJECT_MAP = dict((n, o) for o, n in TYPE_NAME_MAP.items())
+
+def bool2(v):
+    "Convert to boolean from CSV string value."
+    if v == "True": return True
+    if v == "true": return True
+    if v == "False": return False
+    if v == "false": return False
+    if not v: return None
+    raise ValueError(f"invalid bool '{v}'")
+
+TYPE_OBJECT_MAP2 = TYPE_OBJECT_MAP.copy()
+TYPE_OBJECT_MAP2["boolean"] = bool2
 
 def init(app):
     "Initialize; update CouchDB design document."
@@ -290,9 +300,10 @@ class DatasetSaver(EntitySaver):
                             constants.CSV_MIMETYPE)
 
     def get_json_data(self, infile):
-        """Return the data from the given JSON infile.
-        If there is a 'meta' entry for the dataset, check against its types.
-        Otherwise create the 'meta' entry.
+        """Return the data in JSON format from the given JSON infile.
+        If the dataset is new, then define the 'meta' entry contents by 
+        inspection of the data. Also set the Vega-Lite types.
+        If the dataset is being updated, check against the 'meta' entry.
         """
         data = json.load(infile)
         if not data:
@@ -306,8 +317,9 @@ class DatasetSaver(EntitySaver):
             raise ValueError(f"JSON data record 0 '{first}' is not an object.")
 
         meta = self.doc["meta"]
-        if not meta:
-            # The 'meta' entry for the dataset has not been set.
+        new = not bool(meta) # New dataset, or being updated?
+
+        if new:
             # Figure out the types from the items in the first data record.
             for key in first:
                 meta[key] = {}
@@ -317,10 +329,8 @@ class DatasetSaver(EntitySaver):
                 except KeyError:
                     raise ValueError(f"JSON data item 0 '{first}'"
                                      " contains illegal type")
-                meta[key]["vega_lite_types"] = VEGA_LITE_TYPES_MAP[meta[key]["type"]]
 
         # Check data homogeneity.
-        TYPE_OBJECT_MAP = dict((n, o) for o, n in TYPE_NAME_MAP.items())
         keys = list(meta.keys())
         for pos, record in enumerate(data):
             if not isinstance(record, dict):
@@ -335,31 +345,27 @@ class DatasetSaver(EntitySaver):
                    type(value) != TYPE_OBJECT_MAP[meta[key]["type"]]:
                     raise ValueError(f"JSON data record {pos} '{record}'"
                                      " contains wrong type.")
+
+        # Set Vega-Lite types if new dataset.
+        if new:
+            self.set_initial_vega_lite_types(data)
         return data
 
     def get_csv_data(self, infile):
-        """Return the data from the given CSV infile.
-        If there is a 'meta' entry for the dataset, check against its types.
-        Otherwise create the 'meta' entry.
+        """Return the data in JSON format from the given CSV infile.
+        If the dataset is new, then define the 'meta' entry contents by 
+        inspection of the data. Also set the Vega-Lite types.
+        If the dataset is being updated, check against the 'meta' entry.
         """
         reader = csv.DictReader(io.StringIO(infile.read().decode("utf-8")))
         data = list(reader)
         if not data:
             raise ValueError("No data in CSV file.")
 
-        TYPE_OBJECT_MAP = dict((n, o) for o, n in TYPE_NAME_MAP.items())
-        def bool2(s):
-            if s == "True": return True
-            if s == "true": return True
-            if s == "False": return False
-            if s == "false": return False
-            if not s: return None
-            raise ValueError(f"invalid bool '{s}'")
-        TYPE_OBJECT_MAP["boolean"] = bool2
-
         meta = self.doc["meta"]
-        if not meta:
-            # The 'meta' entry for the dataset has not been set.
+        new = not bool(meta) # New dataset, or being updated?
+
+        if new:
             # Figure out the types from the items in the first data record.
             first = data[0]
             for key in first:
@@ -378,7 +384,6 @@ class DatasetSaver(EntitySaver):
                             meta[key]["type"] = "boolean"
                         except ValueError:
                             meta[key]["type"] = "string"
-                meta[key]["vega_lite_types"] = VEGA_LITE_TYPES_MAP[meta[key]["type"]]
 
         # Convert values; check data homogeneity.
         keys = list(meta.keys())
@@ -386,7 +391,7 @@ class DatasetSaver(EntitySaver):
             for key, value in record.items():
                 if value:
                     try:
-                        record[key] = TYPE_OBJECT_MAP[meta[key]["type"]](value)
+                        record[key] = TYPE_OBJECT_MAP2[meta[key]["type"]](value)
                     except ValueError:
                         raise ValueError(f"CSV data record {pos} '{record}'"
                                          " contains wrong type.")
@@ -394,7 +399,31 @@ class DatasetSaver(EntitySaver):
                     # An empty string is a string when type is 'string'.
                     # Otherwise the value is set as None.
                     record[key] = None
+
+        # Set Vega-Lite types if new dataset.
+        if new:
+            self.set_initial_vega_lite_types(data)
         return data
+
+    def set_initial_vega_lite_types(self, data):
+        """Set the Vega-Lite types for the data fields as a function of
+        the JSON type, except for string where regexp patterns are checked.
+        """
+        for key, meta in self.doc["meta"].items():
+            if meta["type"] in ("integer", "number"):
+                meta["vega_lite_types"] = ["quantitative"]
+            elif meta["type"] == "boolean":
+                meta["vega_lite_types"] = ["nominal"]
+            elif meta["type"] == "string":
+                for rx in (constants.YEAR_RX, constants.DATE_RX,
+                           constants.DATETIME_RX, constants.TIME_RX):
+                    for record in data:
+                        if not rx.match(record[key]): break
+                    else:
+                        meta["vega_lite_types"] = ["temporal"]
+                        break
+                else:
+                    meta["vega_lite_types"] = ["nominal"]
 
     def update_meta(self, data):
         "Update the 'meta' entry given the data."
