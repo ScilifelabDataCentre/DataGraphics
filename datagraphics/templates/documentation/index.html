@@ -14,7 +14,20 @@
   <a href="https://en.wikipedia.org/wiki/JSON">JSON</a>.
 </p>
 
-<h4>Dataset</h4>
+<p>
+  <ul>
+    <li>
+      <a href="{{ url_for('.documentation', page='api') }}">
+        API (Application Programming Interface) for programmatic access</a>.
+    </li>
+    <li>
+      <a href="{{ url_for('.documentation', page='how-to-include-graphic') }}">
+        How to include a graphic in another web page</a>.
+    </li>
+  </ul>
+</p>
+
+<h4 class="ml-5">Dataset</h4>
 <p>
   A dataset contains data as well as some metadata describing it. It
   is owned by a user account.
@@ -37,14 +50,18 @@
   </ul>
 </p>
 <p>
-  The keys and the datatypes of the corresponding values are determined
-  when the data is first loaded into a dataset. This metadata cannot be
-  changed once defined for a dataset.
+  The keys and the datatypes of the corresponding values are
+  determined automatically from the data when is first loaded into a
+  dataset. This metadata cannot be changed once defined for a dataset.
 </p>
 <p>
-  The data contents can be downloaded from, and uploaded to, the dataset
+  The data contents can be downloaded from, and uploaded to, the
+  dataset
   as <a href="https://en.wikipedia.org/wiki/Comma-separated_values">CSV</a>
-  or <a href="https://en.wikipedia.org/wiki/JSON">JSON</a>.
+  or <a href="https://en.wikipedia.org/wiki/JSON">JSON</a>. When
+  updating the data contents, the new data must have the same fields
+  and types as the previous data; it is not possible to change this
+  for a dataset by uploading differently structured data.
 </p>
 <p>
   A dataset is static in the sense that the data contents does not
@@ -72,7 +89,7 @@
   </ul>
 </p>
 
-<h4>Graphic</h4>
+<h4 class="ml-5">Graphic</h4>
 <p>
   A graphic is a visualization of a dataset. It is owned by a user
   account. A dataset can be visualized by any number of graphic items.
@@ -97,7 +114,7 @@
   grammar. For more information on it, follow the link.
 </p>
 
-<h4>Access rights</h4>
+<h4 class="ml-5">Access rights</h4>
 <p>
   Currently, the access rights system is based on a very simple model
   where an item can have one of two possible access settings:
@@ -119,7 +136,7 @@
   owner.
 </p>
 
-<h4>User account</h4>
+<h4 class="ml-5">User account</h4>
 <p>
   A user account in the system is required to create and edit datasets
   and graphics. A dataset and graphic is always owned by one and only one
@@ -134,11 +151,5 @@
     <li> Creating, editing, deleting and viewing all items.</li>
     <li> Registering, enabling or disabling other user accounts.
   </ul>
-</p>
-
-<h4>API</h4>
-<p>
-  There is an API which allows datasets and graphics to be created and
-  manipulated programmatically.
 </p>
 {% endblock %}
