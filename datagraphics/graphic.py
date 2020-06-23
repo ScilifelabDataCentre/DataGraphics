@@ -91,7 +91,6 @@ def display(iuid):
                           if gr["_id"] != graphic["_id"]]
     else:
         other_graphics = []
-    print(json.dumps(graphic["specification"], indent=2))
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
