@@ -120,8 +120,7 @@ def register():
         else:
             admins = get_users(constants.ADMIN, status=constants.ENABLED)
             emails = [u["email"] for u in admins]
-            site = flask.current_app.config["SITE_NAME"]
-            message = flask_mail.Message(f"{site} user account pending",
+            message = flask_mail.Message("DataGraphics user account pending",
                                          recipients=emails)
             url = flask.url_for(".display", username=user["username"],
                                 _external=True)
@@ -464,8 +463,7 @@ def do_login(username, password):
 
 def send_password_code(user, action):
     "Send an email with the one-time code to the user's email address."
-    site = flask.current_app.config["SITE_NAME"]
-    message = flask_mail.Message(f"{site} user account {action}",
+    message = flask_mail.Message("DataGraphics user account {action}",
                                  recipients=[user["email"]])
     url = flask.url_for(".password",
                         username=user["username"],

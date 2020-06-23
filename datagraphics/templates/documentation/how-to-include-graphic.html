@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block head_title %}How to include a graphic in another web page{% endblock %}
+{% block body_title %}How to include a graphic in another web page{% endblock %}
+
+{% block main %}
+<p>
+  A graphic can be included in a web page at another site. The required
+  HTML code fragment can be downloaded from the graphic page by clicking
+  the <strong>HTML code</strong> button on the right hand side of the
+  web page for the graphic in the DataGraphics system.
+</p>
+<p>
+  Here is an example of the HTML code:
+  <pre class="ml-4">
+&lt;!-- The graphic will be rendered in this div element in the HTML page. --&gt;
+&lt;div id="graphic"&gt;&lt;/div&gt;
+
+&lt;!-- Add the code below to the JavaScript section of the HTML page. --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/vega@5.12.1"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/vega-lite@4.12.2"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/vega-embed@6.8.0"&gt;&lt;/script&gt;
+&lt;script src="https://datagraphics.dckube.scilifelab.se/graphic/ddb1119aefce47d58d0b3a49e98b4fcc.js?id=graphic"&gt;&lt;/script&gt;
+  </pre>
+</p>
+<p>
+  The first part of the fragment contains the <code>div</code> element
+  where the graphic will be rendered. It must have its <code>id</code>
+  attribute set. The value of this attribute must be passed as a query
+  parameter to the URL in the JavaScript in the
+  last <code>script</code> element in the second part of the fragment.
+</p>
+<p>
+  The second part of the fragment contains the <code>script</code> elements
+  including the various required JavaScript libraries, and the JavaScript
+  code which actually renders the graphic. This part of the fragment is
+  usually placed close to the end of the HTML document, just before the
+  <code>&lt;/body&gt;</code> tag.
+</p>
+<p>
+  Please note that a graphic included on a web page at another site must
+  have <strong>public</strong> access set, and its dataset must also be
+  <strong>public</strong>. There is no way to include authentication
+  information in the HTML code on a page.
+{% endblock %}
+
+{% block actions %}
+<div class="mt-2">
+  <a href="{{ url_for('.documentation') }}"
+     class="btn btn-block btn-secondary">Back</a>
+</div>
+{% endblock %}

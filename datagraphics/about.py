@@ -18,6 +18,15 @@ def software():
     return flask.render_template("about/software.html",
                                  software=get_software())
 
+@blueprint.route("/documentation")
+@blueprint.route("/documentation/<page>")
+def documentation(page=None):
+    "Documentation pages."
+    if page is None:
+        return flask.render_template("documentation/index.html")
+    else:
+        return flask.render_template(f"documentation/{page}.html")
+
 def get_software():
     v = sys.version_info
     return sorted([

@@ -55,7 +55,8 @@
     <table class="table table-sm my-0">
       <tr>
         <th>Field</th>
-        <th>Type</th>
+        <th>JSON Schema type</th>
+        <th>Vega-Lite types</th>
         <th># null</th>
         <th># distinct</th>
         <th>Min</th>
@@ -68,6 +69,7 @@
       <tr>
         <th>{{ key }}</th>
         <td>{{ meta['type'] }}</td>
+        <td>{{ ', '.join(meta.get('vega_lite_types', [])) or '-' }}</td>
         <td>{{ meta['n_null'] }}</td>
         <td>{{ meta['n_distinct'] | default('-') }}</td>
         <td>{{ meta.get('min') | float_default('-') }}</td>

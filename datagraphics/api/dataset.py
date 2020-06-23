@@ -74,6 +74,10 @@ def serve(iuid):
                     saver.set_public(data["public"])
                 except KeyError:
                     pass
+                try:
+                    saver.set_vega_lite_types(data["meta"])
+                except KeyError:
+                    pass
         except ValueError as error:
             return str(error), http.client.BAD_REQUEST
         dataset = saver.doc

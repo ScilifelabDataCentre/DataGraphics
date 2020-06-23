@@ -3,6 +3,7 @@
 import datetime
 import functools
 import http.client
+import json
 import logging
 import time
 import unicodedata
@@ -27,6 +28,7 @@ def init(app):
     """
     app.url_map.converters["name"] = NameConverter
     app.url_map.converters["iuid"] = IuidConverter
+    app.add_template_filter(prettyjson)
     app.add_template_filter(markdown)
     app.add_template_filter(emojize)
     app.add_template_filter(float_default)
@@ -237,6 +239,11 @@ def flash_error(msg):
 def flash_message(msg):
     "Flash information message."
     flask.flash(str(msg), "message")
+
+def prettyjson(value):
+    "Data structure as pretty-printed JSON."
+    # The predefined filter tojson outputs some non-ASCII weirdly.
+    return json.dumps(value, indent=2)
 
 def markdown(value):
     "Template filter: Convert Markdown to HMTL."
