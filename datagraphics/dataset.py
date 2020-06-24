@@ -105,8 +105,6 @@ def data(iuid):
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(utils.url_referrer())
-    storage = sum([s['length'] 
-                   for s in dataset.get('_attachments', {}).values()])
     outfile = flask.g.db.get_attachment(dataset, "data.json")
     data = json.load(outfile)
     max_records = flask.current_app.config["MAX_RECORDS_INSPECT"]
@@ -115,7 +113,6 @@ def data(iuid):
         utils.flash_message(f"Only the first {max_records} records are displayed.")
     return flask.render_template("dataset/data.html",
                                  dataset=dataset,
-                                 storage=storage,
                                  data=data)
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
