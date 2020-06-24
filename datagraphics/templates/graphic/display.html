@@ -10,6 +10,7 @@
 {% block meta %}
 <div>
   <a href="{{ url_for('api_graphic.serve', iuid=graphic['_id']) }}"
+     role="button"
      class="badge badge-dark">API</a>
 </div>
 {% endblock %} {# block meta #}
@@ -100,16 +101,19 @@
     <div>
       <a href="{{ url_for('.download', iuid=graphic['_id'], ext='json') }}"
          title="Download the Vega-Lite JSON specification for the graphic."
+         role="button"
          class="badge badge-pill badge-primary">JSON file</a>
     </div>
     <div>
       <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js') }}"
          title="Download the JavaScript code for the graphic."
+         role="button"
          class="badge badge-pill badge-primary">JavaScript code</a>
     </div>
     <div>
       <a href="{{ url_for('.download', iuid=graphic['_id'], ext='js', inline=True) }}"
          title="Download the JavaScript code for the graphic with the data included."
+         role="button"
          class="badge badge-pill badge-primary">JavaScript code w data</a>
     </div>
     <div>

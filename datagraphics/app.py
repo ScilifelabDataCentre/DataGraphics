@@ -63,6 +63,7 @@ def setup_template_context():
     "Add useful stuff to the global context of Jinja2 templates."
     return dict(constants=constants,
                 csrf_token=utils.csrf_token,
+                enumerate=enumerate,
                 am_admin_or_self=datagraphics.user.am_admin_or_self,
                 url_referrer=utils.url_referrer)
 
