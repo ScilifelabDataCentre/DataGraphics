@@ -23,6 +23,25 @@ import datagraphics.api.user
 from datagraphics import constants
 from datagraphics import utils
 
+class JsonException(Exception):
+    "JSON API error response."
+
+    status_code = 400
+
+    def __init__(self, message, status_code=None, data=None):
+        super().__init__()
+        self.message = str(message)
+        if status_code is not None:
+            self.status_code = status_code
+        self.data = data
+
+    def to_dict(self):
+        result = dict(self.data or ())
+        result["status_code"] = self.status_code
+        result["message"] = self.message
+        return result
+
+
 app = flask.Flask(__name__)
 
 # Get the configuration and initialize modules (database).
@@ -33,8 +52,7 @@ datagraphics.graphic.init(app)
 datagraphics.user.init(app)
 utils.mail.init_app(app)
 
-
-@app.errorhandler(utils.JsonException)
+@app.errorhandler(JsonException)
 def handle_json_exception(error):
     response = flask.jsonify(error.to_dict())
     response.status_code = error.status_code
@@ -45,6 +63,7 @@ def setup_template_context():
     "Add useful stuff to the global context of Jinja2 templates."
     return dict(constants=constants,
                 csrf_token=utils.csrf_token,
+                enumerate=enumerate,
                 am_admin_or_self=datagraphics.user.am_admin_or_self,
                 url_referrer=utils.url_referrer)
 

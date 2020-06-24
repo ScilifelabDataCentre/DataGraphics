@@ -64,9 +64,11 @@
         <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> JSON.
         <br>
         <strong>
-          The items <code>$schema</code> and <code>data</code> are
-          fixed, and attempts to change them will be overwritten when
-          saving.
+          The data sources used by the specification must include a
+          reference to the dataset for this graphic.
+          <br>
+          The item <code>$schema</code> is fixed, and attempts to
+          change it will be overwritten when saving.
         </strong>
       </small>
     </div>
@@ -92,6 +94,7 @@
 {% block actions %}
 <div class="mt-2">
   <a href="{{ url_for('.display', iuid=graphic['_id']) }}"
+     role="button"
      class="btn btn-block btn-secondary">Cancel</a>
 </div>
 {% endblock %}

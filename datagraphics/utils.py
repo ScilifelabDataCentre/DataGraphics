@@ -307,20 +307,29 @@ def get_json(**data):
     return result
 
 
-class JsonException(Exception):
-    "JSON API error response."
+class JsonTraverser:
+    "Traverse the JSON data structure, and handle each path/value pair."
 
-    status_code = 400
+    def traverse(self, data):
+        self.stack = []
+        self._traverse(data)
 
-    def __init__(self, message, status_code=None, data=None):
-        super().__init__()
-        self.message = str(message)
-        if status_code is not None:
-            self.status_code = status_code
-        self.data = data
+    def _traverse(self, fragment):
+        if isinstance(fragment, dict):
+            self.stack.append(None)
+            for key, value in fragment.items():
+                self.stack[-1] = key
+                self._traverse(value)
+            self.stack.pop()
+        elif isinstance(fragment, list):
+            self.stack.append(None)
+            for pos, value in enumerate(fragment):
+                self.stack[-1] = pos
+                self._traverse(value)
+            self.stack.pop()
+        else:
+            self.handle(self.stack[:], fragment)
 
-    def to_dict(self):
-        result = dict(self.data or ())
-        result["status_code"] = self.status_code
-        result["message"] = self.message
-        return result
+    def handle(self, path, value):
+        "Handle the path/value pair."
+        raise NotImplementedError

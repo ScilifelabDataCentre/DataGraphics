@@ -94,6 +94,27 @@ def display(iuid):
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset))
 
+@blueprint.route("/<iuid:iuid>/data")
+def data(iuid):
+    "Display the data contents of the dataset."
+    try:
+        dataset = get_dataset(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(flask.url_for("home"))
+    if not allow_view(dataset):
+        utils.flash_error("View access to dataset not allowed.")
+        return flask.redirect(utils.url_referrer())
+    outfile = flask.g.db.get_attachment(dataset, "data.json")
+    data = json.load(outfile)
+    max_records = flask.current_app.config["MAX_RECORDS_INSPECT"]
+    if len(data) > max_records:
+        data = data[:max_records]
+        utils.flash_message(f"Only the first {max_records} records are displayed.")
+    return flask.render_template("dataset/data.html",
+                                 dataset=dataset,
+                                 data=data)
+
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
 def edit(iuid):

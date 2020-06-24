@@ -283,21 +283,45 @@ class GraphicSaver(EntitySaver):
             specification = flask.request.form.get("specification") or "{}"
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
-        # Ensure that items '$schema' and 'data' are kept fixed.
+        # Ensure that item '$schema' is kept fixed.
         specification["$schema"] = constants.VEGA_LITE_SCHEMA_URL
-        specification["data"] = {"url": flask.url_for("api_dataset.content",
-                                                      iuid=self.doc["dataset"],
-                                                      ext="csv",
-                                                      _external=True),
-                                 "format": {"type": "csv"}}
-        try:
-            utils.validate_vega_lite(specification)
-        except jsonschema.ValidationError as error:
-            self.doc["error"] = str(error)
+        # Check that at least one data URL refers to the dataset.
+        dataset_urls = set([flask.url_for("api_dataset.content",
+                                          iuid=self.doc["dataset"],
+                                          ext="csv",
+                                          _external=True),
+                            flask.url_for("api_dataset.content",
+                                          iuid=self.doc["dataset"],
+                                          ext="json",
+                                          _external=True)])
+        data_urls = DataUrls()
+        data_urls.traverse(specification)
+        if dataset_urls.intersection(data_urls):
+            try:
+                utils.validate_vega_lite(specification)
+            except jsonschema.ValidationError as error:
+                self.doc["error"] = str(error)
+            else:
+                self.doc["error"] = None
         else:
-            self.doc["error"] = None
+            self.doc["error"] = "The graphic does not refer to its dataset."
         # Save it, even if incorrect Vega-Lite.
         self.doc["specification"] = specification
+
+
+class DataUrls(utils.JsonTraverser):
+    "Extract the data URLs from the specification."
+
+    def __init__(self):
+        self.result = []
+
+    def handle(self, path, value):
+        if path[-2:] == ["data", "url"]:
+            self.result.append(value)
+
+    def __iter__(self):
+        yield from self.result
+
 
 # Utility functions
 
