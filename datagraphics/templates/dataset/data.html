@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block head_title %}{{ dataset['title'] }} data{% endblock %}
+
+{% block body_title %}
+{{ dataset['title']  }} data
+{{ macros.access_symbol(dataset) }}
+{% endblock %}
+
+{% block meta %}
+<div class="mt-2">
+  <a href="{{ url_for('.display', iuid=dataset['_id']) }}"
+     role="button"
+     class="btn btn-block btn-secondary">Back</a>
+</div>
+{% endblock %} {# block meta #}
+
+{% block supermain %}
+<table id="data" class="table table-sm">
+  <thead>
+    <tr>
+      <th width="5%">#</th>
+      {% for key, meta in dataset['meta'].items() %}
+      <td>
+        <strong>{{ key }}</strong>
+        <br>
+        <i>{{ meta['type'] }}</i>
+      </td>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for pos, record in enumerate(data) %}
+    <tr>
+      <td class="text-monospace text-muted">{{ pos+1 }}</td>
+      {% for key in dataset['meta'] %}
+      {% set value = record[key] %}
+      <td>
+        {% if value is none %}
+        <i>null</i>
+        {% else %}
+        {{ value }}
+        {% endif %}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %} {# block supermain #}
+
+{% block javascript %}
+<script>
+  $(function() {
+    $("#data").DataTable( {
+      pagingType: "full_numbers",
+      pageLength: 25
+    });
+  });
+</script>
+{% endblock %}
