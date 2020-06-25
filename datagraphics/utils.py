@@ -311,25 +311,25 @@ class JsonTraverser:
     "Traverse the JSON data structure, and handle each path/value pair."
 
     def traverse(self, data):
-        self.stack = []
+        self.path = []
         self._traverse(data)
 
     def _traverse(self, fragment):
         if isinstance(fragment, dict):
-            self.stack.append(None)
+            self.path.append(None)
             for key, value in fragment.items():
-                self.stack[-1] = key
+                self.path[-1] = key
                 self._traverse(value)
-            self.stack.pop()
+            self.path.pop()
         elif isinstance(fragment, list):
-            self.stack.append(None)
+            self.path.append(None)
             for pos, value in enumerate(fragment):
-                self.stack[-1] = pos
+                self.path[-1] = pos
                 self._traverse(value)
-            self.stack.pop()
+            self.path.pop()
         else:
-            self.handle(self.stack[:], fragment)
+            self.handle(fragment)
 
-    def handle(self, path, value):
-        "Handle the path/value pair."
+    def handle(self, value):
+        "Handle the current path/value."
         raise NotImplementedError

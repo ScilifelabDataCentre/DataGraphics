@@ -44,6 +44,11 @@ class Graphic(api_base.Base):
         response = self.PUT(dataset["$id"] + ".json", json=data)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
 
+        # Get the updated dataset containing the data content URLs.
+        response = self.GET(dataset["$id"])
+        self.assertEqual(response.status_code, http.client.OK)
+        dataset = self.check_schema(response)
+
         # Create the graphic.
         url = f"{api_base.SETTINGS['ROOT_URL']}/graphic/"
         response = self.POST(url, json={"title": "test",
@@ -55,7 +60,9 @@ class Graphic(api_base.Base):
         # Update the specification to make it correct.
         response = self.POST(graphic["$id"],
                              json={"specification":
-                                   {"mark": "point",
+                                   {"data": 
+                                    {"url": dataset["content"]["csv"]["href"]},
+                                    "mark": "point",
                                     "encoding": {
                                         "x": {"field": "col1",
                                               "type": "quantitative"},

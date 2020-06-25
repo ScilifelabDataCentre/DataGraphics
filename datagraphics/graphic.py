@@ -315,8 +315,9 @@ class DataUrls(utils.JsonTraverser):
     def __init__(self):
         self.result = []
 
-    def handle(self, path, value):
-        if path[-2:] == ["data", "url"]:
+    def handle(self, value):
+        "Record all values for the fragment 'data.url'."
+        if self.path[-2:] == ["data", "url"]:
             self.result.append(value)
 
     def __iter__(self):

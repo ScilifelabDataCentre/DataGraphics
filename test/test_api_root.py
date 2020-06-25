@@ -10,7 +10,7 @@ class Root(api_base.Base):
 
     def test_root_data(self):
         "Get root information."
-        url = f"{api_base.SETTINGS['ROOT_URL']}"
+        url = api_base.SETTINGS['ROOT_URL']
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
