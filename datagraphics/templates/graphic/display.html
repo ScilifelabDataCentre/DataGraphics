@@ -80,23 +80,25 @@
 <div class="mt-2">
   {{ graphic['description'] | markdown }}
 </div>
-<p>
-  <button type="button" class="btn btn-outline-dark"
-          data-toggle="collapse" data-target="#collapseSpecification"
-          aria-expanded="false" aria-controls="collapseSpecification">
-    Show Vega-Lite JSON specification
-  </button>
-</p>
-<div class="collapse" id="collapseSpecification">
-  <div class="card card-body">
-    <pre>{{ graphic['specification'] | prettyjson }}</pre>
+<div class="card">
+  <div class="card-header">
+    <button type="button" class="btn btn-outline-dark btn-sm"
+            data-toggle="collapse" data-target="#collapseSpecification"
+            aria-expanded="false" aria-controls="collapseSpecification">
+      Vega-Lite specification
+    </button>
+  </div>
+  <div class="collapse" id="collapseSpecification">
+    <div class="card-body border-dark" style="font-size: 80%">
+      <pre>{{ graphic['specification'] | prettyjson }}</pre>
+    </div>
   </div>
 </div>
 {% endblock %} {# block main #}
 
 {% block links %}
 <div class="card">
-  <div class="card-header">Downloads</div>
+  <div class="card-header">Download</div>
   <div class="card-body">
     <div>
       <a href="{{ url_for('.download', iuid=graphic['_id'], ext='json') }}"

@@ -54,8 +54,7 @@ def create():
                    "data": {"url": flask.url_for("api_dataset.content",
                                                  iuid=dataset["_id"],
                                                  ext="csv",
-                                                 _external=True),
-                            "format": {"type": "csv"}}}
+                                                 _external=True)}}
         return flask.render_template("graphic/create.html",
                                      dataset=dataset,
                                      graphic=graphic)

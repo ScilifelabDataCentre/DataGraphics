@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block head_title %}How to include a graphic in another web page{% endblock %}
-{% block body_title %}How to include a graphic in another web page{% endblock %}
+{% block head_title %}How to include a graphic in a web page{% endblock %}
+{% block body_title %}How to include a graphic in a web page{% endblock %}
 
 {% block main %}
 <p>
@@ -42,11 +42,13 @@
   have <strong>public</strong> access set, and its dataset must also be
   <strong>public</strong>. There is no way to include authentication
   information in the HTML code on a page.
-{% endblock %}
+</p>
+{% endblock %} {# block main #}
 
 {% block actions %}
-<div class="mt-2">
+<div>
   <a href="{{ url_for('.documentation') }}"
-     class="btn btn-block btn-secondary">Back</a>
+     role="button"
+     class="btn btn-block btn-outline-secondary">Documentation</a>
 </div>
-{% endblock %}
+{% endblock %} {# block actions #}
