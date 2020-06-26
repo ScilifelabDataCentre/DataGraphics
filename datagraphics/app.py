@@ -19,9 +19,11 @@ import datagraphics.api.datasets
 import datagraphics.api.graphic
 import datagraphics.api.graphics
 import datagraphics.api.user
+import datagraphics.api.schema
 
 from datagraphics import constants
 from datagraphics import utils
+
 
 class JsonException(Exception):
     "JSON API error response."
@@ -135,6 +137,8 @@ app.register_blueprint(datagraphics.api.graphics.blueprint,
                        url_prefix="/api/graphics")
 app.register_blueprint(datagraphics.api.user.blueprint,
                        url_prefix="/api/user")
+app.register_blueprint(datagraphics.api.schema.blueprint,
+                       url_prefix="/api/schema")
 
 
 # This code is used only during development.

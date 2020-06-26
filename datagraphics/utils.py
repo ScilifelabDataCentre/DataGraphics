@@ -292,19 +292,43 @@ def accept_json():
     return best == constants.JSON_MIMETYPE and \
         acc[best] > acc[constants.HTML_MIMETYPE]
 
-def get_json(**data):
-    "Return the JSON structure after fixing up for external representation."
-    result = {"$id": flask.request.url,
-              "timestamp": get_time()}
+# XXX
+# def get_json(**data):
+#     "Return the JSON structure after fixing up for external representation."
+#     result = {"$id": flask.request.url,
+#               "timestamp": get_time()}
+#     try:
+#         result["iuid"] = data.pop("_id")
+#     except KeyError:
+#         pass
+#     result.update(data)
+#     result.pop("_rev", None)
+#     result.pop("doctype", None)
+#     return result
+
+def jsonify(data, id=None, timestamp=True, schema_url=None):
+    """Return a Response object containing the JSON of 'data'.
+    Fix up the JSON structure for external representation.
+    Optionally add a header Link to the schema given by its URL.
+    """
+    result = {"$id": flask.request.url}
     try:
-        result["iuid"] = data["_id"]
+        result["$schema"] = data.pop("$schema")
+    except KeyError:
+        pass
+    if timestamp:
+        result["timestamp"] = get_time()
+    try:
+        result["iuid"] = data.pop("_id")
     except KeyError:
         pass
     result.update(data)
-    result.pop("_id", None)
     result.pop("_rev", None)
     result.pop("doctype", None)
-    return result
+    response = flask.jsonify(result)
+    if schema_url:
+        response.headers.add('Link', schema_url, rel='schema')
+    return response
 
 
 class JsonTraverser:
