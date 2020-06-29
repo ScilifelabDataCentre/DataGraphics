@@ -1,11 +1,9 @@
 "Serve data and graphics on the web using Vega-Lite graphics."
 
-import json
-import os.path
 import re
 import string
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 class Constants:
     VERSION = __version__

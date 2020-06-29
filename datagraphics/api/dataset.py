@@ -37,7 +37,7 @@ def create():
     dataset["$id"] = flask.url_for("api_dataset.serve",
                                    iuid=dataset["_id"],
                                    _external=True)
-    return flask.jsonify(utils.get_json(**dataset))
+    return utils.jsonify(dataset)
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
@@ -54,7 +54,7 @@ def serve(iuid):
             flask.abort(http.client.FORBIDDEN)
         set_content_links(dataset)
         set_graphics_links(dataset)
-        return flask.jsonify(utils.get_json(**dataset))
+        return utils.jsonify(dataset)
 
     elif utils.http_POST(csrf=False):
         if not allow_edit(dataset):
@@ -83,7 +83,7 @@ def serve(iuid):
         dataset = saver.doc
         set_content_links(dataset)
         set_graphics_links(dataset)
-        return flask.jsonify(utils.get_json(**dataset))
+        return utils.jsonify(dataset)
 
     elif utils.http_DELETE():
         if not possible_delete(dataset):

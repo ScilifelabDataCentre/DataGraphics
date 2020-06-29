@@ -23,7 +23,7 @@ def public():
                                                _external=True),
                          "owner": dataset["owner"],
                          "modified": dataset["modified"]})
-    return flask.jsonify(utils.get_json(datasets=datasets))
+    return utils.jsonify({"datasets": datasets})
 
 @blueprint.route("/user/<username>")
 def user(username):
@@ -36,7 +36,7 @@ def user(username):
                                                iuid=iuid,
                                                _external=True),
                          "modified": modified})
-    return flask.jsonify(utils.get_json(datasets=datasets))
+    return utils.jsonify({"datasets": datasets})
 
 @blueprint.route("/all")
 def all():
@@ -50,4 +50,4 @@ def all():
                                                _external=True),
                          "owner": owner,
                          "modified": modified})
-    return flask.jsonify(utils.get_json(datasets=datasets))
+    return utils.jsonify({"datasets": datasets})

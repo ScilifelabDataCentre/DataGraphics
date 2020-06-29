@@ -62,5 +62,7 @@ def settings():
 @blueprint.route('/schema')
 def schema():
     "Page with links to all JSON schema for the API."
-    schemas = [(flask.url_for("api_schema.root", _external=True), "API Root")]
+    schemas = [
+        (flask.url_for("api_schema.root", _external=True), "API Root"),
+        (flask.url_for("api_schema.schema", _external=True), "API Schema")]
     return flask.render_template('about/schema.html', schemas=schemas)

@@ -1,4 +1,4 @@
-"Root API resources."
+"API Root resources."
 
 import flask
 from flask_cors import CORS
@@ -20,7 +20,7 @@ CORS(blueprint, supports_credentials=True)
 
 @blueprint.route("")
 def root():
-    "API root; links to other resources."
+    "API Root; links to other resources."
     items = {
         "version": constants.VERSION,
         "title": __doc__,
@@ -68,7 +68,7 @@ def root():
 
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
-    "title": "JSON Schema for API Root.",
+    "title": "JSON Schema for API Root resource.",
     "definitions": {
         "link": schema_definitions.link,
     },

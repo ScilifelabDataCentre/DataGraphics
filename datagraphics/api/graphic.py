@@ -41,7 +41,7 @@ def create():
                                    iuid=graphic["_id"],
                                    _external=True)
     fixup_dataset(graphic)
-    return flask.jsonify(utils.get_json(**graphic))
+    return utils.jsonify(graphic)
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
@@ -55,7 +55,7 @@ def serve(iuid):
         if not allow_view(graphic):
             flask.abort(http.client.FORBIDDEN)
         fixup_dataset(graphic)
-        return flask.jsonify(utils.get_json(**graphic))
+        return utils.jsonify(graphic)
 
     elif utils.http_POST(csrf=False):
         if not allow_edit(graphic):

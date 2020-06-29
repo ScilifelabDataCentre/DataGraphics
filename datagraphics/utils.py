@@ -292,20 +292,6 @@ def accept_json():
     return best == constants.JSON_MIMETYPE and \
         acc[best] > acc[constants.HTML_MIMETYPE]
 
-# XXX
-# def get_json(**data):
-#     "Return the JSON structure after fixing up for external representation."
-#     result = {"$id": flask.request.url,
-#               "timestamp": get_time()}
-#     try:
-#         result["iuid"] = data.pop("_id")
-#     except KeyError:
-#         pass
-#     result.update(data)
-#     result.pop("_rev", None)
-#     result.pop("doctype", None)
-#     return result
-
 def jsonify(data, id=None, timestamp=True, schema_url=None):
     """Return a Response object containing the JSON of 'data'.
     Fix up the JSON structure for external representation.
