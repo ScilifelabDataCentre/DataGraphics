@@ -1,3 +1,5 @@
+"API Graphics resource."
+
 import http.client
 
 import flask

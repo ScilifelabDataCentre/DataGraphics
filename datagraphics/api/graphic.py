@@ -1,4 +1,4 @@
-"Graphic API endpoints."
+"API Graphic resource."
 
 import http.client
 
@@ -13,6 +13,7 @@ from datagraphics.graphic import (GraphicSaver,
                                   allow_delete)
 from datagraphics import utils
 from datagraphics import constants
+from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_graphic", __name__)
 
@@ -97,3 +98,15 @@ def fixup_dataset(graphic):
                           "href": flask.url_for("api_dataset.serve",
                                                 iuid=graphic["dataset"],
                                                 _external=True)}
+
+schema = {
+    "$schema": constants.JSON_SCHEMA_URL,
+    "title": "JSON Schema for API Graphic resource.",
+    "definitions": {
+        "link": schema_definitions.link,
+    },
+    "type": "object",
+    "properties": {
+        # XXX
+    }
+}

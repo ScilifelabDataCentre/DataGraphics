@@ -64,5 +64,7 @@ def schema():
     "Page with links to all JSON schema for the API."
     schemas = [
         (flask.url_for("api_schema.root", _external=True), "API Root"),
-        (flask.url_for("api_schema.schema", _external=True), "API Schema")]
+        (flask.url_for("api_schema.schema", _external=True), "API Schema"),
+        (flask.url_for("api_schema.graphic", _external=True), "API Graphic"),
+        (flask.url_for("api_schema.dataset", _external=True), "API Dataset")]
     return flask.render_template('about/schema.html', schemas=schemas)

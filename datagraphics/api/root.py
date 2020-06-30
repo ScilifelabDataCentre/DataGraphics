@@ -1,4 +1,4 @@
-"API Root resources."
+"API Root resource."
 
 import flask
 from flask_cors import CORS

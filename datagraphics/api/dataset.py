@@ -1,4 +1,4 @@
-"Dataset API endpoints."
+"API Dataset resource."
 
 import io
 import http.client
@@ -15,6 +15,7 @@ from datagraphics.dataset import (DatasetSaver,
                                   allow_delete)
 from datagraphics import utils
 from datagraphics import constants
+from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_dataset", __name__)
 
@@ -41,7 +42,7 @@ def create():
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
-    """Return dataset information, update it, or delete it.
+    """Return dataset's information (metadata), update it, or delete it.
     The content of the dataset cannot be update via this endpoint.
     """
     try:
@@ -164,3 +165,15 @@ def set_graphics_links(dataset):
                                                   iuid=g["_id"],
                                                   _external=True)}
                            for g in get_graphics(dataset)]
+
+schema = {
+    "$schema": constants.JSON_SCHEMA_URL,
+    "title": "JSON Schema for API Dataset resource.",
+    "definitions": {
+        "link": schema_definitions.link,
+    },
+    "type": "object",
+    "properties": {
+        # XXX
+    }
+}

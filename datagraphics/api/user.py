@@ -1,4 +1,4 @@
-"User API endpoints."
+"API User resource."
 
 import http.client
 

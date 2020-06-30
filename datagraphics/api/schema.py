@@ -1,10 +1,12 @@
-"JSON Schema for API resources."
+"API Schema resource."
 
 import flask
 
 from datagraphics import utils
 from datagraphics.api import root as api_root
 from datagraphics.api import about as api_about
+from datagraphics.api import dataset as api_dataset
+from datagraphics.api import graphic as api_graphic
 
 blueprint = flask.Blueprint("api_schema", __name__)
 
@@ -17,16 +19,34 @@ def schema():
          "schemas": {
              "root": {"href": flask.url_for("api_schema.root", _external=True),
                       "title": api_root.schema["title"]},
-             "about": {"href": flask.url_for("api_schema.about", _external=True),
-                       "title": api_about.schema["title"]}}
+             "about": {"href": flask.url_for("api_schema.about",
+                                             _external=True),
+                       "title": api_about.schema["title"]},
+             "dataset": {"href": flask.url_for("api_schema.dataset",
+                                               _external=True),
+                       "title": api_dataset.schema["title"]},
+             "graphic": {"href": flask.url_for("api_schema.graphic",
+                                               _external=True),
+                       "title": api_graphic.schema["title"]},
+         }
         })
 
 @blueprint.route("root")
 def root():
-    "JSON schema for root API."
+    "JSON Schema for API Root resource."
     return utils.jsonify(api_root.schema)
 
 @blueprint.route("about")
 def about():
-    "JSON schema for about API."
+    "JSON schema for API About resource."
     return utils.jsonify(api_about.schema)
+
+@blueprint.route("dataset")
+def dataset():
+    "JSON schema for API Dataset resource."
+    return utils.jsonify(api_dataset.schema)
+
+@blueprint.route("graphic")
+def graphic():
+    "JSON schema for API Graphic resource."
+    return utils.jsonify(api_graphic.schema)
