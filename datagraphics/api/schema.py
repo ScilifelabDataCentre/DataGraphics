@@ -2,6 +2,7 @@
 
 import flask
 
+from datagraphics import constants
 from datagraphics import utils
 from datagraphics.api import root as api_root
 from datagraphics.api import about as api_about

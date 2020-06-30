@@ -9,6 +9,8 @@ import unittest
 import jsonschema
 import requests
 
+from datagraphics import constants
+
 JSON_MIMETYPE = 'application/json'
 
 DEFAULT_SETTINGS = {
@@ -77,9 +79,13 @@ class Base(unittest.TestCase):
         try:
             schema = self.schemas[url]
         except KeyError:
-            r = self.GET(url)
-            self.assertEqual(r.status_code, http.client.OK)
-            schema = r.json()
+            if url == constants.JSON_SCHEMA_URL:
+                with open("schema.json") as infile:
+                    schema = json.load(infile)
+            else:
+                r = self.GET(url)
+                self.assertEqual(r.status_code, http.client.OK)
+                schema = r.json()
             self.schemas[url] = schema
         self.validate_schema(result, schema)
         return result

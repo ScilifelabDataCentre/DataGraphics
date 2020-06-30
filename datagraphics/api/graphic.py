@@ -11,8 +11,8 @@ from datagraphics.graphic import (GraphicSaver,
                                   allow_view,
                                   allow_edit,
                                   allow_delete)
-from datagraphics import utils
 from datagraphics import constants
+from datagraphics import utils
 from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_graphic", __name__)

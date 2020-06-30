@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
 "Test the API Dataset resource."
-=======
-"Test the API Dataset resources."
->>>>>>> Stashed changes
 
 import collections
 import csv
