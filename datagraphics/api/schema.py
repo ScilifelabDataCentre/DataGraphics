@@ -10,7 +10,6 @@ from datagraphics.api import graphic as api_graphic
 
 blueprint = flask.Blueprint("api_schema", __name__)
 
-
 @blueprint.route("")
 def schema():
     "Map of available JSON schemas."
@@ -33,20 +32,22 @@ def schema():
 
 @blueprint.route("root")
 def root():
-    "JSON Schema for API Root resource."
-    return utils.jsonify(api_root.schema)
+    "JSON schema for API Root resource."
+    return utils.jsonify(api_root.schema, schema_url=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("about")
 def about():
     "JSON schema for API About resource."
-    return utils.jsonify(api_about.schema)
-
-@blueprint.route("dataset")
-def dataset():
-    "JSON schema for API Dataset resource."
-    return utils.jsonify(api_dataset.schema)
+    return utils.jsonify(api_about.schema, schema_url=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("graphic")
 def graphic():
     "JSON schema for API Graphic resource."
-    return utils.jsonify(api_graphic.schema)
+    return utils.jsonify(api_graphic.schema,
+                         schema_url=constants.JSON_SCHEMA_URL)
+
+@blueprint.route("dataset")
+def dataset():
+    "JSON schema for API Dataset resource."
+    return utils.jsonify(api_dataset.schema,
+                         schema_url=constants.JSON_SCHEMA_URL)

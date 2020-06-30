@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 "Test the API Graphic resource."
+=======
+"Test the API Graphic resources."
+>>>>>>> Stashed changes
 
 import http.client
 

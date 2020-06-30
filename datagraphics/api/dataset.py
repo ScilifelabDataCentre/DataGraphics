@@ -43,7 +43,7 @@ def create():
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
     """Return dataset's information (metadata), update it, or delete it.
-    The content of the dataset cannot be update via this endpoint.
+    The content of the dataset cannot be update via this resource.
     """
     try:
         dataset = get_dataset(iuid)
