@@ -44,7 +44,7 @@ class Base(unittest.TestCase):
 
     @property
     def root(self):
-        "Return the API root data."
+        "Return the API Root resource."
         try:
             return self._root
         except AttributeError:
