@@ -11,7 +11,7 @@ class Links(api_base.Base):
 
     def test_links(self):
         self.visited = set()
-        self.visit(api_base.SETTINGS['ROOT_URL'])
+        self.visit(self.SETTINGS['ROOT_URL'])
 
     def visit(self, url):
         if url in self.visited: return
@@ -20,7 +20,7 @@ class Links(api_base.Base):
         self.visited.add(url)
         # URLs with explicit extensions are data; do not parse.
         if os.path.splitext(url)[1]: return
-        hrefs = Hrefs()
+        hrefs = Hrefs(base_url=self.SETTINGS['ROOT_URL'])
         hrefs.traverse(self.check_schema(response))
         for url in hrefs:
             self.visit(url)
@@ -28,6 +28,9 @@ class Links(api_base.Base):
 
 class Hrefs:
     "Traverse the JSON data structure to find all 'href' values."
+
+    def __init__(self, base_url):
+        self.base_url = base_url
 
     def traverse(self, data):
         self.path = []
@@ -53,12 +56,8 @@ class Hrefs:
     def handle(self, value):
         "Handle the current path/value."
         if self.path[-1] == "href" and \
-           value.startswith(api_base.SETTINGS['ROOT_URL']):
+           value.startswith(self.base_url):
             self.urls.append(value)
 
     def __iter__(self):
         yield from self.urls
-
-
-if __name__ == '__main__':
-    api_base.run()

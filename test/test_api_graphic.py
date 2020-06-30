@@ -1,29 +1,29 @@
-"Test the graphic API endpoints."
+"Test the API Graphic resource."
 
 import http.client
 
 import api_base
 
 class Graphic(api_base.Base):
-    "Test the graphic API endpoints."
+    "Test the API Graphic resource."
 
     def test_public_graphics(self):
         "Get public graphics."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/graphics/public"
+        url = f"{self.SETTINGS['ROOT_URL']}/graphics/public"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
 
     def test_user_graphics(self):
         "Get user's graphics."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/graphics/user/{api_base.SETTINGS['USERNAME']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/graphics/user/{self.SETTINGS['USERNAME']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
 
     def test_all_graphics(self):
         "Get all graphics."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/graphics/all"
+        url = f"{self.SETTINGS['ROOT_URL']}/graphics/all"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
@@ -32,7 +32,7 @@ class Graphic(api_base.Base):
         "Create, update and delete a graphic."
 
         # First create the dataset.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/"
         response = self.POST(url, json={"title": "test"})
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
@@ -50,7 +50,7 @@ class Graphic(api_base.Base):
         dataset = self.check_schema(response)
 
         # Create the graphic.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/graphic/"
+        url = f"{self.SETTINGS['ROOT_URL']}/graphic/"
         response = self.POST(url, json={"title": "test",
                                         "dataset": dataset["iuid"]})
         self.assertEqual(response.status_code, http.client.OK)
@@ -82,7 +82,3 @@ class Graphic(api_base.Base):
         # Delete the dataset.
         response = self.DELETE(dataset["$id"])
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
-
-
-if __name__ == '__main__':
-    api_base.run()

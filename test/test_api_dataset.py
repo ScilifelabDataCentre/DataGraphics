@@ -1,4 +1,4 @@
-"Test the dataset API endpoints."
+"Test the API Dataset resource."
 
 import collections
 import csv
@@ -8,32 +8,32 @@ import io
 import api_base
 
 class Dataset(api_base.Base):
-    "Test the dataset API endpoints."
+    "Test the API Dataset resource."
 
     def test_public_datasets(self):
         "Get public datasets."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/datasets/public"
+        url = f"{self.SETTINGS['ROOT_URL']}/datasets/public"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
 
     def test_user_datasets(self):
         "Get user's datasets."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/datasets/user/{api_base.SETTINGS['USERNAME']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/datasets/user/{self.SETTINGS['USERNAME']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
 
     def test_all_datasets(self):
         "Get all datasets."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/datasets/all"
+        url = f"{self.SETTINGS['ROOT_URL']}/datasets/all"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
 
     def test_create_dataset(self):
         "Create, update and delete a dataset."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/"
         title = "My title"
         description = "My description."
 
@@ -42,7 +42,7 @@ class Dataset(api_base.Base):
                                         "description": description})
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         self.assertEqual(dataset["$id"], url)
         self.assertEqual(dataset["title"], title)
         self.assertEqual(dataset["description"], description)
@@ -63,7 +63,7 @@ class Dataset(api_base.Base):
         
     def test_upload_json_dataset(self):
         "Create, upload, update and destroy a dataset using JSON."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/"
         title = "My title"
         description = "My description."
         first = collections.OrderedDict()
@@ -80,12 +80,12 @@ class Dataset(api_base.Base):
         dataset = self.check_schema(response)
 
         # Upload JSON data content.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.json"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.json"
         response = self.PUT(url, json=data)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
 
         # Check content and meta.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
@@ -95,12 +95,12 @@ class Dataset(api_base.Base):
 
         # Update data, and upload.
         data.append({"col1": 4, "col2": "stuff"})
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.json"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.json"
         response = self.PUT(url, json=data)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
 
         # Check content and meta.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
@@ -115,13 +115,13 @@ class Dataset(api_base.Base):
                          ["nominal"])
 
         # Delete the dataset.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.DELETE(url)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
         
     def test_upload_csv_dataset(self):
         "Create, upload and destroy a dataset using CSV."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/"
         title = "My title"
         description = "My description."
         first = collections.OrderedDict()
@@ -144,12 +144,12 @@ class Dataset(api_base.Base):
         for record in data:
             writer.writerow(record)
         outfile.seek(0)
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.csv"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.csv"
         response = self.PUT(url, data=outfile)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
 
         # Check content and meta.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
@@ -171,12 +171,12 @@ class Dataset(api_base.Base):
         for record in data:
             writer.writerow(record)
         outfile.seek(0)
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.csv"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.csv"
         response = self.PUT(url, data=outfile)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
 
         # Check content and meta.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
@@ -185,13 +185,13 @@ class Dataset(api_base.Base):
         self.assertEqual(sorted(dataset["meta"].keys()), sorted(data[0].keys()))
 
         # Read data directly from CSV file.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.csv"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.csv"
         with open("test.csv", "rb") as infile:
             response = self.PUT(url, data=infile)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
 
         # Check content and meta.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
@@ -203,13 +203,13 @@ class Dataset(api_base.Base):
         self.assertEqual(sorted(dataset["meta"].keys()), sorted(data[0].keys()))
 
         # Delete the dataset.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.DELETE(url)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
         
     def test_upload_dataset_update_bad(self):
         "Create, upload dataset and attempt bad update."
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/"
         title = "My title"
         description = "My description."
         first = collections.OrderedDict()
@@ -226,12 +226,12 @@ class Dataset(api_base.Base):
         dataset = self.check_schema(response)
 
         # Upload JSON data content.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.json"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.json"
         response = self.PUT(url, json=data)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
 
         # Check content and meta.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
@@ -242,12 +242,12 @@ class Dataset(api_base.Base):
         # Upload JSON data content with data that doesn't fit.
         bad_data = data[:]      # Shallow copy
         bad_data.append({"col1": "a string, not an integer", "col2": -1})
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.json"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}.json"
         response = self.PUT(url, json=bad_data)
         self.assertEqual(response.status_code, http.client.BAD_REQUEST)
 
         # Check content and meta; compare to original data.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         dataset = self.check_schema(response)
@@ -256,9 +256,6 @@ class Dataset(api_base.Base):
         self.assertEqual(sorted(dataset["meta"].keys()), sorted(data[0].keys()))
 
         # Delete the dataset.
-        url = f"{api_base.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
+        url = f"{self.SETTINGS['ROOT_URL']}/dataset/{dataset['iuid']}"
         response = self.DELETE(url)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
-
-if __name__ == '__main__':
-    api_base.run()
