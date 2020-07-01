@@ -159,7 +159,7 @@ def set_links(dataset):
     "Set the links in the dataset."
     # Convert 'owner' to an object with a link to the user account.
     dataset["owner"] = {"username": dataset["owner"],
-                        "href": flask.url_for("api_user.display",
+                        "href": flask.url_for("api_user.serve",
                                               username=dataset["owner"],
                                               _external=True)}
     # Convert the '_attachments' item to links to contents.

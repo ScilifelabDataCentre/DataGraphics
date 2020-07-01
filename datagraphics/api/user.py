@@ -21,13 +21,13 @@ def all():
     users = []
     for user in datagraphics.user.get_users():
         users.append({"username": user["username"],
-                      "href": flask.url_for(".display",
+                      "href": flask.url_for(".serve",
                                             username=user["username"],
                                             _external=True)})
     return utils.jsonify({"users": users})
 
 @blueprint.route("/<name:username>")
-def display(username):          # XXX change to 'serve'
+def serve(username):
     "Information about the given user."
     user = datagraphics.user.get_user(username=username)
     if not user:
@@ -53,7 +53,7 @@ def logs(username):
         flask.abort(http.client.FORBIDDEN)
     entity = {"type": "user",
               "username": user["username"],
-              "href": flask.url_for(".display",
+              "href": flask.url_for(".serve",
                                     username=user["username"],
                                     _external=True)}
     return utils.jsonify({"entity": entity,

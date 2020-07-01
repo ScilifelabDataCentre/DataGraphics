@@ -116,7 +116,7 @@ def set_links(graphic):
     "Set the links in the dataset."
     # Convert 'owner' to an object with a link to the user account.
     graphic["owner"] = {"username": graphic["owner"],
-                        "href": flask.url_for("api_user.display",
+                        "href": flask.url_for("api_user.serve",
                                               username=graphic["owner"],
                                               _external=True)}
     # Convert dataset IUID to href and IUID.

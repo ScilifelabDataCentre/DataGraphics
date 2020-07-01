@@ -49,7 +49,7 @@ def root():
                                                             _external=True)}
         items["user"] = {
             "username": flask.g.current_user["username"],
-            "href": flask.url_for("api_user.display",
+            "href": flask.url_for("api_user.serve",
                                   username=flask.g.current_user["username"],
                                   _external=True)
         }

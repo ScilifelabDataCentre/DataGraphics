@@ -68,8 +68,9 @@ class Base(unittest.TestCase):
         return self.session.delete(url)
 
     def check_schema(self, response):
-        """If there is JSON schema linked to in the response header,
-        check the response JSON data. Return the response JSON.
+        """ Return the response JSON.
+        If there is link to the JSON Schema in the response header,
+        check the response JSON data against it.
         """
         result = response.json()
         try:
