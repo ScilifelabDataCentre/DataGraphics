@@ -55,7 +55,9 @@ def serve(iuid):
         if not allow_view(graphic):
             flask.abort(http.client.FORBIDDEN)
         set_links(graphic)
-        return utils.jsonify(graphic)
+        return utils.jsonify(graphic,
+                             schema_url=flask.url_for("api_schema.graphic",
+                                                      _external=True))
 
     elif utils.http_POST(csrf=False):
         if not allow_edit(graphic):
@@ -91,12 +93,35 @@ def serve(iuid):
             flask.g.db.delete(log)
         return "", http.client.NO_CONTENT
 
+@blueprint.route("/<iuid:iuid>/logs")
+def logs(iuid):
+    "Return all log entries for the given graphic."
+    try:
+        graphic = get_graphic(iuid)
+    except ValueError as error:
+        flask.abort(http.client.NOT_FOUND)
+    if not allow_view(graphic):
+        flask.abort(http.client.FORBIDDEN)
+    entity = {"type": "graphic",
+              "iuid": iuid,
+              "href": flask.url_for("api_graphic.serve",
+                                    iuid=iuid,
+                                    _external=True)}
+    return utils.jsonify({"entity": entity,
+                          "logs": utils.get_logs(graphic["_id"])},
+                         schema_url=flask.url_for("api_schema.logs",
+                                                  _external=True))
+
 def set_links(graphic):
     "Convert dataset IUID to href and IUID."
     graphic["dataset"] = {"iuid": graphic["dataset"],
                           "href": flask.url_for("api_dataset.serve",
                                                 iuid=graphic["dataset"],
                                                 _external=True)}
+    # Add link to logs.
+    graphic["logs"] = {"href": flask.url_for(".logs", 
+                                             iuid=graphic["_id"],
+                                             _external=True)}
 
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,

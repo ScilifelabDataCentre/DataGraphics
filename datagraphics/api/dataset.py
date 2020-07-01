@@ -55,7 +55,9 @@ def serve(iuid):
         if not allow_view(dataset):
             flask.abort(http.client.FORBIDDEN)
         set_links(dataset)
-        return utils.jsonify(dataset)
+        return utils.jsonify(dataset,
+                             schema_url=flask.url_for("api_schema.dataset",
+                                                      _external=True))
 
     elif utils.http_POST(csrf=False):
         if not allow_edit(dataset):
@@ -135,6 +137,25 @@ def content(iuid, ext):
             return str(error), http.client.BAD_REQUEST
         return "", http.client.NO_CONTENT
 
+@blueprint.route("/<iuid:iuid>/logs")
+def logs(iuid):
+    "Return all log entries for the given dataset."
+    try:
+        dataset = get_dataset(iuid)
+    except ValueError as error:
+        flask.abort(http.client.NOT_FOUND)
+    if not allow_view(dataset):
+        flask.abort(http.client.FORBIDDEN)
+    entity = {"type": "dataset",
+              "iuid": iuid,
+              "href": flask.url_for("api_dataset.serve",
+                                    iuid=iuid,
+                                    _external=True)}
+    return utils.jsonify({"entity": entity,
+                          "logs": utils.get_logs(dataset["_id"])},
+                         schema_url=flask.url_for("api_schema.logs",
+                                                  _external=True))
+
 def set_links(dataset):
     "Set the links in the dataset."
     # Convert 'owner' to an object with a link to the user account.
@@ -143,22 +164,20 @@ def set_links(dataset):
                                               username=dataset["owner"],
                                               _external=True)}
     # Convert the '_attachments' item to links to contents.
-    try:
-        atts = dataset.pop("_attachments")
-    except KeyError:
-        return
-    dataset["content"] = {
-        "csv": {"href": flask.url_for("api_dataset.content",
-                                      iuid=dataset["_id"],
-                                      ext="csv",
-                                      _external=True),
-                "size": atts["data.csv"]["length"]},
-        "json": {"href": flask.url_for("api_dataset.content",
-                                       iuid=dataset["_id"],
-                                       ext="json",
-                                       _external=True),
-                 "size": atts["data.json"]["length"]}
-    }
+    atts = dataset.pop("_attachments", None)
+    if atts:
+        dataset["content"] = {
+            "csv": {"href": flask.url_for("api_dataset.content",
+                                          iuid=dataset["_id"],
+                                          ext="csv",
+                                          _external=True),
+                    "size": atts["data.csv"]["length"]},
+            "json": {"href": flask.url_for("api_dataset.content",
+                                           iuid=dataset["_id"],
+                                           ext="json",
+                                           _external=True),
+                     "size": atts["data.json"]["length"]}
+        }
     # Add the links to the graphics for the dataset.
     dataset["graphics"] = [{"title": g["title"],
                             "modified": g["modified"],
@@ -166,6 +185,10 @@ def set_links(dataset):
                                                   iuid=g["_id"],
                                                   _external=True)}
                            for g in get_graphics(dataset)]
+    # Add link to logs.
+    dataset["logs"] = {"href": flask.url_for(".logs", 
+                                             iuid=dataset["_id"],
+                                             _external=True)}
 
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
@@ -190,11 +213,19 @@ schema = {
                         "type": "string",
                         "enum": ["string", "integer", "number", "boolean"]
                     },
+                    "vega_lite_types": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": constants.VEGA_LITE_TYPES
+                        }
+                    },
                     "n_null": {"type": "integer", "minimum": 0},
                     "n_distinct": {"type": "integer", "minimum": 0},
-                    "min": {"type": "number"},
-                    "max": {"type": "number"},
+                    "min": {"type": ["number", "string"]},
+                    "max": {"type": ["number", "string"]},
                     "mean": {"type": "number"},
+                    "median": {"type": "number"},
                     "stdev": {"type": "number", "minimum": 0.0}
                 },
                 "required": ["type", "n_null"],
@@ -235,9 +266,11 @@ schema = {
                 "required": ["title", "modified", "href"],
                 "additionalProperties": False
             }
-        }
+        },
+        "logs": schema_definitions.logs_link
     },
     "required": ["$id", "timestamp", "iuid", "created", "modified",
-                 "owner", "title", "description", "public"],
+                 "owner", "title", "description", "public",
+                 "meta", "graphics", "logs"],
     "additionalProperties": False
 }

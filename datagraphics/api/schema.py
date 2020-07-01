@@ -72,3 +72,30 @@ def user():
     "JSON schema for API User resource."
     return utils.jsonify(api_user.schema,
                          schema_url=constants.JSON_SCHEMA_URL)
+
+@blueprint.route("logs")
+def logs():
+    "JSON schema for API Logs resource."
+    return utils.jsonify(logs_schema,
+                         schema_url=constants.JSON_SCHEMA_URL)
+
+logs_schema = {
+    "$schema": constants.JSON_SCHEMA_URL,
+    "title": "JSON Schema for API Logs resource.",
+    "type": "object",
+    "properties": {
+        "$id": {"type": "string", "format": "uri"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "entity": {
+            "type": "object"
+        },
+        "logs": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        }
+    },
+    "required": ["$id", "timestamp", "entity", "logs"],
+    "additionalProperties": False
+}

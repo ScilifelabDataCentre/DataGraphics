@@ -25,6 +25,16 @@ user = {
     "additionalProperties": False
 }
 
+logs_link = {
+    "title": "Link to the log of changes for the entity.",
+    "type": "object",
+    "properties": {
+        "href": {"type": "string", "format": "uri"}
+    },
+    "required": ["href"],
+    "additionalProperties": False
+}
+
 property_names = {"pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"}
 
 iobody = {

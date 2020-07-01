@@ -22,18 +22,17 @@ def all():
     return utils.jsonify({"users": users})
 
 @blueprint.route("/<name:username>")
-def display(username):
+def display(username):          # XXX change to 'serve'
     "Information about the given user."
     user = datagraphics.user.get_user(username=username)
     if not user:
         flask.abort(http.client.NOT_FOUND)
+    # XXX Use 'allow' function
     if not datagraphics.user.am_admin_or_self(user):
         flask.abort(http.client.FORBIDDEN)
     user.pop("password", None)
     user.pop("apikey", None)
-    user["logs"] = {"href": flask.url_for(".logs", 
-                                          username=user["username"],
-                                          _external=True)}
+    set_links(user)
     return utils.jsonify(user)
 
 @blueprint.route("/<name:username>/logs")
@@ -45,8 +44,18 @@ def logs(username):
     # XXX Use 'allow' function
     if not datagraphics.user.am_admin_or_self(user):
         flask.abort(http.client.FORBIDDEN)
-    return utils.jsonify({"user": get_user_basic(user),
-                          "logs": utils.get_logs(user["_id"])})
+    entity = {"type": "user"}
+    entity.update(get_user_basic(user))
+    return utils.jsonify({"entity": entity,
+                          "logs": utils.get_logs(user["_id"])},
+                         schema_url=flask.url_for("api_schema.logs",
+                                                  _external=True))
+
+def set_links(user):
+    "Set the links in the user object."
+    user["logs"] = {"href": flask.url_for(".logs", 
+                                          username=user["username"],
+                                          _external=True)}
 
 def get_user_basic(user):
     "Return the basic JSON data for a user."
@@ -60,6 +69,25 @@ schema = {
     "title": "JSON Schema for API User resource.",
     "type": "object",
     "properties": {
-        # XXX
+        "$id": {"type": "string", "format": "uri"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "iuid": {"type": "string", "pattern": "^[0-9a-f]{32,32}$"},
+        "created": {"type": "string", "format": "date-time"},
+        "modified": {"type": "string", "format": "date-time"},
+        "status": {
+            "type": "string",
+            "enum": ["pending", "enabled", "disabled"]
+        },
+        "username": {"type": "string"},
+        "email": {"type": "string", "format": "email"},
+        "role": {"type": "string", "enum": ["admin", "user"]},
+        "logs": {
+            "type": "object",
+            "properties": {
+                "href": {"type": "string", "format": "uri"}
+            },
+            "required": ["href"],
+            "additionalProperties": False,
+        }
     }
 }
