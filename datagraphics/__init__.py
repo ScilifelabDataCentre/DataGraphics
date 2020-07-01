@@ -3,13 +3,13 @@
 import re
 import string
 
-__version__ = "0.5.2"
+__version__ = "0.5.3"
 
 class Constants:
     VERSION = __version__
     URL     = "https://github.com/pekrau/DataGraphics"
 
-    # Currently, these are hardwired; configurability is not meaningful.
+    # Currently, these are hardwired.
     BOOTSTRAP_VERSION    = "4.3.1"
     BOOTSTRAP_URL        = "https://getbootstrap.com/"
     JQUERY_VERSION       = "3.3.1"

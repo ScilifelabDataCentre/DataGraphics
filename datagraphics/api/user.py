@@ -6,7 +6,9 @@ import flask
 from flask_cors import CORS
 
 import datagraphics.user
+from datagraphics import constants
 from datagraphics import utils
+from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_user", __name__)
 
@@ -53,3 +55,15 @@ def get_user_basic(user):
             "href": flask.url_for(".display",
                                   username=user["username"],
                                   _external=True)}
+
+schema = {
+    "$schema": constants.JSON_SCHEMA_URL,
+    "title": "JSON Schema for API User resource.",
+    "definitions": {
+        "link": schema_definitions.link,
+    },
+    "type": "object",
+    "properties": {
+        # XXX
+    }
+}

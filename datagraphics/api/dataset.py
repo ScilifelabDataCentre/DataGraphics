@@ -38,6 +38,7 @@ def create():
     dataset["$id"] = flask.url_for("api_dataset.serve",
                                    iuid=dataset["_id"],
                                    _external=True)
+    set_links(dataset)
     return utils.jsonify(dataset)
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
@@ -53,8 +54,7 @@ def serve(iuid):
     if utils.http_GET():
         if not allow_view(dataset):
             flask.abort(http.client.FORBIDDEN)
-        set_content_links(dataset)
-        set_graphics_links(dataset)
+        set_links(dataset)
         return utils.jsonify(dataset)
 
     elif utils.http_POST(csrf=False):
@@ -82,9 +82,9 @@ def serve(iuid):
         except ValueError as error:
             return str(error), http.client.BAD_REQUEST
         dataset = saver.doc
-        set_content_links(dataset)
-        set_graphics_links(dataset)
-        return utils.jsonify(dataset)
+        set_links(dataset)
+        url = flask.url_for("api_schema.dataset", _external=True)
+        return utils.jsonify(dataset, schema_url=url)
 
     elif utils.http_DELETE():
         if not possible_delete(dataset):
@@ -138,8 +138,14 @@ def content(iuid, ext):
             return str(error), http.client.BAD_REQUEST
         return "", http.client.NO_CONTENT
 
-def set_content_links(dataset):
-    "Convert the '_attachments' item to links to contents."
+def set_links(dataset):
+    "Set the links in the dataset."
+    # Convert 'owner' to an object with a link to the user account.
+    dataset["owner"] = {"username": dataset["owner"],
+                        "href": flask.url_for("api_user.display",
+                                              username=dataset["owner"],
+                                              _external=True)}
+    # Convert the '_attachments' item to links to contents.
     try:
         atts = dataset.pop("_attachments")
     except KeyError:
@@ -156,9 +162,7 @@ def set_content_links(dataset):
                                        _external=True),
                  "size": atts["data.json"]["length"]}
     }
-
-def set_graphics_links(dataset):
-    "Add the links to the graphics for the dataset."
+    # Add the links to the graphics for the dataset.
     dataset["graphics"] = [{"title": g["title"],
                             "modified": g["modified"],
                             "href": flask.url_for("api_graphic.serve",
@@ -174,6 +178,72 @@ schema = {
     },
     "type": "object",
     "properties": {
-        # XXX
-    }
+        "$id": {"type": "string", "format": "uri"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "iuid": {"type": "string", "pattern": "^[0-9a-f]{32,32}$"},
+        "created": {"type": "string", "format": "date-time"},
+        "modified": {"type": "string", "format": "date-time"},
+        "owner": schema_definitions.user,
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "public": {"type": "boolean"},
+        "meta": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": ["string", "integer", "number", "boolean"]
+                    },
+                    "n_null": {"type": "integer", "minimum": 0},
+                    "n_distinct": {"type": "integer", "minimum": 0},
+                    "min": {"type": "number"},
+                    "max": {"type": "number"},
+                    "mean": {"type": "number"},
+                    "stdev": {"type": "number", "minimum": 0.0}
+                },
+                "required": ["type", "n_null"],
+                "additionalProperties": False
+            }
+        },
+        "n_records": {"type": "integer", "minimum": 0},
+        "content": {
+            "type": "object",
+            "properties": {
+                "csv": {
+                    "type": "object",
+                    "properties": {
+                        "href": {"type": "string", "format": "uri"},
+                        "size": {"type": "integer", "minimum": 0}
+                    }
+                },
+                "json": {
+                    "type": "object",
+                    "properties": {
+                        "href": {"type": "string", "format": "uri"},
+                        "size": {"type": "integer", "minimum": 0}
+                    }
+                }
+            },
+            "required": ["csv", "json"],
+            "additionalProperties": False
+        },
+        "graphics": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "modified":  {"type": "string", "format": "date-time"},
+                    "href":  {"type": "string", "format": "uri"}
+                },
+                "required": ["title", "modified", "href"],
+                "additionalProperties": False
+            }
+        }
+    },
+    "required": ["$id", "timestamp", "iuid", "created", "modified",
+                 "owner", "title", "description", "public"],
+    "additionalProperties": False
 }

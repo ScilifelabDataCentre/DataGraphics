@@ -87,6 +87,7 @@ class Base(unittest.TestCase):
                 self.assertEqual(r.status_code, http.client.OK)
                 schema = r.json()
             self.schemas[url] = schema
+        print("checking >>>", url)
         self.validate_schema(result, schema)
         return result
 
