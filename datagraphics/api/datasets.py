@@ -11,6 +11,7 @@ from datagraphics.datasets import (get_datasets_public,
 import datagraphics.user
 from datagraphics import constants
 from datagraphics import utils
+from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_datasets", __name__)
 
@@ -20,10 +21,10 @@ CORS(blueprint, supports_credentials=True)
 def public():
     datasets = []
     for dataset in get_datasets_public(full=True):
-        datasets.append({"title": dataset["title"],
-                         "href": flask.url_for("api_dataset.serve",
+        datasets.append({"href": flask.url_for("api_dataset.serve",
                                                iuid=dataset["_id"],
                                                _external=True),
+                         "title": dataset["title"],
                          "owner": dataset["owner"],
                          "modified": dataset["modified"]})
     return utils.jsonify({"datasets": datasets},
@@ -36,10 +37,10 @@ def user(username):
         flask.abort(http.client.FORBIDDEN)
     datasets = []
     for iuid, title, modified in get_datasets_owner(username):
-        datasets.append({"title": title,
-                         "href": flask.url_for("api_dataset.serve",
+        datasets.append({"href": flask.url_for("api_dataset.serve",
                                                iuid=iuid,
                                                _external=True),
+                         "title": title,
                          "modified": modified})
     return utils.jsonify({"datasets": datasets},
                          schema=flask.url_for("api_schema.datasets",
@@ -51,10 +52,10 @@ def all():
         flask.abort(http.client.FORBIDDEN)
     datasets = []
     for iuid, title, owner, modified in get_datasets_all():
-        datasets.append({"title": title,
-                         "href": flask.url_for("api_dataset.serve",
+        datasets.append({"href": flask.url_for("api_dataset.serve",
                                                iuid=iuid,
                                                _external=True),
+                         "title": title,
                          "owner": owner,
                          "modified": modified})
     return utils.jsonify({"datasets": datasets},
@@ -70,17 +71,7 @@ schema = {
         "timestamp": {"type": "string", "format": "date-time"},
         "datasets": {
             "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "href": {"type": "string", "format": "uri"},
-                    "modified": {"type": "string", "format": "date-time"},
-                    "owner": {"type": "string"}
-                },
-                "required": ["title", "href", "modified"],
-                "additionalProperties": False
-            }
+            "items": schema_definitions.link
         }
     },
     "required": ["$id", "timestamp", "datasets"],

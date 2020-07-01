@@ -11,6 +11,7 @@ from datagraphics.graphics import (get_graphics_public,
 import datagraphics.user
 from datagraphics import constants
 from datagraphics import utils
+from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_graphics", __name__)
 
@@ -20,10 +21,10 @@ CORS(blueprint, supports_credentials=True)
 def public():
     graphics = []
     for graphic in get_graphics_public(full=True):
-        graphics.append({"title": graphic["title"],
-                         "href": flask.url_for("api_graphic.serve",
+        graphics.append({"href": flask.url_for("api_graphic.serve",
                                                iuid=graphic["_id"],
                                                _external=True),
+                         "title": graphic["title"],
                          "owner": graphic["owner"],
                          "modified": graphic["modified"]})
     return utils.jsonify({"graphics": graphics},
@@ -36,10 +37,10 @@ def user(username):
         flask.abort(http.client.FORBIDDEN)
     graphics = []
     for iuid, title, modified in get_graphics_owner(username):
-        graphics.append({"title": title,
-                         "href": flask.url_for("api_graphic.serve",
+        graphics.append({"href": flask.url_for("api_graphic.serve",
                                                iuid=iuid,
                                                _external=True),
+                         "title": title,
                          "modified": modified})
     return utils.jsonify({"graphics": graphics},
                          schema=flask.url_for("api_schema.graphics",
@@ -51,10 +52,10 @@ def all():
         flask.abort(http.client.FORBIDDEN)
     graphics = []
     for iuid, title, owner, modified in get_graphics_all():
-        graphics.append({"title": title,
-                         "href": flask.url_for("api_graphic.serve",
+        graphics.append({"href": flask.url_for("api_graphic.serve",
                                                iuid=iuid,
                                                _external=True),
+                         "title": title,
                          "owner": owner,
                          "modified": modified})
     return utils.jsonify({"graphics": graphics},
@@ -70,17 +71,7 @@ schema = {
         "timestamp": {"type": "string", "format": "date-time"},
         "graphics": {
             "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "href": {"type": "string", "format": "uri"},
-                    "modified": {"type": "string", "format": "date-time"},
-                    "owner": {"type": "string"}
-                },
-                "required": ["title", "href", "modified"],
-                "additionalProperties": False
-            }
+            "items": schema_definitions.link
         }
     },
     "required": ["$id", "timestamp", "graphics"],

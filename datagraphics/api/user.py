@@ -8,6 +8,7 @@ from flask_cors import CORS
 import datagraphics.user
 from datagraphics import constants
 from datagraphics import utils
+from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_user", __name__)
 
@@ -70,13 +71,6 @@ schema = {
         "username": {"type": "string"},
         "email": {"type": "string", "format": "email"},
         "role": {"type": "string", "enum": ["admin", "user"]},
-        "logs": {
-            "type": "object",
-            "properties": {
-                "href": {"type": "string", "format": "uri"}
-            },
-            "required": ["href"],
-            "additionalProperties": False,
-        }
+        "logs": schema_definitions.logs_link
     }
 }

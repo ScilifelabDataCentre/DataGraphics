@@ -4,8 +4,11 @@ link = {
     "title": "A link to a resource.",
     "type": "object",
     "properties": {
-        "title": {"type": "string"},
         "href": {"type": "string", "format": "uri"},
+        "title": {"type": "string"},
+        "username": {"type": "string"},
+        "owner": {"type": "string"},
+        "modified": {"type": "string", "format": "date-time"},
         "count": {"type": "integer"},
         "content-type": {"type": "string", "default": "application/json"},
         "format": {"type": "string", "default": "json"}
