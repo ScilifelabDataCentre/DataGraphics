@@ -9,6 +9,7 @@ from datagraphics.graphics import (get_graphics_public,
                                    get_graphics_all,
                                    get_graphics_owner)
 import datagraphics.user
+from datagraphics import constants
 from datagraphics import utils
 
 blueprint = flask.Blueprint("api_graphics", __name__)
@@ -25,7 +26,9 @@ def public():
                                                _external=True),
                          "owner": graphic["owner"],
                          "modified": graphic["modified"]})
-    return utils.jsonify({"graphics": graphics})
+    return utils.jsonify({"graphics": graphics},
+                         schema=flask.url_for("api_schema.graphics",
+                                              _external=True))
 
 @blueprint.route("/user/<username>")
 def user(username):
@@ -38,7 +41,9 @@ def user(username):
                                                iuid=iuid,
                                                _external=True),
                          "modified": modified})
-    return utils.jsonify({"graphics": graphics})
+    return utils.jsonify({"graphics": graphics},
+                         schema=flask.url_for("api_schema.graphics",
+                                              _external=True))
 
 @blueprint.route("/all")
 def all():
@@ -52,4 +57,32 @@ def all():
                                                _external=True),
                          "owner": owner,
                          "modified": modified})
-    return utils.jsonify({"graphics": graphics})
+    return utils.jsonify({"graphics": graphics},
+                         schema=flask.url_for("api_schema.graphics",
+                                              _external=True))
+
+schema = {
+    "$schema": constants.JSON_SCHEMA_URL,
+    "title": "JSON Schema for API Graphics resource.",
+    "type": "object",
+    "properties": {
+        "$id": {"type": "string", "format": "uri"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "graphics": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "href": {"type": "string", "format": "uri"},
+                    "modified": {"type": "string", "format": "date-time"},
+                    "owner": {"type": "string"}
+                },
+                "required": ["title", "href", "modified"],
+                "additionalProperties": False
+            }
+        }
+    },
+    "required": ["$id", "timestamp", "graphics"],
+    "additionalProperties": False
+}

@@ -26,7 +26,9 @@ def public():
                                                _external=True),
                          "owner": dataset["owner"],
                          "modified": dataset["modified"]})
-    return utils.jsonify({"datasets": datasets})
+    return utils.jsonify({"datasets": datasets},
+                         schema=flask.url_for("api_schema.datasets",
+                                              _external=True))
 
 @blueprint.route("/user/<username>")
 def user(username):
@@ -39,7 +41,9 @@ def user(username):
                                                iuid=iuid,
                                                _external=True),
                          "modified": modified})
-    return utils.jsonify({"datasets": datasets})
+    return utils.jsonify({"datasets": datasets},
+                         schema=flask.url_for("api_schema.datasets",
+                                              _external=True))
 
 @blueprint.route("/all")
 def all():
@@ -53,7 +57,9 @@ def all():
                                                _external=True),
                          "owner": owner,
                          "modified": modified})
-    return utils.jsonify({"datasets": datasets})
+    return utils.jsonify({"datasets": datasets},
+                         schema=flask.url_for("api_schema.datasets",
+                                              _external=True))
 
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
@@ -69,7 +75,8 @@ schema = {
                 "properties": {
                     "title": {"type": "string"},
                     "href": {"type": "string", "format": "uri"},
-                    "modified": {"type": "string", "format": "date-time"}
+                    "modified": {"type": "string", "format": "date-time"},
+                    "owner": {"type": "string"}
                 },
                 "required": ["title", "href", "modified"],
                 "additionalProperties": False
