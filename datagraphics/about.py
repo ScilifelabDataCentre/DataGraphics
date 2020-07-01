@@ -68,5 +68,6 @@ def schema():
         (flask.url_for("api_schema.dataset", _external=True), "API Dataset"),
         (flask.url_for("api_schema.datasets", _external=True), "API Datasets"),
         (flask.url_for("api_schema.graphic", _external=True), "API Graphic"),
-        (flask.url_for("api_schema.user", _external=True), "API User")]
+        (flask.url_for("api_schema.user", _external=True), "API User"),
+        (flask.url_for("api_schema.logs", _external=True), "API Logs")]
     return flask.render_template('about/schema.html', schemas=schemas)

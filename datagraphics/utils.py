@@ -292,7 +292,7 @@ def accept_json():
     return best == constants.JSON_MIMETYPE and \
         acc[best] > acc[constants.HTML_MIMETYPE]
 
-def jsonify(data, id=None, timestamp=True, schema_url=None):
+def jsonify(data, id=None, timestamp=True, schema=None):
     """Return a Response object containing the JSON of 'data'.
     Fix up the JSON structure for external representation.
     Optionally add a header Link to the schema given by its URL.
@@ -312,8 +312,8 @@ def jsonify(data, id=None, timestamp=True, schema_url=None):
     result.pop("_rev", None)
     result.pop("doctype", None)
     response = flask.jsonify(result)
-    if schema_url:
-        response.headers.add('Link', schema_url, rel='schema')
+    if schema:
+        response.headers.add('Link', schema, rel='schema')
     return response
 
 

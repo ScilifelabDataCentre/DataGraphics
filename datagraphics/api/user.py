@@ -18,7 +18,12 @@ def all():
     "Information about all users."
     if not flask.g.am_admin:
         flask.abort(http.client.FORBIDDEN)
-    users = [get_user_basic(u) for u in datagraphics.user.get_users()]
+    users = []
+    for user in datagraphics.user.get_users():
+        users.append({"username": user["username"],
+                      "href": flask.url_for(".display",
+                                            username=user["username"],
+                                            _external=True)})
     return utils.jsonify({"users": users})
 
 @blueprint.route("/<name:username>")
@@ -33,7 +38,9 @@ def display(username):          # XXX change to 'serve'
     user.pop("password", None)
     user.pop("apikey", None)
     set_links(user)
-    return utils.jsonify(user)
+    return utils.jsonify(user,
+                         schema=flask.url_for("api_schema.user",
+                                              _external=True))
 
 @blueprint.route("/<name:username>/logs")
 def logs(username):
@@ -44,8 +51,11 @@ def logs(username):
     # XXX Use 'allow' function
     if not datagraphics.user.am_admin_or_self(user):
         flask.abort(http.client.FORBIDDEN)
-    entity = {"type": "user"}
-    entity.update(get_user_basic(user))
+    entity = {"type": "user",
+              "username": user["username"],
+              "href": flask.url_for(".display",
+                                    username=user["username"],
+                                    _external=True)}
     return utils.jsonify({"entity": entity,
                           "logs": utils.get_logs(user["_id"])},
                          schema_url=flask.url_for("api_schema.logs",
@@ -56,13 +66,6 @@ def set_links(user):
     user["logs"] = {"href": flask.url_for(".logs", 
                                           username=user["username"],
                                           _external=True)}
-
-def get_user_basic(user):
-    "Return the basic JSON data for a user."
-    return {"username": user["username"],
-            "href": flask.url_for(".display",
-                                  username=user["username"],
-                                  _external=True)}
 
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
