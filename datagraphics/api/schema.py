@@ -85,12 +85,54 @@ logs_schema = {
         "$id": {"type": "string", "format": "uri"},
         "timestamp": {"type": "string", "format": "date-time"},
         "entity": {
-            "type": "object"
+            "oneOf": [
+                {"type": "object",
+                 "properties": {
+                     "type": {"type": "string", "enum": ["dataset", "graphic"]},
+                     "iuid": {"type": "string", "pattern": "^[0-9a-f]{32,32}$"},
+                     "href": {"type": "string", "format": "uri"}
+                 },
+                 "required": ["type", "iuid", "href"],
+                 "additionalProperties": False
+                },
+                {"type": "object",
+                 "properties": {
+                     "type": {"const": "user"},
+                     "username": {"type": "string"},
+                     "href": {"type": "string", "format": "uri"}
+                 },
+                 "required": ["type", "username", "href"],
+                 "additionalProperties": False
+                }
+            ]
         },
         "logs": {
             "type": "array",
             "items": {
-                "type": "object"
+                "type": "object",
+                "properties": {
+                    "added": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                        },
+                    "attachments_added": {
+                        "type": "array",
+                        "items": {"type": "object"}
+                    },
+                    "attachments_deleted": {
+                        "type": "array",
+                        "items": {"type": "object"}
+                    },
+                    "updated": {"type": "object"},
+                    "removed": {"type": "object"},
+                    "timestamp": {"type": "string", "format": "date-time"},
+                    "username": {"type": ["null", "string"]},
+                    "remote_addr": {"type": ["null", "string"]},
+                    "user_agent": {"type": ["null", "string"]}
+                },
+                "required": ["added", "updated", "removed", "timestamp",
+                             "username", "remote_addr", "user_agent"],
+                "additionalProperties": False
             }
         }
     },
