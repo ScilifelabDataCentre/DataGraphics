@@ -13,19 +13,6 @@ blueprint = flask.Blueprint("api_user", __name__)
 
 CORS(blueprint, supports_credentials=True)
 
-@blueprint.route("/")
-def all():
-    "Information about all users."
-    if not flask.g.am_admin:
-        flask.abort(http.client.FORBIDDEN)
-    users = []
-    for user in datagraphics.user.get_users():
-        users.append({"username": user["username"],
-                      "href": flask.url_for(".serve",
-                                            username=user["username"],
-                                            _external=True)})
-    return utils.jsonify({"users": users})
-
 @blueprint.route("/<name:username>")
 def serve(username):
     "Information about the given user."

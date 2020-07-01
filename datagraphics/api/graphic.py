@@ -42,7 +42,9 @@ def create():
                                    iuid=graphic["_id"],
                                    _external=True)
     set_links(graphic)
-    return utils.jsonify(graphic)
+    return utils.jsonify(graphic,
+                         schema=flask.url_for("api_schema.graphic",
+                                              _external=True))
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
@@ -84,7 +86,11 @@ def serve(iuid):
                     pass
         except ValueError as error:
             return str(error), http.client.BAD_REQUEST
-        return flask.redirect(flask.url_for(".serve", iuid=iuid))
+        graphic = saver.doc
+        set_links(graphic)
+        return utils.jsonify(graphic,
+                             schema=flask.url_for("api_schema.graphic",
+                                                  _external=True))
 
     elif utils.http_DELETE():
         if not allow_delete(graphic):

@@ -11,14 +11,15 @@ from datagraphics.api import datasets as api_datasets
 from datagraphics.api import graphic as api_graphic
 from datagraphics.api import graphics as api_graphics
 from datagraphics.api import user as api_user
+from datagraphics.api import users as api_users
 
 blueprint = flask.Blueprint("api_schema", __name__)
 
 @blueprint.route("")
-def schema():
-    "Map of available JSON schemas."
+def all():
+    "Map of all JSON schemas for DataGraphics."
     return utils.jsonify(
-        {"title": schema.__doc__,
+        {"title": "Map of available JSON schemas.",
          "schemas": {
              "root": {"href": flask.url_for("api_schema.root", _external=True),
                       "title": api_root.schema["title"]},
@@ -40,11 +41,19 @@ def schema():
              "user": {"href": flask.url_for("api_schema.user",
                                             _external=True),
                       "title": api_user.schema["title"]},
+             "users": {"href": flask.url_for("api_schema.users",
+                                             _external=True),
+                       "title": api_users.schema["title"]},
+             "schemas": {"href": flask.url_for("api_schema.schemas",
+                                               _external=True),
+                         "title": schema["title"]},
              "logs": {"href": flask.url_for("api_schema.logs",
                                             _external=True),
                       "title": logs_schema["title"]},
          }
-        })
+        },
+        schema=flask.url_for("api_schema.schemas", _external=True)
+    )
 
 @blueprint.route("root")
 def root():
@@ -81,10 +90,58 @@ def user():
     "JSON schema for API User resource."
     return utils.jsonify(api_user.schema, schema=constants.JSON_SCHEMA_URL)
 
+@blueprint.route("users")
+def users():
+    "JSON schema for API Users resource."
+    return utils.jsonify(api_users.schema, schema=constants.JSON_SCHEMA_URL)
+
 @blueprint.route("logs")
 def logs():
     "JSON schema for API Logs resource."
     return utils.jsonify(logs_schema, schema=constants.JSON_SCHEMA_URL)
+
+@blueprint.route("schemas")
+def schemas():
+    "JSON schema for API Schema resource."
+    return utils.jsonify(schema, schema=constants.JSON_SCHEMA_URL)
+
+
+schema = {
+    "$schema": constants.JSON_SCHEMA_URL,
+    "title": "JSON Schema for API Logs resource.",
+    "definitions": {
+        "link": {
+            "title": "A link to a resource.",
+            "type": "object",
+            "properties": {
+                "href": {"type": "string", "format": "uri"},
+                "title": {"type": "string"}
+            },
+            "required": ["href"],
+            "additionalProperties": False
+        }
+    },
+    "type": "object",
+    "properties": {
+        "$id": {"type": "string", "format": "uri"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "title": {"type": "string"},
+        "schemas": {
+            "properties": {
+                "root": {"$ref": "#/definitions/link"},
+                "about": {"$ref": "#/definitions/link"},
+                "dataset": {"$ref": "#/definitions/link"},
+                "datasets": {"$ref": "#/definitions/link"},
+                "graphic": {"$ref": "#/definitions/link"},
+                "graphics": {"$ref": "#/definitions/link"},
+                "user": {"$ref": "#/definitions/link"},
+                "users": {"$ref": "#/definitions/link"},
+                "schemas": {"$ref": "#/definitions/link"},
+                "logs": {"$ref": "#/definitions/link"}
+            }
+        }
+    }
+}
 
 logs_schema = {
     "$schema": constants.JSON_SCHEMA_URL,

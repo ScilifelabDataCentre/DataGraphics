@@ -25,7 +25,7 @@ def root():
         "version": constants.VERSION,
         "title": __doc__,
         "schemas": {
-            "href": flask.url_for("api_schema.schema", _external=True)},
+            "href": flask.url_for("api_schema.all", _external=True)},
         "software": {
             "href": flask.url_for("api_about.software", _external=True)},
         "datasets": {
@@ -61,7 +61,7 @@ def root():
                                     "href": flask.url_for("api_graphics.all",
                                                           _external=True)}
         items["users"] = {
-            "all": {"href": flask.url_for("api_user.all", _external=True)}
+            "all": {"href": flask.url_for("api_users.all", _external=True)}
         }
     return utils.jsonify(items, 
                          schema=flask.url_for("api_schema.root",_external=True))
@@ -139,16 +139,7 @@ schema = {
         "user": schema_definitions.user,
         "operations": schema_definitions.operations
     },
-    "required": [
-        "$id",
-        "timestamp",
-        "title",
-        "version",
-        "schemas",
-        "software",
-        "datasets",
-        "graphics",
-        # XXX "operations"
-    ],
+    "required": ["$id", "timestamp", "title", "version",
+                 "schemas", "software", "datasets", "graphics"],
     "additionalProperties": False
 }

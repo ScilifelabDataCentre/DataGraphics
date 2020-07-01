@@ -59,16 +59,16 @@ def settings():
     config.pop("VEGA_LITE_SCHEMA", None)
     return flask.render_template("about/settings.html",
                                  items=sorted(config.items()))
-@blueprint.route('/schema')
-def schema():
+@blueprint.route('/schemas')
+def schemas():
     "Page with links to all JSON schema for the API."
     schemas = [
         (flask.url_for("api_schema.root", _external=True), "API Root"),
-        (flask.url_for("api_schema.schema", _external=True), "API Schema"),
         (flask.url_for("api_schema.dataset", _external=True), "API Dataset"),
         (flask.url_for("api_schema.datasets", _external=True), "API Datasets"),
         (flask.url_for("api_schema.graphic", _external=True), "API Graphic"),
         (flask.url_for("api_schema.graphics", _external=True), "API Graphics"),
         (flask.url_for("api_schema.user", _external=True), "API User"),
+        (flask.url_for("api_schema.all", _external=True), "API Schemas"),
         (flask.url_for("api_schema.logs", _external=True), "API Logs")]
-    return flask.render_template('about/schema.html', schemas=schemas)
+    return flask.render_template('about/schemas.html', schemas=schemas)

@@ -39,7 +39,9 @@ def create():
                                    iuid=dataset["_id"],
                                    _external=True)
     set_links(dataset)
-    return utils.jsonify(dataset)
+    return utils.jsonify(dataset,
+                         schema=flask.url_for("api_schema.dataset",
+                                              _external=True))
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
 def serve(iuid):
@@ -83,7 +85,11 @@ def serve(iuid):
                     pass
         except ValueError as error:
             return str(error), http.client.BAD_REQUEST
-        return flask.redirect(flask.url_for(".serve", iuid=iuid))
+        dataset = saver.doc
+        set_links(dataset)
+        return utils.jsonify(dataset,
+                             schema=flask.url_for("api_schema.dataset",
+                                                  _external=True))
 
     elif utils.http_DELETE():
         if not possible_delete(dataset):

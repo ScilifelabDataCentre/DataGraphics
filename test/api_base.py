@@ -68,15 +68,14 @@ class Base(unittest.TestCase):
         return self.session.delete(url)
 
     def check_schema(self, response):
-        """ Return the response JSON.
-        If there is link to the JSON Schema in the response header,
-        check the response JSON data against it.
+        """ Return the response JSON after checking it against
+        the JSON Schema in the response header.
         """
         result = response.json()
         try:
             url = response.links['schema']['url']
         except KeyError:
-            return result
+            raise ValueError(f"No schema schema for {response.url}")
         try:
             schema = self.schemas[url]
         except KeyError:

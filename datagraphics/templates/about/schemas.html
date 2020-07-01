@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
-{% block head_title %}JSON Schema for API{% endblock %}
+{% block head_title %}JSON Schemas for API{% endblock %}
 
-{% block body_title %}JSON Schema for API{% endblock %}
+{% block body_title %}JSON Schemas for API{% endblock %}
 
 {% block main %}
 <div class="row">
   <div class="col-md-9 offset-md-1">
     <p>
-      The JSON schema in DataGraphics currently use
+      The JSON schemas in DataGraphics currently use
       <a href="http://json-schema.org/specification-links.html">
         draft 7 of the specification</a>.
       See <a href="https://json-schema.org/understanding-json-schema/">
@@ -29,7 +29,7 @@
 {% block meta %}
 <div class="py-1">
   <div>
-    <a href="{{ url_for('api_schema.schema') }}"
+    <a href="{{ url_for('api_schema.all') }}"
        class="badge badge-pill badge-dark">API</a>
   </div>
 </div>
