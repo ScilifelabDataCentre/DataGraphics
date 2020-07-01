@@ -13,6 +13,7 @@ from datagraphics.graphic import (GraphicSaver,
                                   allow_delete)
 from datagraphics import constants
 from datagraphics import utils
+from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_graphic", __name__)
 
@@ -56,8 +57,8 @@ def serve(iuid):
             flask.abort(http.client.FORBIDDEN)
         set_links(graphic)
         return utils.jsonify(graphic,
-                             schema_url=flask.url_for("api_schema.graphic",
-                                                      _external=True))
+                             schema=flask.url_for("api_schema.graphic",
+                                                  _external=True))
 
     elif utils.http_POST(csrf=False):
         if not allow_edit(graphic):
@@ -109,15 +110,26 @@ def logs(iuid):
                                     _external=True)}
     return utils.jsonify({"entity": entity,
                           "logs": utils.get_logs(graphic["_id"])},
-                         schema_url=flask.url_for("api_schema.logs",
-                                                  _external=True))
+                         schema=flask.url_for("api_schema.logs",_external=True))
 
 def set_links(graphic):
-    "Convert dataset IUID to href and IUID."
-    graphic["dataset"] = {"iuid": graphic["dataset"],
-                          "href": flask.url_for("api_dataset.serve",
-                                                iuid=graphic["dataset"],
-                                                _external=True)}
+    "Set the links in the dataset."
+    # Convert 'owner' to an object with a link to the user account.
+    graphic["owner"] = {"username": graphic["owner"],
+                        "href": flask.url_for("api_user.display",
+                                              username=graphic["owner"],
+                                              _external=True)}
+    # Convert dataset IUID to href and IUID.
+    dataset = datagraphics.dataset.get_dataset(graphic["dataset"])
+    if datagraphics.dataset.allow_view(dataset):
+        graphic["dataset"] = {"title": dataset["title"],
+                              "modified": dataset["modified"],
+                              "iuid": dataset["_id"],
+                              "href": flask.url_for("api_dataset.serve",
+                                                    iuid=dataset["_id"],
+                                                    _external=True)}
+    else:
+        graphic["dataset"] = None
     # Add link to logs.
     graphic["logs"] = {"href": flask.url_for(".logs", 
                                              iuid=graphic["_id"],
@@ -128,6 +140,36 @@ schema = {
     "title": "JSON Schema for API Graphic resource.",
     "type": "object",
     "properties": {
-        # XXX
-    }
+        "$id": {"type": "string", "format": "uri"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "iuid": {"type": "string", "pattern": "^[0-9a-f]{32,32}$"},
+        "created": {"type": "string", "format": "date-time"},
+        "modified": {"type": "string", "format": "date-time"},
+        "owner": schema_definitions.user,
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "public": {"type": "boolean"},
+        "dataset": {
+            "oneOf": [
+                {"type": "object",
+                 "properties": {
+                     "title": {"type": "string"},
+                     "iuid": {"type": "string", "pattern": "^[0-9a-f]{32,32}$"},
+                     "modified": {"type": "string", "format": "date-time"},
+                     "href": {"type": "string", "format": "uri"}
+                 },
+                 "required": ["title", "iuid", "modified", "href"],
+                 "additionalProperties": False
+                },
+                {"type": "null"}
+            ]
+        },
+        "specification": {"type": "object"},
+        "error": {"type": ["null", "string"]},
+        "logs": schema_definitions.logs_link
+    },
+    "required": ["$id", "timestamp", "iuid", "created", "modified",
+                 "owner", "title", "description", "public",
+                 "dataset", "specification", "error", "logs"],
+    "additionalProperties": False
 }

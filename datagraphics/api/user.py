@@ -58,8 +58,7 @@ def logs(username):
                                     _external=True)}
     return utils.jsonify({"entity": entity,
                           "logs": utils.get_logs(user["_id"])},
-                         schema_url=flask.url_for("api_schema.logs",
-                                                  _external=True))
+                         schema=flask.url_for("api_schema.logs",_external=True))
 
 def set_links(user):
     "Set the links in the user object."

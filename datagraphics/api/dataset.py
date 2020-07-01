@@ -13,8 +13,8 @@ from datagraphics.dataset import (DatasetSaver,
                                   allow_edit,
                                   possible_delete,
                                   allow_delete)
-from datagraphics import utils
 from datagraphics import constants
+from datagraphics import utils
 from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_dataset", __name__)
@@ -56,8 +56,8 @@ def serve(iuid):
             flask.abort(http.client.FORBIDDEN)
         set_links(dataset)
         return utils.jsonify(dataset,
-                             schema_url=flask.url_for("api_schema.dataset",
-                                                      _external=True))
+                             schema=flask.url_for("api_schema.dataset",
+                                                  _external=True))
 
     elif utils.http_POST(csrf=False):
         if not allow_edit(dataset):
@@ -153,8 +153,7 @@ def logs(iuid):
                                     _external=True)}
     return utils.jsonify({"entity": entity,
                           "logs": utils.get_logs(dataset["_id"])},
-                         schema_url=flask.url_for("api_schema.logs",
-                                                  _external=True))
+                         schema=flask.url_for("api_schema.logs",_external=True))
 
 def set_links(dataset):
     "Set the links in the dataset."

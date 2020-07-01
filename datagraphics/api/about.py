@@ -17,8 +17,9 @@ def software():
     result = {"title": __doc__,
               "software": [{"name": s[0], "version": s[1], "href": s[2]}
                            for s in datagraphics.about.get_software()]}
-    url = flask.url_for("api_schema.about", _external=True)
-    return utils.jsonify(result, schema_url=url)
+    return utils.jsonify(result,
+                         schema=flask.url_for("api_schema.about",
+                                              _external=True))
 
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,

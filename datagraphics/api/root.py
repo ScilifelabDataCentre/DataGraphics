@@ -63,8 +63,8 @@ def root():
         items["users"] = {
             "all": {"href": flask.url_for("api_user.all", _external=True)}
         }
-    url = flask.url_for("api_schema.root", _external=True)
-    return utils.jsonify(items, schema_url=url)
+    return utils.jsonify(items, 
+                         schema=flask.url_for("api_schema.root",_external=True))
 
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
