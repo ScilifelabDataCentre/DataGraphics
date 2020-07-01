@@ -7,6 +7,7 @@ from datagraphics import utils
 from datagraphics.api import root as api_root
 from datagraphics.api import about as api_about
 from datagraphics.api import dataset as api_dataset
+from datagraphics.api import datasets as api_datasets
 from datagraphics.api import graphic as api_graphic
 from datagraphics.api import user as api_user
 
@@ -25,10 +26,13 @@ def schema():
                        "title": api_about.schema["title"]},
              "dataset": {"href": flask.url_for("api_schema.dataset",
                                                _external=True),
-                       "title": api_dataset.schema["title"]},
+                         "title": api_dataset.schema["title"]},
+             "datasets": {"href": flask.url_for("api_schema.datasets",
+                                                _external=True),
+                          "title": api_datasets.schema["title"]},
              "graphic": {"href": flask.url_for("api_schema.graphic",
                                                _external=True),
-                       "title": api_graphic.schema["title"]},
+                         "title": api_graphic.schema["title"]},
              "user": {"href": flask.url_for("api_schema.user",
                                             _external=True),
                       "title": api_user.schema["title"]},
@@ -49,6 +53,12 @@ def about():
 def dataset():
     "JSON schema for API Dataset resource."
     return utils.jsonify(api_dataset.schema,
+                         schema_url=constants.JSON_SCHEMA_URL)
+
+@blueprint.route("datasets")
+def datasets():
+    "JSON schema for API Dataset resource."
+    return utils.jsonify(api_datasets.schema,
                          schema_url=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("graphic")

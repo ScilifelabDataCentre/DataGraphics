@@ -6,7 +6,6 @@ from flask_cors import CORS
 import datagraphics.about
 from datagraphics import constants
 from datagraphics import utils
-from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_about", __name__)
 
@@ -24,9 +23,6 @@ def software():
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
     "title": "JSON Schema for API About resources.",
-    "definitions": {
-        "link": schema_definitions.link,
-    },
     "type": "object",
     "properties": {
         "$id": {"type": "string", "format": "uri"},

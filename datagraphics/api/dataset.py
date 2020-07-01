@@ -81,10 +81,7 @@ def serve(iuid):
                     pass
         except ValueError as error:
             return str(error), http.client.BAD_REQUEST
-        dataset = saver.doc
-        set_links(dataset)
-        url = flask.url_for("api_schema.dataset", _external=True)
-        return utils.jsonify(dataset, schema_url=url)
+        return flask.redirect(flask.url_for(".serve", iuid=iuid))
 
     elif utils.http_DELETE():
         if not possible_delete(dataset):
@@ -173,9 +170,6 @@ def set_links(dataset):
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
     "title": "JSON Schema for API Dataset resource.",
-    "definitions": {
-        "link": schema_definitions.link,
-    },
     "type": "object",
     "properties": {
         "$id": {"type": "string", "format": "uri"},

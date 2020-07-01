@@ -15,7 +15,7 @@ link = {
 }
 
 user = {
-    "title": "The user associated with the current resource.",
+    "title": "The user account associated with the current resource.",
     "type": "object",
     "properties": {
         "username": {"type": "string"},

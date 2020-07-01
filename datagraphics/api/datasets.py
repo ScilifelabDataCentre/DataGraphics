@@ -9,6 +9,7 @@ from datagraphics.datasets import (get_datasets_public,
                                    get_datasets_all,
                                    get_datasets_owner)
 import datagraphics.user
+from datagraphics import constants
 from datagraphics import utils
 
 blueprint = flask.Blueprint("api_datasets", __name__)
@@ -53,3 +54,28 @@ def all():
                          "owner": owner,
                          "modified": modified})
     return utils.jsonify({"datasets": datasets})
+
+schema = {
+    "$schema": constants.JSON_SCHEMA_URL,
+    "title": "JSON Schema for API Datasets resource.",
+    "type": "object",
+    "properties": {
+        "$id": {"type": "string", "format": "uri"},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "datasets": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "href": {"type": "string", "format": "uri"},
+                    "modified": {"type": "string", "format": "date-time"}
+                },
+                "required": ["title", "href", "modified"],
+                "additionalProperties": False
+            }
+        }
+    },
+    "required": ["$id", "timestamp", "datasets"],
+    "additionalProperties": False
+}

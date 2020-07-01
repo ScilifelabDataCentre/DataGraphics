@@ -13,7 +13,6 @@ from datagraphics.graphic import (GraphicSaver,
                                   allow_delete)
 from datagraphics import constants
 from datagraphics import utils
-from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_graphic", __name__)
 
@@ -41,7 +40,7 @@ def create():
     graphic["$id"] = flask.url_for("api_graphic.serve",
                                    iuid=graphic["_id"],
                                    _external=True)
-    fixup_dataset(graphic)
+    set_links(graphic)
     return utils.jsonify(graphic)
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
@@ -55,7 +54,7 @@ def serve(iuid):
     if utils.http_GET():
         if not allow_view(graphic):
             flask.abort(http.client.FORBIDDEN)
-        fixup_dataset(graphic)
+        set_links(graphic)
         return utils.jsonify(graphic)
 
     elif utils.http_POST(csrf=False):
@@ -92,7 +91,7 @@ def serve(iuid):
             flask.g.db.delete(log)
         return "", http.client.NO_CONTENT
 
-def fixup_dataset(graphic):
+def set_links(graphic):
     "Convert dataset IUID to href and IUID."
     graphic["dataset"] = {"iuid": graphic["dataset"],
                           "href": flask.url_for("api_dataset.serve",
@@ -102,9 +101,6 @@ def fixup_dataset(graphic):
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
     "title": "JSON Schema for API Graphic resource.",
-    "definitions": {
-        "link": schema_definitions.link,
-    },
     "type": "object",
     "properties": {
         # XXX
