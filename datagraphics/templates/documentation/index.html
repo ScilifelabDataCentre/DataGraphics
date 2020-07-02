@@ -14,19 +14,6 @@
   <a href="https://en.wikipedia.org/wiki/JSON">JSON</a>.
 </p>
 
-<p>
-  <ul>
-    <li>
-      <a href="{{ url_for('.documentation', page='api') }}">
-        API (Application Programming Interface) for programmatic access</a>.
-    </li>
-    <li>
-      <a href="{{ url_for('.documentation', page='how-to-include-graphic') }}">
-        How to include a graphic in another web page</a>.
-    </li>
-  </ul>
-</p>
-
 <h4 class="ml-5">Dataset</h4>
 <p>
   A dataset contains data as well as some metadata describing it. It
@@ -35,9 +22,8 @@
 <p>
   The data in a dataset consists of a list of records, where each
   record contains key-value pairs. The data is homogenous: Each record
-  has the same fields corresponding to the same keys. The values
-  corresponding to the same key in different records must have the
-  same datatype.
+  has the same set of keys and the corresponding values are of the
+  same type.
 </p>
 <p>
   The datatypes allowed for the values in a record are the simple
@@ -152,4 +138,18 @@
     <li> Registering, enabling or disabling other user accounts.
   </ul>
 </p>
-{% endblock %}
+{% endblock %} {# block main #}
+
+{% block actions %}
+<div>
+  <a href="{{ url_for('.documentation', page='api') }}"
+     role="button"
+     class="btn btn-block btn-outline-primary">API for programmatic access</a>
+</div>
+<div class="mt-2">
+  <a href="{{ url_for('.documentation', page='how-to-include-graphic') }}"
+     role="button"
+     class="btn btn-block btn-outline-primary">
+    How to include a graphic in a web page</a>
+</div>
+{% endblock %} {# block actions #}

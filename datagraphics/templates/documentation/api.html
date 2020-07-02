@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block head_title %}API documentation{% endblock %}
-{% block body_title %}API documentation{% endblock %}
+{% block head_title %}API for programmatic access{% endblock %}
+{% block body_title %}API for programmatic access{% endblock %}
 
 {% block main %}
 <p>
-  The Application Programming Interface uses JSON. Access is granted
-  by an API key which is set for a user account.
+  The Application Programming Interface (API) uses JSON. Access is
+  granted by an API key which is set for a user account.
 </p>
 <p>
   Several of the web pages have a button in the upper right corner
@@ -14,10 +14,15 @@
   resource.
 </p>
 <p>
+  The documentation pages linked to on the right-hand side describes
+  which of the HTTP operations (GET, PUT, POST, DELETE) are allowed,
+  which input is required, what they do, and which output is produced.
+</p>
+<p>
   Using the
   <a href="https://requests.readthedocs.io/en/master/"><code>requests</code></a>
-  module, this is a small example of how to use the API. It fetches a
-  list of the public datasets and outputs their titles.
+  module, this is a minimal example of how to use the API.
+  This fetches a list of the public datasets and outputs their titles.
   <pre class="ml-5">
 import requests
 
@@ -46,11 +51,19 @@ for dataset in data["datasets"]:
   see the
   <a href="https://github.com/pekrau/DataGraphics/tree/devel/test">GitHub repo</a>.
 </p>
-{% endblock %}
+{% endblock %} {# block main #}
 
 {% block actions %}
-<div class="mt-2">
+<div>
   <a href="{{ url_for('.documentation') }}"
-     class="btn btn-block btn-secondary">Back</a>
+     class="btn btn-block btn-outline-secondary">Documentation</a>
 </div>
-{% endblock %}
+<div class="mt-2">
+  <a href="{{ url_for('.documentation', page='api_root') }}"
+     class="btn btn-block btn-outline-primary">API Root</a>
+</div>
+<div class="mt-2">
+  <a href="{{ url_for('.documentation', page='api_about') }}"
+     class="btn btn-block btn-outline-primary">API About</a>
+</div>
+{% endblock %} {# block actions #}

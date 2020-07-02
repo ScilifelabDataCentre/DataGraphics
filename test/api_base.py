@@ -1,17 +1,15 @@
 "Base class for API tests."
 
-import argparse
 import http.client
 import json
 import os
 import re
-import sys
 import unittest
 
 import jsonschema
 import requests
 
-SCHEMA_LINK_RX = re.compile(r'<([^>])+>; rel="([^"]+)')
+from datagraphics import constants
 
 JSON_MIMETYPE = 'application/json'
 
@@ -21,43 +19,26 @@ DEFAULT_SETTINGS = {
     'APIKEY': None              # Needs to be set! For the above user.
 }
 
-# The actual settings to use.
-SETTINGS = {}
-
-def process_args(filepath=None):
-    """Process command-line arguments for this test suite.
-    Reset the settings and read the given settings file.
-    Return the unused arguments.
-    """
-    if filepath is None:
-        parser = argparse.ArgumentParser()
-        parser.add_argument('-S', '--settings', dest='settings',
-                            metavar='FILE', default='settings.json',
-                            help='Settings file')
-        parser.add_argument('unittest_args', nargs='*')
-        options, args = parser.parse_known_args()
-        filepath = options.settings
-        args = [sys.argv[0]] + args
-    else:
-        args = sys.argv
-    SETTINGS.update(DEFAULT_SETTINGS)
-    with open(filepath) as infile:
-        SETTINGS.update(json.load(infile))
-    assert SETTINGS['USERNAME']
-    assert SETTINGS['APIKEY']
-    return args
-
-def run():
-    unittest.main(argv=process_args())
-
 
 class Base(unittest.TestCase):
     "Base class for DataGraphics API test cases."
 
+    @classmethod
+    def setUpClass(cls):
+        cls.SETTINGS = DEFAULT_SETTINGS.copy()
+        try:
+            settings_filepath = os.environ["SETTINGS"]
+        except KeyError:
+            settings_filepath = "settings.json"
+        with open(settings_filepath) as infile:
+            cls.SETTINGS.update(json.load(infile))
+        assert cls.SETTINGS['USERNAME']
+        assert cls.SETTINGS['APIKEY']
+        cls.schemas = {}
+
     def setUp(self):
-        self.schemas = {}
         self.session = requests.Session()
-        self.session.headers.update({'x-apikey': SETTINGS['APIKEY']})
+        self.session.headers.update({'x-apikey': self.SETTINGS['APIKEY']})
         self.addCleanup(self.close_session)
 
     def close_session(self):
@@ -65,11 +46,11 @@ class Base(unittest.TestCase):
 
     @property
     def root(self):
-        "Return the API root data."
+        "Return the API Root resource."
         try:
             return self._root
         except AttributeError:
-            response = self.GET(SETTINGS['ROOT_URL'])
+            response = self.GET(self.SETTINGS['ROOT_URL'])
             self.assertEqual(response.status_code, http.client.OK)
             self._root = self.check_schema(response)
             return self._root
@@ -87,20 +68,24 @@ class Base(unittest.TestCase):
         return self.session.delete(url)
 
     def check_schema(self, response):
-        """If there is JSON schema linked to in the response header,
-        check the response JSON data. Return the response JSON.
+        """ Return the response JSON after checking it against
+        the JSON Schema in the response header.
         """
         result = response.json()
         try:
             url = response.links['schema']['url']
         except KeyError:
-            return result
+            raise ValueError(f"No schema schema for {response.url}")
         try:
             schema = self.schemas[url]
         except KeyError:
-            r = self.GET(url)
-            self.assertEqual(r.status_code, http.client.OK)
-            schema = r.json()
+            if url == constants.JSON_SCHEMA_URL:
+                with open("schema.json") as infile:
+                    schema = json.load(infile)
+            else:
+                r = self.GET(url)
+                self.assertEqual(r.status_code, http.client.OK)
+                schema = r.json()
             self.schemas[url] = schema
         self.validate_schema(result, schema)
         return result

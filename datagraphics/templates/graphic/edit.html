@@ -55,21 +55,18 @@
 	   class="col-md-2 col-form-label text-right font-weight-bold">
       Specification</label>
     <div class="col-md">
-      <textarea id="specification" name="specification" rows="20"
-                class="form-control"
+      <textarea id="specification" name="specification" rows="22"
+                class="form-control text-monospace"
+                style="font-size: 80%"
                 aria-describedby="specificationHelp"
                 >{{ graphic['specification'] | prettyjson }}</textarea>
       <small id="specificationHelp" class="form-text text-muted">
         Specification of the graphic using
         <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> JSON.
-        <br>
-        <strong>
-          The data sources used by the specification must include a
-          reference to the dataset for this graphic.
-          <br>
-          The item <code>$schema</code> is fixed, and attempts to
-          change it will be overwritten when saving.
-        </strong>
+        The data source in the specification <strong>must</strong>
+        reference the dataset for this graphic. The item
+        <code>$schema</code> is fixed, and attempts to change it will
+        be overwritten when saving.
       </small>
     </div>
   </div>

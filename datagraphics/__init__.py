@@ -1,17 +1,15 @@
 "Serve data and graphics on the web using Vega-Lite graphics."
 
-import json
-import os.path
 import re
 import string
 
-__version__ = "0.4.17"
+__version__ = "0.5.11"
 
 class Constants:
     VERSION = __version__
     URL     = "https://github.com/pekrau/DataGraphics"
 
-    # Currently, these are hardwired; configurability is not meaningful.
+    # Currently, these are hardwired.
     BOOTSTRAP_VERSION    = "4.3.1"
     BOOTSTRAP_URL        = "https://getbootstrap.com/"
     JQUERY_VERSION       = "3.3.1"
@@ -63,7 +61,7 @@ class Constants:
     JS_MIMETYPE   = "text/javascript"
 
     # JSON Schema; Draft 7 validator is currently hardwired.
-    JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#",
+    JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#"
 
     def __setattr__(self, key, value):
         raise ValueError("cannot set constant")

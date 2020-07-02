@@ -54,8 +54,7 @@ def create():
                    "data": {"url": flask.url_for("api_dataset.content",
                                                  iuid=dataset["_id"],
                                                  ext="csv",
-                                                 _external=True),
-                            "format": {"type": "csv"}}}
+                                                 _external=True)}}
         return flask.render_template("graphic/create.html",
                                      dataset=dataset,
                                      graphic=graphic)
@@ -315,8 +314,9 @@ class DataUrls(utils.JsonTraverser):
     def __init__(self):
         self.result = []
 
-    def handle(self, path, value):
-        if path[-2:] == ["data", "url"]:
+    def handle(self, value):
+        "Record all values for the fragment 'data.url'."
+        if self.path[-2:] == ["data", "url"]:
             self.result.append(value)
 
     def __iter__(self):

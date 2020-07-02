@@ -292,44 +292,54 @@ def accept_json():
     return best == constants.JSON_MIMETYPE and \
         acc[best] > acc[constants.HTML_MIMETYPE]
 
-def get_json(**data):
-    "Return the JSON structure after fixing up for external representation."
-    result = {"$id": flask.request.url,
-              "timestamp": get_time()}
+def jsonify(data, id=None, timestamp=True, schema=None):
+    """Return a Response object containing the JSON of 'data'.
+    Fix up the JSON structure for external representation.
+    Optionally add a header Link to the schema given by its URL.
+    """
+    result = {"$id": flask.request.url}
     try:
-        result["iuid"] = data["_id"]
+        result["$schema"] = data.pop("$schema")
+    except KeyError:
+        pass
+    if timestamp:
+        result["timestamp"] = get_time()
+    try:
+        result["iuid"] = data.pop("_id")
     except KeyError:
         pass
     result.update(data)
-    result.pop("_id", None)
     result.pop("_rev", None)
     result.pop("doctype", None)
-    return result
+    response = flask.jsonify(result)
+    if schema:
+        response.headers.add('Link', schema, rel='schema')
+    return response
 
 
 class JsonTraverser:
     "Traverse the JSON data structure, and handle each path/value pair."
 
     def traverse(self, data):
-        self.stack = []
+        self.path = []
         self._traverse(data)
 
     def _traverse(self, fragment):
         if isinstance(fragment, dict):
-            self.stack.append(None)
+            self.path.append(None)
             for key, value in fragment.items():
-                self.stack[-1] = key
+                self.path[-1] = key
                 self._traverse(value)
-            self.stack.pop()
+            self.path.pop()
         elif isinstance(fragment, list):
-            self.stack.append(None)
+            self.path.append(None)
             for pos, value in enumerate(fragment):
-                self.stack[-1] = pos
+                self.path[-1] = pos
                 self._traverse(value)
-            self.stack.pop()
+            self.path.pop()
         else:
-            self.handle(self.stack[:], fragment)
+            self.handle(fragment)
 
-    def handle(self, path, value):
-        "Handle the path/value pair."
+    def handle(self, value):
+        "Handle the current path/value."
         raise NotImplementedError
