@@ -41,13 +41,6 @@
             </td>
           </tr>
         </table>
-        {% if g.current_user and g.current_user["username"] == graphic["owner"] and dataset["owner"] != graphic["owner"] %}
-        <p class="text-danger">
-          The dataset is not owned by you. This graphic may become invalid
-          if the user of the dataset deletes it or make it
-          inaccessible.
-        </p>
-        {% endif %}
       </div>
     </div>
   </div>

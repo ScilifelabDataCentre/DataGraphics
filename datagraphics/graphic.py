@@ -90,6 +90,12 @@ def display(iuid):
                           if gr["_id"] != graphic["_id"]]
     else:
         other_graphics = []
+    if flask.g.current_user and \
+       flask.g.current_user["username"] == graphic["owner"] and \
+       dataset["owner"] != graphic["owner"]:
+        utils.flash_warning("The dataset is not owned by you."
+                            " This graphic may become invalid if the owner of"
+                            " the dataset deletes it or makes it inaccessible.")
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
