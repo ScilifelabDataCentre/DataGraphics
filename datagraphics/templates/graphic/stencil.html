@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block head_title %}
+Select graphic stencil for dataset {{ dataset['title'] }}
+{% endblock %}
+
+{% block body_title %}
+Select graphic stencil for dataset
+<a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
+  {{ dataset['title'] }}</a>
+{% endblock %}
+
+{% block main %}
+{% for stencil in stencils %}
+<div class="card">
+  <div class="card-header">{{ stencil["title"] }}</div>
+  <div class="card-body">
+    <form action="{{ url_for('graphic.stencil') }}"
+          method="POST">
+      {{ csrf_token() }}
+      <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
+      {% for variable in stencil["input_variables"] %}
+      <div class="form-group row">
+        <label for="{{ variable['name'] }}"
+	       class="col-md-2 col-form-label text-right font-weight-bold">
+          {{ variable["name"] }}</label>
+        <div class="col-md">
+          {% if variable.get("type") == "integer" %}
+          <input type="integer" class="form-control"
+                 id="{{ variable['name'] }}" name="{{ variable['name'] }}"
+                 aria-describedby="{{ variable['name'] }}Help"
+                 value="{{ variable.get('default') or '' }}">
+          {% else %}
+          <input type="text" class="form-control"
+                 id="{{ variable['name'] }}" name="{{ variable['name'] }}"
+                 aria-describedby="{{ variable['name'] }}Help"
+                 value="{{ variable.get('default') or '' }}">
+          {% endif %}
+          <small id="{{ variable['name'] }}Help" class="form-text text-muted">
+            {{ variable['title'] }}
+          </small>
+        </div>
+      </div>
+      {% endfor %} {# for variable ... #}
+      <div class="form-group row">
+        <div class="col-md-3 offset-md-2">
+          <button type="submit" class="btn btn-block btn-primary">
+            Create</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %} {# for stencil in stencils #}
+{% endblock %} {# block main #}
+
+{% block actions %}
+<div class="mt-2">
+  <a href="{{ url_referrer(url_for('dataset.display', iuid=dataset['_id'])) }}"
+     role="button"
+     class="btn btn-block btn-secondary">Cancel</a>
+</div>
+{% endblock %}

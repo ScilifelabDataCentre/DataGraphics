@@ -270,6 +270,38 @@ def logs(iuid):
         logs=utils.get_logs(iuid))
 
 
+@blueprint.route("/stencil", methods=["GET", "POST"])
+@utils.login_required
+def stencil():
+    "Select a stencil for the dataset given as form argument."
+    try:
+        iuid = flask.request.values.get("dataset")
+        if not iuid:
+            raise ValueError("No dataset IUID provided.")
+        dataset = datagraphics.dataset.get_dataset(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(flask.url_for("home"))
+    if not datagraphics.dataset.allow_view(dataset):
+        utils.flash_error("View access to dataset not allowed.")
+        return flask.redirect(utils.url_referrer())
+
+    if utils.http_GET():
+        stencils = []
+        for name in sorted(flask.current_app.config["STENCILS"]):
+            stencil = flask.current_app.config["STENCILS"][name]
+            variables = [v for v in stencil["variables"]
+                         if v.get("auto") == "field"]
+            stencil["input_variables"] = [v for v in stencil["variables"]
+                                          if not v.get("auto")]
+            stencils.append(stencil)
+        return flask.render_template("graphic/stencil.html",
+                                     dataset=dataset,
+                                     stencils=stencils)
+    elif utils.http_POST():
+        pass
+
+
 class GraphicSaver(EntitySaver):
     "Graphic saver context with file attachment handling."
 

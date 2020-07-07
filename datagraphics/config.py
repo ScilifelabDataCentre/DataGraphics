@@ -9,8 +9,6 @@ import flask
 from datagraphics import constants
 from datagraphics import utils
 
-ROOT_DIRPATH = os.path.dirname(os.path.abspath(__file__))
-
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
     SERVER_NAME = "127.0.0.1:5005", # For URL generation.
@@ -63,7 +61,8 @@ def init(app):
     except KeyError:
         filepaths = []
     for filepath in ["settings.json", "../site/settings.json"]:
-        filepaths.append(os.path.normpath(os.path.join(ROOT_DIRPATH, filepath)))
+        filepaths.append(os.path.normpath(os.path.join(constants.ROOT_DIRPATH,
+                                                       filepath)))
     for filepath in filepaths:
         try:
             app.config.from_json(filepath)
@@ -95,7 +94,21 @@ def init(app):
     assert app.config["MIN_PASSWORD_LENGTH"] > 4
 
     # Read in JSON Schema for Vega-Lite from file in 'static'.
-    filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    filepath = os.path.join(constants.ROOT_DIRPATH,
                             f"static/v{constants.VEGA_LITE_VERSION}.json")
-    with open(filepath) as f:
-        app.config['VEGA_LITE_SCHEMA'] = json.load(f)
+    with open(filepath) as infile:
+        app.config["VEGA_LITE_SCHEMA"] = json.load(infile)
+
+    # Read in stencil JSON specifications from files in 'stencils'.
+    app.config["STENCILS"] = {}
+    for rootpath in ["stencils", "../site/stencils"]:
+        rootpath = os.path.normpath(os.path.join(constants.ROOT_DIRPATH,
+                                                 rootpath))
+        if not os.path.exists(rootpath) or not os.path.isdir(rootpath): continue
+        for filename in os.listdir(rootpath):
+            name = os.path.splitext(filename)[0]
+            with open(os.path.join(rootpath, filename)) as infile:
+                stencil = json.load(infile)
+                for variable in stencil["variables"]:
+                    variable["name"] = "/".join(variable["path"])
+                app.config["STENCILS"][name] = stencil

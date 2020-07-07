@@ -1,0 +1,47 @@
+{
+    "variables": [
+        {"path": ["data"],
+         "title": "URI to the dataset CSV. Filled in automatically.",
+         "auto": "dataset"},
+        {"path": ["encoding", "x", "field"],
+         "title": "The x dimension of the scatterplot.",
+         "auto": "field",
+         "field": "quantitative"},
+        {"path": ["encoding", "y", "field"],
+         "title": "The y dimension of the scatterplot.",
+         "auto": "field",
+         "field": "quantitative"},
+        {"path": ["encoding", "class", "field"],
+         "title": "The color of the points in the scatterplot.",
+         "auto": "field",
+         "field": "nominal"}
+    ],
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "data": {
+    "url": "Dataset",
+    "format": {
+      "type": "csv"
+    }
+  },
+  "title": "2D scatterplot with colored points.",
+  "width": 400,
+  "height": 400,
+  "mark": {
+    "type": "point",
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "x field",
+      "type": "quantitative"
+    },
+    "y": {
+      "field": "y field",
+      "type": "quantitative"
+    },
+    "color": {
+      "field": "color field",
+      "type": "nominal"
+    }
+  }
+}
