@@ -70,9 +70,13 @@
   Dataset does not exist, or view access to it is not allowed.
 </p>
 {% endif %}
-<div class="mt-2">
-  {{ graphic['description'] | markdown }}
+{% if graphic['description'] %}
+<div class="card my-2">
+  <div class="card-body">
+    {{ graphic['description'] | markdown }}
+  </div>
 </div>
+{% endif %}
 <div class="card">
   <div class="card-header">
     <button type="button" class="btn btn-outline-dark btn-sm"

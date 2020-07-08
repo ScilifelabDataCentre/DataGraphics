@@ -10,7 +10,11 @@
         {"path": ["encoding", "y", "field"],
          "title": "Plot y dimension",
          "class": "field",
-         "type": "quantitative"}
+         "type": "quantitative"},
+        {"path": ["encoding", "color", "field"],
+         "title": "Point color",
+         "class": "field",
+         "type": "nominal"}
     ],
   "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
   "data": {
@@ -19,7 +23,7 @@
       "type": "csv"
     }
   },
-  "title": "2D scatterplot.",
+  "title": "2D scatterplot with colored points.",
   "width": 400,
   "height": 400,
   "mark": {
@@ -34,6 +38,10 @@
     "y": {
       "field": "y field",
       "type": "quantitative"
+    },
+    "color": {
+      "field": "color field",
+      "type": "nominal"
     }
   }
 }

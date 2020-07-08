@@ -1,24 +1,25 @@
 {% extends 'base.html' %}
 
 {% block head_title %}
-Select graphic stencil for dataset {{ dataset['title'] }}
+Select graphic for dataset {{ dataset['title'] }}
 {% endblock %}
 
 {% block body_title %}
-Select graphic stencil for dataset
+Select graphic for dataset
 <a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
   {{ dataset['title'] }}</a>
 {% endblock %}
 
 {% block main %}
 {% for stencil in stencils %}
-<div class="card">
+<div class="card mb-3">
   <div class="card-header">{{ stencil["title"] }}</div>
-  <div class="card-body">
+  <div class="card-body pb-0">
     <form action="{{ url_for('graphic.stencil') }}"
           method="POST">
       {{ csrf_token() }}
       <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
+      <input type="hidden" name="stencil" value="{{ stencil['stencil_name'] }}">
       {% for variable in stencil["input_variables"] %}
       <div class="form-group row">
         <label for="{{ variable['name'] }}"
@@ -42,6 +43,18 @@ Select graphic stencil for dataset
         </div>
       </div>
       {% endfor %} {# for variable ... #}
+      <div class="form-group row">
+        <label for="__conbinations__"
+	       class="col-md-2 col-form-label text-right font-weight-bold">
+          Field combinations</label>
+        <div class="col-md">
+          <select name="combination" class="custom-select">
+            {% for value, title in stencil["combinations"] %}
+            <option value="{{ value }}">{{ title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
       <div class="form-group row">
         <div class="col-md-3 offset-md-2">
           <button type="submit" class="btn btn-block btn-primary">

@@ -1,5 +1,6 @@
 "Graphic to display dataset."
 
+from copy import deepcopy
 import json
 
 import couchdb2
@@ -289,17 +290,85 @@ def stencil():
     if utils.http_GET():
         stencils = []
         for name in sorted(flask.current_app.config["STENCILS"]):
-            stencil = flask.current_app.config["STENCILS"][name]
-            variables = [v for v in stencil["variables"]
-                         if v.get("auto") == "field"]
+            stencil = deepcopy(flask.current_app.config["STENCILS"][name])
+            stencil["field_variables"] = [v for v in stencil["variables"]
+                                          if v.get("class") == "field"]
             stencil["input_variables"] = [v for v in stencil["variables"]
-                                          if not v.get("auto")]
-            stencils.append(stencil)
+                                          if v.get("class") == "input"]
+            stencil["combinations"] = combinations(stencil["field_variables"],
+                                                   dataset["meta"].items())
+            if stencil["combinations"]:
+                stencils.append(stencil)
         return flask.render_template("graphic/stencil.html",
                                      dataset=dataset,
                                      stencils=stencils)
     elif utils.http_POST():
-        pass
+        try:
+            stencil = flask.current_app.config["STENCILS"]\
+                      [flask.request.form["stencil"]]
+            setfields = SetFields(flask.request.form["combination"])
+            spec = deepcopy(stencil)
+            variables = spec.pop("variables")
+            name = spec.pop("stencil_name")
+            url = flask.url_for("api_dataset.content",
+                                iuid=dataset["_id"],
+                                ext="csv",
+                                _external=True)
+            for variable in variables:
+                if variable.get("class") == "dataset":
+                    setfields.lookup["/".join(variable["path"])] = url
+            setfields.traverse(spec)
+            with GraphicSaver() as saver:
+                saver.set_dataset(dataset)
+                saver.set_title(spec["title"])
+                saver.set_description(f"Created from stencil '{name}'.")
+                saver.set_public(False)
+                saver.set_specification(spec)
+        except (KeyError, ValueError) as error:
+            utils.flash_error(str(error))
+            return flask.redirect(utils.url_referrer())
+        return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
+
+def combinations(variables, field_items, current=None):
+    """Return all combinations of variables in the stencil
+    with fields in the dataset.
+    """
+    result = []
+    if current is None:
+        current = []
+    pos = len(current)
+    for name, field in field_items:
+        if not field.get("vega_lite_types"): continue
+        if variables[pos]["type"] not in field["vega_lite_types"]: continue
+        if name in current: continue
+        extended = current + [name]
+        if pos + 1 == len(variables):
+            value = []
+            title = []
+            for vname, vtitle, fname in zip([v["name"] for v in variables], 
+                                            [v["title"] for v in variables],
+                                            extended):
+                value.append(f"{vname}={fname}")
+                title.append(f"{vtitle} = {fname}")
+            result.append((";".join(value), "; ".join(title)))
+        else:
+            result.extend(combinations(variables, field_items, extended))
+    return result
+
+class SetFields(utils.JsonTraverser):
+    "Set the fields in the specification according to the combination."
+
+    replace = True
+
+    def __init__(self, combination):
+        self.lookup = dict([p.split("=") for p in combination.split(";")])
+
+    def handle(self, value):
+        "Return field value or lookup value if any."
+        try:
+            return self.lookup["/".join([str(p) for p in self.path])]
+        except KeyError:
+            return value
 
 
 class GraphicSaver(EntitySaver):

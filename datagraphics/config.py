@@ -109,6 +109,7 @@ def init(app):
             name = os.path.splitext(filename)[0]
             with open(os.path.join(rootpath, filename)) as infile:
                 stencil = json.load(infile)
+                stencil["stencil_name"] = name
                 for variable in stencil["variables"]:
                     variable["name"] = "/".join(variable["path"])
                 app.config["STENCILS"][name] = stencil

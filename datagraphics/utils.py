@@ -324,6 +324,8 @@ def jsonify(data, id=None, timestamp=True, schema=None):
 class JsonTraverser:
     "Traverse the JSON data structure, and handle each path/value pair."
 
+    replace = False
+
     def traverse(self, data):
         self.path = []
         self._traverse(data)
@@ -333,17 +335,23 @@ class JsonTraverser:
             self.path.append(None)
             for key, value in fragment.items():
                 self.path[-1] = key
-                self._traverse(value)
+                new = self._traverse(value)
+                if self.replace:
+                    fragment[key] = new
             self.path.pop()
+            return fragment
         elif isinstance(fragment, list):
             self.path.append(None)
             for pos, value in enumerate(fragment):
                 self.path[-1] = pos
-                self._traverse(value)
+                new = self._traverse(value)
+                if self.replace:
+                    fragment[pos] = new
             self.path.pop()
+            return fragment
         else:
-            self.handle(fragment)
+            return self.handle(fragment)
 
     def handle(self, value):
-        "Handle the current path/value."
+        "Handle the current path/value. Optionally return replacement value."
         raise NotImplementedError
