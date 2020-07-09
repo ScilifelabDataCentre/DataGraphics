@@ -289,39 +289,36 @@ def stencil():
 
     if utils.http_GET():
         stencils = []
-        for name in sorted(flask.current_app.config["STENCILS"]):
-            stencil = deepcopy(flask.current_app.config["STENCILS"][name])
-            stencil["field_variables"] = [v for v in stencil["variables"]
-                                          if v.get("class") == "field"]
-            stencil["input_variables"] = [v for v in stencil["variables"]
-                                          if v.get("class") == "input"]
-            stencil["combinations"] = combinations(stencil["field_variables"],
-                                                   dataset["meta"].items())
-            if stencil["combinations"]:
-                stencils.append(stencil)
+        for name in flask.current_app.config["STENCILS"]:
+            header = deepcopy(flask.current_app.config["STENCILS"][name]["header"])
+            field_variables = [v for v in header["variables"]
+                               if v.get("class") == "field"]
+            header["combinations"] = combinations(field_variables,
+                                                  dataset["meta"].items())
+            if header["combinations"]:
+                stencils.append(header)
+        stencils.sort(key=lambda h: (h.get("weight", 0), h["title"]))
         return flask.render_template("graphic/stencil.html",
                                      dataset=dataset,
                                      stencils=stencils)
     elif utils.http_POST():
         try:
-            stencil = flask.current_app.config["STENCILS"]\
-                      [flask.request.form["stencil"]]
+            spec = deepcopy(flask.current_app.config["STENCILS"]\
+                            [flask.request.form["stencil"]])
+            header = spec.pop("header")
             setfields = SetFields(flask.request.form["combination"])
-            spec = deepcopy(stencil)
-            variables = spec.pop("variables")
-            name = spec.pop("stencil_name")
             url = flask.url_for("api_dataset.content",
                                 iuid=dataset["_id"],
                                 ext="csv",
                                 _external=True)
-            for variable in variables:
+            for variable in header["variables"]:
                 if variable.get("class") == "dataset":
                     setfields.lookup["/".join(variable["path"])] = url
             setfields.traverse(spec)
             with GraphicSaver() as saver:
                 saver.set_dataset(dataset)
-                saver.set_title(spec["title"])
-                saver.set_description(f"Created from stencil '{name}'.")
+                saver.set_title(header["title"])
+                saver.set_description(f"Created from stencil {header['name']}.")
                 saver.set_public(False)
                 saver.set_specification(spec)
         except (KeyError, ValueError) as error:

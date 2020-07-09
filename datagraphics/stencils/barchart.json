@@ -1,24 +1,20 @@
 {
     "header": {
-        "title": "2D scatterplot with colored points",
+        "title": "Bar chart",
         "variables": [
             {"path": ["data", "url"],
              "title": "URI to the dataset CSV. Filled in automatically.",
              "class": "dataset"},
             {"path": ["encoding", "x", "field"],
-             "title": "X dimension",
+             "title": "Ordinal value",
              "class": "field",
-             "type": "quantitative"},
+             "type": "ordinal"},
             {"path": ["encoding", "y", "field"],
-             "title": "Y dimension",
+             "title": "Quantitative value",
              "class": "field",
-             "type": "quantitative"},
-            {"path": ["encoding", "color", "field"],
-             "title": "Point color",
-             "class": "field",
-             "type": "nominal"}
+             "type": "quantitative"}
         ],
-        "weight": 12
+        "weight": 2
     },
   "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
   "data": {
@@ -30,21 +26,17 @@
   "width": 400,
   "height": 400,
   "mark": {
-    "type": "point",
+    "type": "bar",
     "tooltip": true
   },
   "encoding": {
     "x": {
       "field": "x field",
-      "type": "quantitative"
+      "type": "ordinal"
     },
     "y": {
       "field": "y field",
       "type": "quantitative"
-    },
-    "color": {
-      "field": "color field",
-      "type": "nominal"
     }
   }
 }

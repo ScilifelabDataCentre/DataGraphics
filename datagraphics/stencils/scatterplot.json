@@ -1,17 +1,21 @@
 {
-    "variables": [
-        {"path": ["data", "url"],
-         "title": "URI to the dataset CSV. Filled in automatically.",
-         "class": "dataset"},
-        {"path": ["encoding", "x", "field"],
-         "title": "Plot x dimension",
-         "class": "field",
-         "type": "quantitative"},
-        {"path": ["encoding", "y", "field"],
-         "title": "Plot y dimension",
-         "class": "field",
-         "type": "quantitative"}
-    ],
+    "header": {
+        "title": "2D scatterplot",
+        "variables": [
+            {"path": ["data", "url"],
+             "title": "URI to the dataset CSV. Filled in automatically.",
+             "class": "dataset"},
+            {"path": ["encoding", "x", "field"],
+             "title": "X dimension",
+             "class": "field",
+             "type": "quantitative"},
+            {"path": ["encoding", "y", "field"],
+             "title": "Y dimension",
+             "class": "field",
+             "type": "quantitative"}
+        ],
+        "weight": 10
+    },
   "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
   "data": {
     "url": "Dataset",
@@ -19,7 +23,6 @@
       "type": "csv"
     }
   },
-  "title": "2D scatterplot.",
   "width": 400,
   "height": 400,
   "mark": {

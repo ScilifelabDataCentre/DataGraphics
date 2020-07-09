@@ -106,10 +106,11 @@ def init(app):
                                                  rootpath))
         if not os.path.exists(rootpath) or not os.path.isdir(rootpath): continue
         for filename in os.listdir(rootpath):
-            name = os.path.splitext(filename)[0]
+            name, ext = os.path.splitext(filename)
+            if ext != ".json": continue
             with open(os.path.join(rootpath, filename)) as infile:
                 stencil = json.load(infile)
-                stencil["stencil_name"] = name
-                for variable in stencil["variables"]:
+                stencil["header"]["name"] = name
+                for variable in stencil["header"]["variables"]:
                     variable["name"] = "/".join(variable["path"])
                 app.config["STENCILS"][name] = stencil

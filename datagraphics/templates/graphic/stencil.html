@@ -12,41 +12,15 @@ Select graphic for dataset
 
 {% block main %}
 {% for stencil in stencils %}
-<div class="card mb-3">
-  <div class="card-header">{{ stencil["title"] }}</div>
-  <div class="card-body pb-0">
+<div class="card mb-2">
+  <div class="card-header py-2">{{ stencil["title"] }}</div>
+  <div class="card-body pb-1">
     <form action="{{ url_for('graphic.stencil') }}"
           method="POST">
       {{ csrf_token() }}
       <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
-      <input type="hidden" name="stencil" value="{{ stencil['stencil_name'] }}">
-      {% for variable in stencil["input_variables"] %}
+      <input type="hidden" name="stencil" value="{{ stencil['name'] }}">
       <div class="form-group row">
-        <label for="{{ variable['name'] }}"
-	       class="col-md-2 col-form-label text-right font-weight-bold">
-          {{ variable["name"] }}</label>
-        <div class="col-md">
-          {% if variable.get("type") == "integer" %}
-          <input type="integer" class="form-control"
-                 id="{{ variable['name'] }}" name="{{ variable['name'] }}"
-                 aria-describedby="{{ variable['name'] }}Help"
-                 value="{{ variable.get('default') or '' }}">
-          {% else %}
-          <input type="text" class="form-control"
-                 id="{{ variable['name'] }}" name="{{ variable['name'] }}"
-                 aria-describedby="{{ variable['name'] }}Help"
-                 value="{{ variable.get('default') or '' }}">
-          {% endif %}
-          <small id="{{ variable['name'] }}Help" class="form-text text-muted">
-            {{ variable['title'] }}
-          </small>
-        </div>
-      </div>
-      {% endfor %} {# for variable ... #}
-      <div class="form-group row">
-        <label for="__conbinations__"
-	       class="col-md-2 col-form-label text-right font-weight-bold">
-          Field combinations</label>
         <div class="col-md">
           <select name="combination" class="custom-select">
             {% for value, title in stencil["combinations"] %}
@@ -54,9 +28,7 @@ Select graphic for dataset
             {% endfor %}
           </select>
         </div>
-      </div>
-      <div class="form-group row">
-        <div class="col-md-3 offset-md-2">
+        <div class="col-md-2">
           <button type="submit" class="btn btn-block btn-primary">
             Create</button>
         </div>

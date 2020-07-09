@@ -1,24 +1,16 @@
 {
     "header": {
-        "title": "2D scatterplot with colored points",
+        "title": "Histogram",
         "variables": [
             {"path": ["data", "url"],
              "title": "URI to the dataset CSV. Filled in automatically.",
              "class": "dataset"},
             {"path": ["encoding", "x", "field"],
-             "title": "X dimension",
+             "title": "Binning dimension",
              "class": "field",
-             "type": "quantitative"},
-            {"path": ["encoding", "y", "field"],
-             "title": "Y dimension",
-             "class": "field",
-             "type": "quantitative"},
-            {"path": ["encoding", "color", "field"],
-             "title": "Point color",
-             "class": "field",
-             "type": "nominal"}
+             "type": "quantitative"}
         ],
-        "weight": 12
+        "weight": 0
     },
   "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
   "data": {
@@ -30,21 +22,18 @@
   "width": 400,
   "height": 400,
   "mark": {
-    "type": "point",
+    "type": "bar",
     "tooltip": true
   },
   "encoding": {
     "x": {
-      "field": "x field",
+      "field": "binned field",
+      "bin": true,
       "type": "quantitative"
     },
     "y": {
-      "field": "y field",
+      "aggregate": "count",
       "type": "quantitative"
-    },
-    "color": {
-      "field": "color field",
-      "type": "nominal"
     }
   }
 }
