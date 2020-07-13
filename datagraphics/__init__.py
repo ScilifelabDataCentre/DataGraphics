@@ -1,13 +1,15 @@
 "Serve data and graphics on the web using Vega-Lite graphics."
 
 import re
+import os.path
 import string
 
-__version__ = "0.5.11"
+__version__ = "0.6.1"
 
 class Constants:
     VERSION = __version__
     URL     = "https://github.com/pekrau/DataGraphics"
+    ROOT_DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
     # Currently, these are hardwired.
     BOOTSTRAP_VERSION    = "4.3.1"

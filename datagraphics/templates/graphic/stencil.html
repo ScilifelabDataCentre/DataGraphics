@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block head_title %}
+Select graphic for dataset {{ dataset['title'] }}
+{% endblock %}
+
+{% block body_title %}
+Select graphic for dataset
+<a href="{{ url_for('dataset.display', iuid=dataset['_id']) }}">
+  {{ dataset['title'] }}</a>
+{% endblock %}
+
+{% block main %}
+{% for stencil in stencils %}
+<div class="card mb-2">
+  <div class="card-header py-2">{{ stencil["title"] }}</div>
+  <div class="card-body pb-1">
+    <form action="{{ url_for('graphic.stencil') }}"
+          method="POST">
+      {{ csrf_token() }}
+      <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
+      <input type="hidden" name="stencil" value="{{ stencil['name'] }}">
+      <div class="form-group row">
+        <div class="col-md">
+          <select name="combination" class="custom-select">
+            {% for value, title in stencil["combinations"] %}
+            <option value="{{ value }}">{{ title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-block btn-primary">
+            Create</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %} {# for stencil in stencils #}
+{% endblock %} {# block main #}
+
+{% block actions %}
+<div class="mt-2">
+  <a href="{{ url_referrer(url_for('dataset.display', iuid=dataset['_id'])) }}"
+     role="button"
+     class="btn btn-block btn-secondary">Cancel</a>
+</div>
+{% endblock %}

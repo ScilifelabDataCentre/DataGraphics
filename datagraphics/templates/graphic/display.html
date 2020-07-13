@@ -41,13 +41,6 @@
             </td>
           </tr>
         </table>
-        {% if g.current_user and g.current_user["username"] == graphic["owner"] and dataset["owner"] != graphic["owner"] %}
-        <p class="text-danger">
-          The dataset is not owned by you. This graphic may become invalid
-          if the user of the dataset deletes it or make it
-          inaccessible.
-        </p>
-        {% endif %}
       </div>
     </div>
   </div>
@@ -77,9 +70,13 @@
   Dataset does not exist, or view access to it is not allowed.
 </p>
 {% endif %}
-<div class="mt-2">
-  {{ graphic['description'] | markdown }}
+{% if graphic['description'] %}
+<div class="card my-2">
+  <div class="card-body">
+    {{ graphic['description'] | markdown }}
+  </div>
 </div>
+{% endif %}
 <div class="card">
   <div class="card-header">
     <button type="button" class="btn btn-outline-dark btn-sm"

@@ -1,5 +1,6 @@
 "Graphic to display dataset."
 
+from copy import deepcopy
 import json
 
 import couchdb2
@@ -90,6 +91,12 @@ def display(iuid):
                           if gr["_id"] != graphic["_id"]]
     else:
         other_graphics = []
+    if flask.g.current_user and \
+       flask.g.current_user["username"] == graphic["owner"] and \
+       dataset["owner"] != graphic["owner"]:
+        utils.flash_warning("The dataset is not owned by you."
+                            " This graphic may become invalid if the owner of"
+                            " the dataset deletes it or makes it inaccessible.")
     return flask.render_template("graphic/display.html",
                                  graphic=graphic,
                                  slug=utils.slugify(graphic['title']),
@@ -262,6 +269,103 @@ def logs(iuid):
         title=f"Graphic {graphic['title']}",
         cancel_url=flask.url_for(".display", iuid=iuid),
         logs=utils.get_logs(iuid))
+
+
+@blueprint.route("/stencil", methods=["GET", "POST"])
+@utils.login_required
+def stencil():
+    "Select a stencil for the dataset given as form argument."
+    try:
+        iuid = flask.request.values.get("dataset")
+        if not iuid:
+            raise ValueError("No dataset IUID provided.")
+        dataset = datagraphics.dataset.get_dataset(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(flask.url_for("home"))
+    if not datagraphics.dataset.allow_view(dataset):
+        utils.flash_error("View access to dataset not allowed.")
+        return flask.redirect(utils.url_referrer())
+
+    if utils.http_GET():
+        stencils = []
+        for name in flask.current_app.config["STENCILS"]:
+            header = deepcopy(flask.current_app.config["STENCILS"][name]["header"])
+            field_variables = [v for v in header["variables"]
+                               if v.get("class") == "field"]
+            header["combinations"] = combinations(field_variables,
+                                                  dataset["meta"].items())
+            if header["combinations"]:
+                stencils.append(header)
+        stencils.sort(key=lambda h: (h.get("weight", 0), h["title"]))
+        return flask.render_template("graphic/stencil.html",
+                                     dataset=dataset,
+                                     stencils=stencils)
+    elif utils.http_POST():
+        try:
+            spec = deepcopy(flask.current_app.config["STENCILS"]\
+                            [flask.request.form["stencil"]])
+            header = spec.pop("header")
+            setfields = SetFields(flask.request.form["combination"])
+            url = flask.url_for("api_dataset.content",
+                                iuid=dataset["_id"],
+                                ext="csv",
+                                _external=True)
+            for variable in header["variables"]:
+                if variable.get("class") == "dataset":
+                    setfields.lookup["/".join(variable["path"])] = url
+            setfields.traverse(spec)
+            with GraphicSaver() as saver:
+                saver.set_dataset(dataset)
+                saver.set_title(header["title"])
+                saver.set_description(f"Created from stencil {header['name']}.")
+                saver.set_public(False)
+                saver.set_specification(spec)
+        except (KeyError, ValueError) as error:
+            utils.flash_error(str(error))
+            return flask.redirect(utils.url_referrer())
+        return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
+
+def combinations(variables, field_items, current=None):
+    """Return all combinations of variables in the stencil
+    with fields in the dataset.
+    """
+    result = []
+    if current is None:
+        current = []
+    pos = len(current)
+    for name, field in field_items:
+        if not field.get("vega_lite_types"): continue
+        if variables[pos]["type"] not in field["vega_lite_types"]: continue
+        if name in current: continue
+        extended = current + [name]
+        if pos + 1 == len(variables):
+            value = []
+            title = []
+            for vname, vtitle, fname in zip([v["name"] for v in variables], 
+                                            [v["title"] for v in variables],
+                                            extended):
+                value.append(f"{vname}={fname}")
+                title.append(f"{vtitle} = {fname}")
+            result.append((";".join(value), "; ".join(title)))
+        else:
+            result.extend(combinations(variables, field_items, extended))
+    return result
+
+class SetFields(utils.JsonTraverser):
+    "Set the fields in the specification according to the combination."
+
+    replace = True
+
+    def __init__(self, combination):
+        self.lookup = dict([p.split("=") for p in combination.split(";")])
+
+    def handle(self, value):
+        "Return field value or lookup value if any."
+        try:
+            return self.lookup["/".join([str(p) for p in self.path])]
+        except KeyError:
+            return value
 
 
 class GraphicSaver(EntitySaver):

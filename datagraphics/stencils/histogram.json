@@ -1,0 +1,39 @@
+{
+    "header": {
+        "title": "Histogram",
+        "variables": [
+            {"path": ["data", "url"],
+             "title": "URI to the dataset CSV. Filled in automatically.",
+             "class": "dataset"},
+            {"path": ["encoding", "x", "field"],
+             "title": "Binning dimension",
+             "class": "field",
+             "type": "quantitative"}
+        ],
+        "weight": 0
+    },
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "data": {
+    "url": "Dataset",
+    "format": {
+      "type": "csv"
+    }
+  },
+  "width": 400,
+  "height": 400,
+  "mark": {
+    "type": "bar",
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "binned field",
+      "bin": true,
+      "type": "quantitative"
+    },
+    "y": {
+      "aggregate": "count",
+      "type": "quantitative"
+    }
+  }
+}

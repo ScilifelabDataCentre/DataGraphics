@@ -1,0 +1,42 @@
+{
+    "header": {
+        "title": "Bar chart",
+        "variables": [
+            {"path": ["data", "url"],
+             "title": "URI to the dataset CSV. Filled in automatically.",
+             "class": "dataset"},
+            {"path": ["encoding", "x", "field"],
+             "title": "Ordinal value",
+             "class": "field",
+             "type": "ordinal"},
+            {"path": ["encoding", "y", "field"],
+             "title": "Quantitative value",
+             "class": "field",
+             "type": "quantitative"}
+        ],
+        "weight": 2
+    },
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "data": {
+    "url": "Dataset",
+    "format": {
+      "type": "csv"
+    }
+  },
+  "width": 400,
+  "height": 400,
+  "mark": {
+    "type": "bar",
+    "tooltip": true
+  },
+  "encoding": {
+    "x": {
+      "field": "x field",
+      "type": "ordinal"
+    },
+    "y": {
+      "field": "y field",
+      "type": "quantitative"
+    }
+  }
+}
