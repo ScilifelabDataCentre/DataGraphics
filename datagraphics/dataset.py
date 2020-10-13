@@ -92,6 +92,7 @@ def display(iuid):
                                  dataset=dataset,
                                  graphics=get_graphics(dataset),
                                  storage=storage,
+                                 am_owner=am_owner(dataset),
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset))
@@ -201,12 +202,12 @@ def public(iuid):
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
-    if allow_edit(dataset):
+    if am_owner(dataset):
         if not dataset["public"]:
             with DatasetSaver(dataset) as saver:
                 saver.set_public(True)
     else:
-        utils.flash_error("Edit access to dataset not allowed.")
+        utils.flash_error("Only owner may make dataset public.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>/private", methods=["POST"])
@@ -218,12 +219,12 @@ def private(iuid):
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
-    if allow_edit(dataset):
+    if am_owner(dataset):
         if dataset["public"]:
             with DatasetSaver(dataset) as saver:
                 saver.set_public(False)
     else:
-        utils.flash_error("Edit access to dataset not allowed.")
+        utils.flash_error("Only owner may make dataset private.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>.<ext>")
@@ -544,7 +545,8 @@ def allow_view(dataset):
     if dataset.get("public"): return True
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == dataset["owner"]
+    if flask.g.current_user["username"] == dataset["owner"]: return True
+    return flask.g.current_user["username"] in dataset.get("editors", [])
 
 def allow_edit(dataset):
     "Is the current user allowed to edit the dataset?"

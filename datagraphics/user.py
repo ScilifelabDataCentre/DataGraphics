@@ -10,7 +10,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from datagraphics import constants
 from datagraphics import utils
-from datagraphics.datasets import count_datasets_owner
+from datagraphics.datasets import (count_datasets_owner,
+                                   count_datasets_editor)
 from datagraphics.graphics import count_graphics_owner
 from datagraphics.saver import BaseSaver
 
@@ -221,6 +222,7 @@ def display(username):
         utils.flash_error("Access not allowed.")
         return flask.redirect(flask.url_for("home"))
     user["count"] = {"datasets": count_datasets_owner(username),
+                     "datasets_editor": count_datasets_editor(username),
                      "graphics": count_graphics_owner(username)}
     return flask.render_template("user/display.html", user=user)
 
