@@ -193,6 +193,19 @@
   {{ dataset['owner'] }}
   {% endif %}
 </div>
+{% if dataset.get('editors') %}
+<div>
+  Editors:
+  {% for editor in dataset['editors'] %}
+    {% if am_admin_or_self(username=editor) %}
+    <a href="{{ url_for('user.display', username=editor) }}">
+      {{ editor }}</a>
+    {% else %}
+    {{ editor }}
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %} {# if dataset.get('editors') #}
 <div>
   Storage: {{ storage | filesizeformat }}
 </div>
