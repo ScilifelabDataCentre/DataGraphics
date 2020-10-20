@@ -118,6 +118,8 @@
       Edit</button>
   </form>
 </div>
+{% endif %} {# if allow_edit #}
+{% if am_owner %}
 <div class="mt-2">
   {% if dataset['public'] %}
   <form action="{{ url_for('.private', iuid=dataset['_id']) }}"
@@ -137,7 +139,7 @@
   </form>
   {% endif %}
 </div>
-{% endif %} {# if allow_edit #}
+{% endif %} {# if am_owner #}
 {% if allow_delete %}
 <div class="mt-2">
   <form action="{{ url_for('.edit', iuid=dataset['_id']) }}"
@@ -152,7 +154,7 @@
       Delete</button>
   </form>
 </div>
-{% endif %}
+{% endif %} {# if allow_delete #}
 {% if g.current_user %}
 <div class="mt-4">
   <form action="{{ url_for('.copy', iuid=dataset['_id']) }}"
@@ -193,6 +195,19 @@
   {{ dataset['owner'] }}
   {% endif %}
 </div>
+{% if dataset.get('editors') %}
+<div>
+  Editors:
+  {% for editor in dataset['editors'] %}
+    {% if am_admin_or_self(username=editor) %}
+    <a href="{{ url_for('user.display', username=editor) }}">
+      {{ editor }}</a>
+    {% else %}
+    {{ editor }}
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %} {# if dataset.get('editors') #}
 <div>
   Storage: {{ storage | filesizeformat }}
 </div>

@@ -1,6 +1,6 @@
 {
     "header": {
-        "title": "2D scatterplot with colored points",
+        "title": "Scatterplot with colored points",
         "variables": [
             {"path": ["data", "url"],
              "title": "URI to the dataset CSV. Filled in automatically.",

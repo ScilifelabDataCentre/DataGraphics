@@ -47,6 +47,8 @@ DESIGN_DOC = {
                             "map": "function(doc) {if (doc.doctype !== 'dataset' || !doc.public) return; emit(doc.modified, doc.title);}"},
         "owner_modified": {"reduce": "_count",
                            "map": "function(doc) {if (doc.doctype !== 'dataset') return; emit([doc.owner, doc.modified], doc.title);}"},
+        "editor_modified": {"reduce": "_count",
+                            "map": "function(doc) {if (doc.doctype !== 'dataset') return; if (!doc.editors) return; for (var i=0; i<doc.editors.length; i++) { emit([doc.editors[i], doc.modified], doc.title);}}"},
         "file_size": {"reduce": "_sum",
                       "map": "function(doc) {if (doc.doctype !== 'dataset' || !doc._attachments) return; for (var key in doc._attachments) if (doc._attachments.hasOwnProperty(key)) emit(doc.owner, doc._attachments[key].length);}"}
     },
@@ -90,6 +92,7 @@ def display(iuid):
                                  dataset=dataset,
                                  graphics=get_graphics(dataset),
                                  storage=storage,
+                                 am_owner=am_owner(dataset),
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset))
@@ -129,7 +132,9 @@ def edit(iuid):
         if not allow_edit(dataset):
             utils.flash_error("Edit access to dataset not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
-        return flask.render_template("dataset/edit.html", dataset=dataset)
+        return flask.render_template("dataset/edit.html",
+                                     am_owner=am_owner(dataset),
+                                     dataset=dataset)
 
     elif utils.http_POST():
         if not allow_edit(dataset):
@@ -140,6 +145,8 @@ def edit(iuid):
                 saver.set_title()
                 if flask.g.am_admin:
                     saver.change_owner()
+                if am_owner(dataset):
+                    saver.set_editors()
                 saver.set_description()
                 saver.set_data()
                 saver.set_vega_lite_types()
@@ -175,6 +182,7 @@ def copy(iuid):
     try:
         with DatasetSaver() as saver:
             saver.set_title(f"Copy of {dataset['title']}")
+            saver.set_editors(dataset.get("editors") or [])
             saver.set_description(dataset["description"])
             saver.set_public(False)
             saver.set_data(flask.g.db.get_attachment(dataset, "data.json"),
@@ -194,12 +202,12 @@ def public(iuid):
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
-    if allow_edit(dataset):
+    if am_owner(dataset):
         if not dataset["public"]:
             with DatasetSaver(dataset) as saver:
                 saver.set_public(True)
     else:
-        utils.flash_error("Edit access to dataset not allowed.")
+        utils.flash_error("Only owner may make dataset public.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>/private", methods=["POST"])
@@ -211,12 +219,12 @@ def private(iuid):
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
-    if allow_edit(dataset):
+    if am_owner(dataset):
         if dataset["public"]:
             with DatasetSaver(dataset) as saver:
                 saver.set_public(False)
     else:
-        utils.flash_error("Edit access to dataset not allowed.")
+        utils.flash_error("Only owner may make dataset private.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>.<ext>")
@@ -526,18 +534,26 @@ def get_graphics(dataset):
             result.append(row.doc)
     return sorted(result, key=lambda g: g["title"])
 
+def am_owner(dataset):
+    "Is the current user the owner of the dataset? Includes admin."
+    if not flask.g.current_user: return False
+    if flask.g.am_admin: return True
+    return flask.g.current_user["username"] == dataset["owner"]
+
 def allow_view(dataset):
     "Is the current user allowed to view the dataset?"
     if dataset.get("public"): return True
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == dataset["owner"]
+    if flask.g.current_user["username"] == dataset["owner"]: return True
+    return flask.g.current_user["username"] in dataset.get("editors", [])
 
 def allow_edit(dataset):
     "Is the current user allowed to edit the dataset?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == dataset["owner"]
+    if flask.g.current_user["username"] == dataset["owner"]: return True
+    return flask.g.current_user["username"] in dataset.get("editors", [])
 
 def allow_delete(dataset):
     "Is the current user allowed to delete the dataset?"

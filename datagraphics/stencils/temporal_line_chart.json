@@ -1,38 +1,38 @@
 {
     "header": {
-        "title": "Bar chart",
+        "title": "Temporal line chart",
         "variables": [
             {"path": ["data", "url"],
              "title": "URI to the dataset CSV. Filled in automatically.",
              "class": "dataset"},
             {"path": ["encoding", "x", "field"],
-             "title": "Ordinal dimension",
+             "title": "Temporal dimension",
              "class": "field",
-             "type": "ordinal"},
+             "type": "temporal"},
             {"path": ["encoding", "y", "field"],
              "title": "Quantitative dimension",
              "class": "field",
              "type": "quantitative"}
         ],
-        "weight": 2
+        "weight": 4
     },
   "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "width": 600,
+  "height": 400,
   "data": {
     "url": "dataset",
     "format": {
       "type": "csv"
     }
   },
-  "width": 400,
-  "height": 400,
   "mark": {
-    "type": "bar",
-    "tooltip": true
+    "type": "line",
+    "interpolate": "monotone"
   },
   "encoding": {
     "x": {
       "field": "x field",
-      "type": "ordinal"
+      "type": "temporal"
     },
     "y": {
       "field": "y field",

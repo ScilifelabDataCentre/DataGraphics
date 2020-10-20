@@ -167,8 +167,6 @@ class EntitySaver(AttachmentsSaver):
 
     def change_owner(self, owner=None):
         "Change the owner."
-        if not flask.g.am_admin:
-            raise ValueError("You must be admin to set owner.")
         if not owner:
             owner = flask.request.form.get("owner")
         if not owner: return
@@ -176,6 +174,19 @@ class EntitySaver(AttachmentsSaver):
             raise ValueError(f"No user account '{owner}' to set as owner.")
         self.doc["owner"] = owner
 
+    def set_editors(self, editors=None):
+        if editors is None:
+            editors = flask.request.form.get("editors")
+        if editors:
+            editors = editors.split()
+            for editor in editors:
+                if not datagraphics.user.get_user(editor):
+                    raise ValueError(f"No user account '{editor}'"
+                                     " to set as editor.")
+            self.doc["editors"] = editors
+        else:
+            self.doc.pop("editors", None)
+            
     def set_title(self, title=None):
         "Set the title."
         if title is None:
