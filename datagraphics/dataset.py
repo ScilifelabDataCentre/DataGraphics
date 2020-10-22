@@ -181,13 +181,28 @@ def copy(iuid):
         return flask.redirect(flask.url_for(".display", iuid=iuid))
     try:
         with DatasetSaver() as saver:
-            saver.set_title(f"Copy of {dataset['title']}")
-            saver.set_editors(dataset.get("editors") or [])
-            saver.set_description(dataset["description"])
-            saver.set_public(False)
-            saver.set_data(flask.g.db.get_attachment(dataset, "data.json"),
-                           content_type=constants.JSON_MIMETYPE)
-            saver.set_vega_lite_types(dataset["meta"])
+            saver.copy(dataset)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.url_referrer())
+    return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
+
+@blueprint.route("/<iuid:iuid>/copy_graphics", methods=["POST"])
+@utils.login_required
+def copy_graphics(iuid):
+    """Copy the dataset, including its data content, 
+    and also all its graphics viewable by the user."""
+    try:
+        dataset = get_dataset(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.url_referrer())
+    if not allow_view(dataset):
+        utils.flash_error("View access to dataset not allowed.")
+        return flask.redirect(flask.url_for(".display", iuid=iuid))
+    try:
+        with DatasetSaver() as saver:
+            saver.copy(dataset, graphics=True)
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
@@ -501,6 +516,23 @@ class DatasetSaver(EntitySaver):
                 types = flask.request.form.getlist(f"vega_lite_types_{key}")
             meta["vega_lite_types"] = [t for t in types
                                        if t in constants.VEGA_LITE_TYPES]
+
+    def copy(self, dataset, graphics=False):
+        """Copy everything from the given dataset into this.
+        If flag is set, also make copies of the graphics for the dataset."""
+        self.set_title(f"Copy of {dataset['title']}")
+        self.set_editors(dataset.get("editors") or [])
+        self.set_description(dataset["description"])
+        self.set_public(False)
+        self.set_data(flask.g.db.get_attachment(dataset, "data.json"),
+                      content_type=constants.JSON_MIMETYPE)
+        self.set_vega_lite_types(dataset["meta"])
+        if graphics:
+            import datagraphics.graphic
+            for graphic in get_graphics(dataset):
+                with datagraphics.graphic.GraphicSaver() as saver:
+                    saver.copy(graphic, dataset=self.doc)
+
 
 # Utility functions
 

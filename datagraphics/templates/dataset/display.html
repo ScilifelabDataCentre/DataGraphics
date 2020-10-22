@@ -164,6 +164,14 @@
       Copy dataset</button>
   </form>
 </div>
+<div class="mt-2">
+  <form action="{{ url_for('.copy_graphics', iuid=dataset['_id']) }}"
+        method="POST">
+    {{ csrf_token() }}
+    <button type="submit" class="btn btn-block btn-sm btn-primary">
+      Copy dataset and its graphics</button>
+  </form>
+</div>
 {% if dataset['meta'] %}
 <div class="mt-4">
   <form action="{{ url_for('graphic.create') }}"
