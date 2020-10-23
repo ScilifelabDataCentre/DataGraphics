@@ -176,9 +176,8 @@ class EntitySaver(AttachmentsSaver):
 
     def set_editors(self, editors=None):
         if editors is None:
-            editors = flask.request.form.get("editors")
+            editors = flask.request.form.get("editors", "").split()
         if editors:
-            editors = editors.split()
             for editor in editors:
                 if not datagraphics.user.get_user(editor):
                     raise ValueError(f"No user account '{editor}'"

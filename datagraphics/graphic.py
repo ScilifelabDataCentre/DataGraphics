@@ -370,23 +370,42 @@ class GraphicSaver(EntitySaver):
     DOCTYPE = constants.DOCTYPE_GRAPHIC
 
     def set_dataset(self, dataset):
+        "Set the dataset that is the basis for this graphic."
         if not datagraphics.dataset.allow_view(dataset):
             raise ValueError("View access to dataset not allowed.")
         if not dataset["meta"] or not dataset["n_records"]:
             raise ValueError("Cannot create graphics for empty dataset.")
         self.doc["dataset"] = dataset["_id"]
 
-    def set_specification(self, specification=None, 
-                          old_data_urls=None, new_data_url=None):
+    def set_specification(self, specification=None, origin_dataset_id=None):
         """Set the Vega-Lite JSON specification.
         Optionally change old data urls to the new value."""
         if specification is None:
             specification = flask.request.form.get("specification") or "{}"
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
+
         # Ensure that item '$schema' is kept fixed.
         specification["$schema"] = constants.VEGA_LITE_SCHEMA_URL
 
+        # Change the dataset URLs if origin is different from current.
+        if origin_dataset_id is not None:
+            old_data_urls = set([flask.url_for("api_dataset.content",
+                                               iuid=origin_dataset_id,
+                                               ext="csv",
+                                               _external=True),
+                                 flask.url_for("api_dataset.content",
+                                               iuid=origin_dataset_id,
+                                               ext="json",
+                                               _external=True)])
+            new_data_url = flask.url_for("api_dataset.content",
+                                         iuid=self.doc["dataset"],
+                                         ext="json",
+                                         _external=True)
+            replacer = ReplaceDataUrl(old_data_urls, new_data_url)
+            replacer.traverse(specification)
+
+        # Sanity and validation check of the specification.
         dataset_urls = set([flask.url_for("api_dataset.content",
                                           iuid=self.doc["dataset"],
                                           ext="csv",
@@ -395,11 +414,6 @@ class GraphicSaver(EntitySaver):
                                           iuid=self.doc["dataset"],
                                           ext="json",
                                           _external=True)])
-        if old_data_urls and new_data_url:
-            replacer = ReplaceDataUrl(old_data_urls, new_data_url)
-            replacer.traverse(specification)
-
-        # Sanity and validation check of the specification.
         data_urls = DataUrls()
         data_urls.traverse(specification)
         if dataset_urls.intersection(data_urls):
@@ -417,32 +431,16 @@ class GraphicSaver(EntitySaver):
 
     def copy(self, graphic, dataset=None):
         """Copy everything from the given graphic into this.
-        If no dataset is given, keep the old one, else update
-        the data URLs."""
+        If the source dataset is given then update the data URLs."""
         self.set_title(f"Copy of {graphic['title']}")
         self.set_description(graphic["description"])
         self.set_public(False)
         if dataset is None:
-            dataset = datagraphics.dataset.get_dataset(graphic["dataset"])
-            old_data_urls = set([flask.url_for("api_dataset.content",
-                                               iuid=graphic["dataset"],
-                                               ext="csv",
-                                               _external=True),
-                                 flask.url_for("api_dataset.content",
-                                               iuid=graphic["dataset"],
-                                               ext="json",
-                                               _external=True)])
-            new_data_url = flask.url_for("api_dataset.content",
-                                         iuid=dataset["_id"],
-                                         ext="json",
-                                         _external=True)
+            self.set_specification(graphic["specification"])
         else:
-            old_data_urls = None
-            new_data_url = None
-        self.set_dataset(dataset)
-        self.set_specification(graphic["specification"],
-                               old_data_urls=old_data_urls,
-                               new_data_url=new_data_url)
+            self.set_dataset(dataset)
+            self.set_specification(graphic["specification"],
+                                   origin_dataset_id=graphic["dataset"])
 
 
 class DataUrls(utils.JsonTraverser):
@@ -474,7 +472,6 @@ class ReplaceDataUrl(utils.JsonTraverser):
         "Record all values for the fragment 'data.url'."
         if self.path[-2:] == ["data", "url"]:
             if value in self.old_data_urls:
-                print("replace", self.old_data_urls, self.new_data_url)
                 return self.new_data_url
         return value
 
