@@ -587,7 +587,7 @@ def allow_edit(dataset):
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
     if flask.g.current_user["username"] == dataset["owner"]: return True
-    return flask.g.current_user["username"] in dataset.get("editors", [])
+    return flask.g.current_user["username"] in dataset.get("editor", [])
 
 def allow_delete(dataset):
     "Is the current user allowed to delete the dataset?"

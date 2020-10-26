@@ -42,6 +42,23 @@ def user(username):
                                  graphics=graphics,
                                  show_public=True)
 
+@blueprint.route("/user/<name:username>/editor")
+@utils.login_required
+def editor(username):
+    "Display list of the graphics for which the user is editor."
+    user = datagraphics.user.get_user(username=username)
+    if user is None:
+        utils.flash_error("No such user.")
+        return flask.redirect(flask.url_for("home"))
+    if not datagraphics.user.am_admin_or_self(user):
+        utils.flash_error("View access to editor graphics is not allowed.")
+        return flask.redirect(flask.url_for("home"))
+    graphics = get_graphics_editor(username, full=True)
+    return flask.render_template("graphics/editor.html",
+                                 user=user,
+                                 graphics=graphics,
+                                 show_public=True)
+
 @blueprint.route("/all")
 def all():
     "Display list of graphics."
@@ -76,6 +93,40 @@ def get_graphics_owner(username, full=False):
 def count_graphics_owner(username):
     "Return the number of graphics owned by the given user."
     view = flask.g.db.view("graphics", "owner_modified",
+                           startkey=(username, ""),
+                           endkey=(username, "ZZZZZZ"),
+                           reduce=True)
+    rows = list(view)
+    if rows:
+        return rows[0].value
+    else:
+        return 0
+
+def get_graphics_editor(username, full=False):
+    """Get the graphics for which the given user is editor.
+    If full is True, as docs.
+    If full is False, as list of tuples (iuid, title, modified).
+    """
+    view = flask.g.db.view("graphics", "editor_modified",
+                           startkey=(username, "ZZZZZZ"),
+                           endkey=(username, ""),
+                           include_docs=full,
+                           reduce=False,
+                           descending=True)
+    if full:
+        result = []
+        for row in view:
+            graphic = row.doc
+            fetch_dataset(graphic)
+            flask.g.cache[graphic["_id"]] = graphic
+            result.append(graphic)
+        return result
+    else:
+        return [(row.id, row.value, row.key[1]) for row in view]
+
+def count_graphics_editor(username):
+    "Return the number of graphics for which the given user is editor."
+    view = flask.g.db.view("graphics", "editor_modified",
                            startkey=(username, ""),
                            endkey=(username, "ZZZZZZ"),
                            reduce=True)

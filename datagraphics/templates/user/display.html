@@ -25,11 +25,19 @@
     </td>
   </tr>
   <tr>
-    <th class="text-right">Graphics</th>
+    <th class="text-right">Graphics (owner)</th>
     <td>
       <a href="{{ url_for('graphics.user', username=user['username']) }}"
          class="badge badge-primary">
         {{ user['count']['graphics'] }}</a>
+    </td>
+  </tr>
+  <tr>
+    <th class="text-right">Graphics (editor)</th>
+    <td>
+      <a href="{{ url_for('graphics.editor', username=user['username']) }}"
+         class="badge badge-primary">
+        {{ user['count']['graphics_editor'] }}</a>
     </td>
   </tr>
   <tr>

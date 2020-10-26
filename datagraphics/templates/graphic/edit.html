@@ -35,7 +35,23 @@
       </small>
     </div>
   </div>
-  {% endif %}
+  {% endif %} {# if g.am_admin #}
+  {% if am_owner %}
+  <div class="form-group row">
+    <label for="editors"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      Editors</label>
+    <div class="col-md">
+      <input type="text" id="editors" name="editors"
+             class="form-control" aria-describedby="editorsHelp"
+             value="{{ ' '.join(graphic.get('editors', [])) }}">
+      <small id="editorsHelp" class="form-text text-muted">
+        Specify the name(s) of the account(s) that are allowed to edit
+        the graphic. Separate multiple names by whitespace.
+      </small>
+    </div>
+  </div>
+  {% endif %} {# if am_owner #}
   <div class="form-group row">
     <label for="description"
 	   class="col-md-2 col-form-label text-right font-weight-bold">

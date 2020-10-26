@@ -12,7 +12,8 @@ from datagraphics import constants
 from datagraphics import utils
 from datagraphics.datasets import (count_datasets_owner,
                                    count_datasets_editor)
-from datagraphics.graphics import count_graphics_owner
+from datagraphics.graphics import (count_graphics_owner,
+                                   count_graphics_editor)
 from datagraphics.saver import BaseSaver
 
 def init(app):
@@ -223,7 +224,8 @@ def display(username):
         return flask.redirect(flask.url_for("home"))
     user["count"] = {"datasets": count_datasets_owner(username),
                      "datasets_editor": count_datasets_editor(username),
-                     "graphics": count_graphics_owner(username)}
+                     "graphics": count_graphics_owner(username),
+                     "graphics_editor": count_graphics_editor(username)}
     return flask.render_template("user/display.html", user=user)
 
 @blueprint.route("/display/<name:username>/edit",
