@@ -319,8 +319,10 @@ class DatasetSaver(EntitySaver):
         self.doc["n_records"] = len(data)
         self.update_meta(data)
 
+        # Data in JSON format.
         json_content = json.dumps(data)
 
+        # Data in CSV format.
         outfile = io.StringIO()
         writer = csv.DictWriter(outfile, fieldnames=list(data[0].keys()))
         writer.writeheader()
@@ -361,7 +363,7 @@ class DatasetSaver(EntitySaver):
             raise ValueError(f"JSON data record 0 '{first}' is not an object.")
 
         meta = self.doc["meta"]
-        new = not bool(meta) # New dataset, or being updated?
+        new = not bool(meta)  # New dataset, or being updated?
 
         if new:
             # Figure out the types from the items in the first data record.
@@ -407,7 +409,7 @@ class DatasetSaver(EntitySaver):
             raise ValueError("No data in CSV file.")
 
         meta = self.doc["meta"]
-        new = not bool(meta) # New dataset, or being updated?
+        new = not bool(meta)  # New dataset, or being updated?
 
         if new:
             # Figure out the types from the items in the first data record.

@@ -196,7 +196,8 @@ class EntitySaver(AttachmentsSaver):
         "Set the Markdown-formatted description."
         if description is None:
             description = flask.request.form.get("description") or ""
-        self.doc["description"] = description
+        # Remove carriage-returns from string.
+        self.doc["description"] = description.replace('\r', '')
 
     def set_public(self, public=None):
         if public is None:
