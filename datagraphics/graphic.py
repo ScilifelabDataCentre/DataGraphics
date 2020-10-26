@@ -162,11 +162,7 @@ def copy(iuid):
         return flask.redirect(flask.url_for(".display", iuid=iuid))
     try:
         with GraphicSaver() as saver:
-            saver.set_title(f"Copy of {graphic['title']}")
-            saver.set_description(graphic["description"])
-            saver.set_public(False)
-            saver.set_dataset(datagraphics.dataset.get_dataset(graphic["dataset"]))
-            saver.set_specification(graphic["specification"])
+            saver.copy(graphic)
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
@@ -374,21 +370,42 @@ class GraphicSaver(EntitySaver):
     DOCTYPE = constants.DOCTYPE_GRAPHIC
 
     def set_dataset(self, dataset):
+        "Set the dataset that is the basis for this graphic."
         if not datagraphics.dataset.allow_view(dataset):
             raise ValueError("View access to dataset not allowed.")
         if not dataset["meta"] or not dataset["n_records"]:
             raise ValueError("Cannot create graphics for empty dataset.")
         self.doc["dataset"] = dataset["_id"]
 
-    def set_specification(self, specification=None):
-        "Set the Vega-Lite JSON specification."
+    def set_specification(self, specification=None, origin_dataset_id=None):
+        """Set the Vega-Lite JSON specification.
+        Optionally change old data urls to the new value."""
         if specification is None:
             specification = flask.request.form.get("specification") or "{}"
             # If it is not even valid JSON, then don't save it, just complain.
             specification = json.loads(specification)
+
         # Ensure that item '$schema' is kept fixed.
         specification["$schema"] = constants.VEGA_LITE_SCHEMA_URL
-        # Check that at least one data URL refers to the dataset.
+
+        # Change the dataset URLs if origin is different from current.
+        if origin_dataset_id is not None:
+            old_data_urls = set([flask.url_for("api_dataset.content",
+                                               iuid=origin_dataset_id,
+                                               ext="csv",
+                                               _external=True),
+                                 flask.url_for("api_dataset.content",
+                                               iuid=origin_dataset_id,
+                                               ext="json",
+                                               _external=True)])
+            new_data_url = flask.url_for("api_dataset.content",
+                                         iuid=self.doc["dataset"],
+                                         ext="json",
+                                         _external=True)
+            replacer = ReplaceDataUrl(old_data_urls, new_data_url)
+            replacer.traverse(specification)
+
+        # Sanity and validation check of the specification.
         dataset_urls = set([flask.url_for("api_dataset.content",
                                           iuid=self.doc["dataset"],
                                           ext="csv",
@@ -408,8 +425,22 @@ class GraphicSaver(EntitySaver):
                 self.doc["error"] = None
         else:
             self.doc["error"] = "The graphic does not refer to its dataset."
+
         # Save it, even if incorrect Vega-Lite.
         self.doc["specification"] = specification
+
+    def copy(self, graphic, dataset=None):
+        """Copy everything from the given graphic into this.
+        If the source dataset is given then update the data URLs."""
+        self.set_title(f"Copy of {graphic['title']}")
+        self.set_description(graphic["description"])
+        self.set_public(False)
+        if dataset is None:
+            self.set_specification(graphic["specification"])
+        else:
+            self.set_dataset(dataset)
+            self.set_specification(graphic["specification"],
+                                   origin_dataset_id=graphic["dataset"])
 
 
 class DataUrls(utils.JsonTraverser):
@@ -425,6 +456,24 @@ class DataUrls(utils.JsonTraverser):
 
     def __iter__(self):
         yield from self.result
+
+
+class ReplaceDataUrl(utils.JsonTraverser):
+    "Replace a given data URL with another."
+
+    replace = True
+
+    def __init__(self, old_data_urls, new_data_url):
+        "Note: The old urls must be a set (or iterable, at least)!"
+        self.old_data_urls = old_data_urls
+        self.new_data_url = new_data_url
+
+    def handle(self, value):
+        "Record all values for the fragment 'data.url'."
+        if self.path[-2:] == ["data", "url"]:
+            if value in self.old_data_urls:
+                return self.new_data_url
+        return value
 
 
 # Utility functions
