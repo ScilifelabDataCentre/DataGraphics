@@ -66,6 +66,9 @@
                  href="{{ url_for('graphics.user', username=g.current_user['username']) }}">
                 My graphics</a>
               <a class="dropdown-item"
+                 href="{{ url_for('graphics.editor', username=g.current_user['username']) }}">
+                Editor graphics</a>
+              <a class="dropdown-item"
                  href="{{ url_for('graphics.public') }}">Public graphics</a>
               {% if g.am_admin %}
               <a class="dropdown-item"

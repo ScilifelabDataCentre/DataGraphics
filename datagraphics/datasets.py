@@ -90,6 +90,18 @@ def get_datasets_owner(username, full=False):
     else:
         return [(row.id, row.value, row.key[1]) for row in view]
 
+def count_datasets_owner(username):
+    "Return the number of datasets owned by the given user."
+    view = flask.g.db.view("datasets", "owner_modified",
+                           startkey=(username, ""),
+                           endkey=(username, "ZZZZZZ"),
+                           reduce=True)
+    rows = list(view)
+    if rows:
+        return rows[0].value
+    else:
+        return 0
+
 def get_datasets_editor(username, full=False):
     """Get the datasets for which the given user is editor.
     If full is True, as docs.
@@ -111,18 +123,6 @@ def get_datasets_editor(username, full=False):
         return result
     else:
         return [(row.id, row.value, row.key[1]) for row in view]
-
-def count_datasets_owner(username):
-    "Return the number of datasets owned by the given user."
-    view = flask.g.db.view("datasets", "owner_modified",
-                           startkey=(username, ""),
-                           endkey=(username, "ZZZZZZ"),
-                           reduce=True)
-    rows = list(view)
-    if rows:
-        return rows[0].value
-    else:
-        return 0
 
 def count_datasets_editor(username):
     "Return the number of datasets for which the given user is editor."

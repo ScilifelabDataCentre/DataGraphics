@@ -4,7 +4,7 @@ import re
 import os.path
 import string
 
-__version__ = "0.7.2"
+__version__ = "0.7.5"
 
 class Constants:
     VERSION = __version__
@@ -61,6 +61,7 @@ class Constants:
     JSON_MIMETYPE = "application/json"
     CSV_MIMETYPE = "text/csv"
     JS_MIMETYPE = "text/javascript"
+    EXCEL_MIMETYPE = "application/vnd.ms-excel"
 
     # JSON Schema; Draft 7 validator is currently hardwired.
     JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#"

@@ -186,6 +186,19 @@
   {{ graphic['owner'] }}
   {% endif %}
 </div>
+{% if graphic.get('editors') %}
+<div>
+  Editors:
+  {% for editor in graphic['editors'] %}
+    {% if am_admin_or_self(username=editor) %}
+    <a href="{{ url_for('user.display', username=editor) }}">
+      {{ editor }}</a>
+    {% else %}
+    {{ editor }}
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %} {# if graphic.get('editors') #}
 <div class="mt-4">
   <div class="small">Modified
     <span class="localtime">{{ graphic['modified'] }}</span>

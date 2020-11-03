@@ -270,7 +270,7 @@ def float_default(value, default=""):
 def slugify(s, lowercase=False):
     """Return the string converted into a valid slug.
     - Lower case, if specified.
-    - Dash instead of blanks.
+    - Dash instead of whitespaces.
     - ASCII letters, numbers and dash.
     - All other characters removed.
     """

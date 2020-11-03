@@ -9,16 +9,13 @@
   <col style="width:20%">
   <col style="width:80%">
   <tr>
-    <th class="text-right">Datasets (owner)</th>
+    <th class="text-right">Datasets</th>
     <td>
+      Owner:
       <a href="{{ url_for('datasets.user', username=user['username']) }}"
-         class="badge badge-primary">
+         class="badge badge-primary mr-5">
         {{ user['count']['datasets'] }}</a>
-    </td>
-  </tr>
-  <tr>
-    <th class="text-right">Datasets (editor)</th>
-    <td>
+      Editor:
       <a href="{{ url_for('datasets.editor', username=user['username']) }}"
          class="badge badge-primary">
         {{ user['count']['datasets_editor'] }}</a>
@@ -27,9 +24,14 @@
   <tr>
     <th class="text-right">Graphics</th>
     <td>
+      Owner:
       <a href="{{ url_for('graphics.user', username=user['username']) }}"
-         class="badge badge-primary">
+         class="badge badge-primary mr-5">
         {{ user['count']['graphics'] }}</a>
+      Editor:
+      <a href="{{ url_for('graphics.editor', username=user['username']) }}"
+         class="badge badge-primary">
+        {{ user['count']['graphics_editor'] }}</a>
     </td>
   </tr>
   <tr>

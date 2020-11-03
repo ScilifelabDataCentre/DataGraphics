@@ -308,19 +308,31 @@ class DatasetSaver(EntitySaver):
         if not infile: return
 
         if content_type is None:
-            content_type = infile.content_type
+            content_type = infile.mimetype  # Exclude parameters.
+        data = None
         if content_type == constants.JSON_MIMETYPE:
             data = self.get_json_data(infile)
         elif content_type == constants.CSV_MIMETYPE:
             data = self.get_csv_data(infile)
-        else:
-            raise ValueError("Cannot handle data file of type"
-                             f" {infile.content_type}.")
+        elif content_type == constants.EXCEL_MIMETYPE:
+            # Microsoft Windows may lie about Content-Type!
+            # May claim Excel, when it is actually CSV. Try to read it as CSV.
+            if "windows" in flask.request.user_agent.lower():
+                try:
+                    data = self.get_csv_data(infile)
+                except ValueError:  # Fails if it really was an Excel file.
+                    pass
+            if data is None:
+                pass  # TODO: Try Excel here, when and if implemented.
+        if data is None:
+            raise ValueError(f"Cannot handle data file of type {content_type}.")
         self.doc["n_records"] = len(data)
         self.update_meta(data)
 
+        # Data in JSON format.
         json_content = json.dumps(data)
 
+        # Data in CSV format.
         outfile = io.StringIO()
         writer = csv.DictWriter(outfile, fieldnames=list(data[0].keys()))
         writer.writeheader()
@@ -361,7 +373,7 @@ class DatasetSaver(EntitySaver):
             raise ValueError(f"JSON data record 0 '{first}' is not an object.")
 
         meta = self.doc["meta"]
-        new = not bool(meta) # New dataset, or being updated?
+        new = not bool(meta)  # New dataset, or being updated?
 
         if new:
             # Figure out the types from the items in the first data record.
@@ -374,7 +386,7 @@ class DatasetSaver(EntitySaver):
                     raise ValueError(f"JSON data item 0 '{first}'"
                                      " contains illegal type")
 
-        # Check data homogeneity.
+        # Check data homogeneity. Checks with respect to 'meta'.
         keys = list(meta.keys())
         for pos, record in enumerate(data):
             if not isinstance(record, dict):
@@ -407,7 +419,7 @@ class DatasetSaver(EntitySaver):
             raise ValueError("No data in CSV file.")
 
         meta = self.doc["meta"]
-        new = not bool(meta) # New dataset, or being updated?
+        new = not bool(meta)  # New dataset, or being updated?
 
         if new:
             # Figure out the types from the items in the first data record.
@@ -429,7 +441,7 @@ class DatasetSaver(EntitySaver):
                         except ValueError:
                             meta[key]["type"] = "string"
 
-        # Convert values; check data homogeneity.
+        # Convert values; check data homogeneity. Checks with respect to 'meta'.
         keys = list(meta.keys())
         for pos, record in enumerate(data):
             for key, value in record.items():
@@ -470,7 +482,7 @@ class DatasetSaver(EntitySaver):
                     meta["vega_lite_types"] = ["nominal"]
 
     def update_meta(self, data):
-        "Update the 'meta' entry given the data."
+        "Update the 'meta' entry statistics given the data."
         for key, meta in self.doc["meta"].items():
             meta["n_null"] = len([r[key] for r in data if r[key] is None])
             if meta["type"] in ("string", "integer"):
@@ -585,7 +597,7 @@ def allow_edit(dataset):
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
     if flask.g.current_user["username"] == dataset["owner"]: return True
-    return flask.g.current_user["username"] in dataset.get("editors", [])
+    return flask.g.current_user["username"] in dataset.get("editor", [])
 
 def allow_delete(dataset):
     "Is the current user allowed to delete the dataset?"

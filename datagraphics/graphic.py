@@ -27,6 +27,8 @@ DESIGN_DOC = {
                             "map": "function(doc) {if (doc.doctype !== 'graphic' || !doc.public) return; emit(doc.modified, doc.title);}"},
         "owner_modified": {"reduce": "_count",
                            "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit([doc.owner, doc.modified], doc.title);}"},
+        "editor_modified": {"reduce": "_count",
+                            "map": "function(doc) {if (doc.doctype !== 'graphic') return; if (!doc.editors) return; for (var i=0; i<doc.editors.length; i++) { emit([doc.editors[i], doc.modified], doc.title);}}"},
         "dataset": {"reduce": "_count",
                     "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}"}
     }
@@ -102,6 +104,7 @@ def display(iuid):
                                  slug=utils.slugify(graphic['title']),
                                  dataset=dataset,
                                  other_graphics=other_graphics,
+                                 am_owner=am_owner(graphic),
                                  allow_edit=allow_edit(graphic),
                                  allow_delete=allow_delete(graphic))
 
@@ -119,7 +122,9 @@ def edit(iuid):
         if not allow_edit(graphic):
             utils.flash_error("Edit access to graphic not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
-        return flask.render_template("graphic/edit.html", graphic=graphic)
+        return flask.render_template("graphic/edit.html",
+                                     am_owner=am_owner(graphic),
+                                     graphic=graphic)
 
     elif utils.http_POST():
         if not allow_edit(graphic):
@@ -130,6 +135,8 @@ def edit(iuid):
                 saver.set_title()
                 if flask.g.am_admin:
                     saver.change_owner()
+                if am_owner(graphic):
+                    saver.set_editors()
                 saver.set_description()
                 saver.set_specification()
         except ValueError as error:
@@ -177,12 +184,12 @@ def public(iuid):
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
-    if allow_edit(graphic):
+    if am_owner(graphic):
         if not graphic["public"]:
             with GraphicSaver(graphic) as saver:
                 saver.set_public(True)
     else:
-        utils.flash_error("Edit access to graphic not allowed.")
+        utils.flash_error("Only owner may make graphic public.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>/private", methods=["POST"])
@@ -194,12 +201,12 @@ def private(iuid):
     except ValueError as error:
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
-    if allow_edit(graphic):
+    if am_owner(graphic):
         if graphic["public"]:
             with GraphicSaver(graphic) as saver:
                 saver.set_public(False)
     else:
-        utils.flash_error("Edit access to graphic not allowed.")
+        utils.flash_error("Only owner may make graphic private.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>.<ext>")
@@ -433,6 +440,7 @@ class GraphicSaver(EntitySaver):
         """Copy everything from the given graphic into this.
         If the source dataset is given then update the data URLs."""
         self.set_title(f"Copy of {graphic['title']}")
+        self.set_editors(graphic.get("editors") or [])
         self.set_description(graphic["description"])
         self.set_public(False)
         if dataset is None:
@@ -494,18 +502,26 @@ def get_graphic(iuid):
     flask.g.cache[iuid] = doc
     return doc
 
+def am_owner(graphic):
+    "Is the current user the owner of the graphic? Includes admin."
+    if not flask.g.current_user: return False
+    if flask.g.am_admin: return True
+    return flask.g.current_user["username"] == graphic["owner"]
+
 def allow_view(graphic):
     "Is the current user allowed to view the graphic?"
     if graphic.get("public"): return True
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == graphic["owner"]
+    if flask.g.current_user["username"] == graphic["owner"]: return True
+    return flask.g.current_user["username"] in graphic.get("editors", [])
 
 def allow_edit(graphic):
     "Is the current user allowed to edit the graphic?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == graphic["owner"]
+    if flask.g.current_user["username"] == graphic["owner"]: return True
+    return flask.g.current_user["username"] in graphic.get("editors", [])
 
 def allow_delete(graphic):
     "Is the current user allowed to delete the graphic?"

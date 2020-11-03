@@ -7,7 +7,8 @@ from flask_cors import CORS
 
 from datagraphics.graphics import (get_graphics_public,
                                    get_graphics_all,
-                                   get_graphics_owner)
+                                   get_graphics_owner,
+                                   get_graphics_editor)
 import datagraphics.user
 from datagraphics import constants
 from datagraphics import utils
@@ -37,6 +38,22 @@ def user(username):
         flask.abort(http.client.FORBIDDEN)
     graphics = []
     for iuid, title, modified in get_graphics_owner(username):
+        graphics.append({"href": flask.url_for("api_graphic.serve",
+                                               iuid=iuid,
+                                               _external=True),
+                         "title": title,
+                         "modified": modified})
+    return utils.jsonify({"graphics": graphics},
+                         schema=flask.url_for("api_schema.graphics",
+                                              _external=True))
+
+@blueprint.route("/user/<username>/editor")
+def editor(username):
+    "Get the graphics which the given user is editor of."
+    if not datagraphics.user.am_admin_or_self(username=username):
+        flask.abort(http.client.FORBIDDEN)
+    graphics = []
+    for iuid, title, modified in get_graphics_editor(username):
         graphics.append({"href": flask.url_for("api_graphic.serve",
                                                iuid=iuid,
                                                _external=True),

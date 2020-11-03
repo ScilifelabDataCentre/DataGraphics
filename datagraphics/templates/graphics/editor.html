@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block head_title %}Editor {{ user['username'] }} graphics{% endblock %}
+
+{% block body_title %}
+Editor <a href="{{ url_for('user.display', username=user['username']) }}">
+  {{ user['username'] }}</a> graphics
+{% endblock %}
+
+{% block meta %}
+<div>
+  <a href="{{ url_for('api_graphics.editor', username=user['username']) }}"
+     class="badge badge-dark">API</a>
+</div>
+{% endblock %} {# block meta #}
+
+{% block main %}
+{{ macros.graphics_table(graphics, show_public=True, show_owner=True) }}
+{% endblock %} {# block main #}
+
+{% block javascript %}
+<script>
+  $(function() {
+    $("#graphics").DataTable( {
+      pagingType: "full_numbers",
+      pageLength: 25,
+      order: [[5, "desc"]]
+    });
+  });
+</script>
+{% endblock %}
