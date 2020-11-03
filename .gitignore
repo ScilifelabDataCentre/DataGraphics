@@ -1,4 +1,5 @@
 *.log
 *~
-settings.json
+!example_settings.json
+*settings.json
 __pycache__
