@@ -407,7 +407,7 @@ class GraphicSaver(EntitySaver):
                                                _external=True)])
             new_data_url = flask.url_for("api_dataset.content",
                                          iuid=self.doc["dataset"],
-                                         ext="json",
+                                         ext="csv",
                                          _external=True)
             replacer = ReplaceDataUrl(old_data_urls, new_data_url)
             replacer.traverse(specification)
