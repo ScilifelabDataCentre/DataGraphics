@@ -317,7 +317,7 @@ class DatasetSaver(EntitySaver):
         elif content_type == constants.EXCEL_MIMETYPE:
             # Microsoft Windows may lie about Content-Type!
             # May claim Excel, when it is actually CSV. Try to read it as CSV.
-            if "windows" in flask.request.user_agent.lower():
+            if "windows" in str(flask.request.user_agent).lower():
                 try:
                     data = self.get_csv_data(infile)
                 except ValueError:  # Fails if it really was an Excel file.
