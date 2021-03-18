@@ -419,7 +419,7 @@ class DatasetSaver(EntitySaver):
             raise ValueError("No data in CSV file.")
 
         meta = self.doc["meta"]
-        new = not bool(meta)  # New dataset, or being updated?
+        new = not bool(meta)  # New dataset, else being updated.
 
         if new:
             # Figure out the types from the items in the first data record.
@@ -443,14 +443,18 @@ class DatasetSaver(EntitySaver):
 
         # Convert values; check data homogeneity. Checks with respect to 'meta'.
         keys = list(meta.keys())
-        for pos, record in enumerate(data):
+        for pos, record in enumerate(data, 1):
             for key, value in record.items():
                 if value:
                     try:
                         record[key] = TYPE_OBJECT_MAP2[meta[key]["type"]](value)
                     except ValueError:
-                        raise ValueError(f"CSV data record {pos} '{record}'"
-                                         " contains wrong type.")
+                        # "Not Applicable" means None.
+                        if value.lower() in constants.NA_STRINGS:
+                            record[key] = None
+                        else:
+                            raise ValueError(f"CSV data record {pos} '{record}'"
+                                             f" '{key}' contains wrong type.")
                 elif meta[key]["type"] != "string":
                     # An empty string is a string when type is 'string'.
                     # Otherwise the value is set as None.
