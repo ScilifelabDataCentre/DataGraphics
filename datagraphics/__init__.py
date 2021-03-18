@@ -4,7 +4,7 @@ import re
 import os.path
 import string
 
-__version__ = "0.7.8"
+__version__ = "0.7.9"
 
 class Constants:
     VERSION = __version__
@@ -37,6 +37,7 @@ class Constants:
                              re.ASCII)
     TIME_RX = re.compile(r"^\d\d:\d\d(:\d\d)?$", re.ASCII)
 
+    NA_STRINGS = {"na", "n/a"}
     SLUG_CHARS = frozenset(string.ascii_letters + string.digits + "-")
 
     # CouchDB document types
