@@ -11,9 +11,9 @@ from datagraphics import utils
 
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
-    SERVER_NAME = "127.0.0.1:5005", # For URL generation.
+    SERVER_NAME = "127.0.0.1:5005",   # For URL generation.
     SERVER_HOST = "127.0.0.1",        # For app.run()
-    SERVER_PORT = "5005",           # For app.run()
+    SERVER_PORT = "5005",             # For app.run()
     SITE_STATIC_DIRPATH = None,
     DEBUG = False,
     LOG_DEBUG = False,
