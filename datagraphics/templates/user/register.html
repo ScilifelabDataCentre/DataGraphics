@@ -40,13 +40,15 @@
       </div>
       <small id="emailHelp" class="form-text text-muted">
         <strong>Required!</strong>
-	A valid email address for the user. The password setting code
-	will be sent to this address. It must be unique within the
-	site.
+	A valid email address for the user. It must be unique within
+	the site.
+        {% if config.get('MAIL_SERVER') %}
+        The password setting code will be sent to this address.
+        {% endif %}
       </small>
     </div>
   </div>
-  {% if g.am_admin %}
+  {% if g.am_admin or not config['MAIL_SERVER'] %}
   <div class="form-group row">
     <label for="password" class="col-md-2 col-form-label text-right">
       Password</label>
@@ -59,9 +61,30 @@
         </div>
       </div>
       <small id="passwordHelp" class="form-text text-muted">
-        <strong>For admin only!</strong>
-        No email with a password-setting code will be sent to the user
-        if the password is set here.
+        The password must contain at least
+        {{ config['MIN_PASSWORD_LENGTH'] }} characters.
+        {% if g.am_admin %}
+        <br>
+        <strong>Note:</strong>
+        No email with a password setting code will be sent to the user
+        if the password is set.
+        {% endif %}
+      </small>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="confirm_password" class="col-md-2 col-form-label text-right">
+      Confirm password</label>
+    <div class="col-md">
+      <div class="row">
+        <div class="col-md-6">
+          <input type="password" id="confirm_password" name="confirm_password"
+                 class="form-control"
+                 aria-describedby="confirm_passwordHelp">
+        </div>
+      </div>
+      <small id="confirm_passwordHelp" class="form-text text-muted">
+        Confirm the password, to safeguard against typographical mistakes.
       </small>
     </div>
   </div>
