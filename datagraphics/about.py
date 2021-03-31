@@ -47,6 +47,11 @@ def documentation(page=None):
     else:
         return flask.render_template(f"documentation/{page}.html")
 
+@blueprint.route("/contact")
+def contact():
+    "Show contact information."
+    return flask.render_template("about/contact.html")
+
 @blueprint.route("/settings")
 @utils.admin_required
 def settings():
