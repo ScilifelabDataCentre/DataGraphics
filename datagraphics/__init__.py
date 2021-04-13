@@ -4,7 +4,7 @@ import re
 import os.path
 import string
 
-__version__ = "0.7.12"
+__version__ = "0.7.13"
 
 class Constants:
     VERSION = __version__
@@ -18,12 +18,12 @@ class Constants:
     JQUERY_URL = "https://jquery.com/"
     DATATABLES_VERSION = "1.10.24"
     DATATABLES_URL = "https://datatables.net/"
-    VEGA_VERSION = "5.12.1"
+    VEGA_VERSION = "5.19.1"
     VEGA_URL = "https://vega.github.io/vega/"
-    VEGA_LITE_VERSION = "4.12.2"  # Must match schema file in 'static'.
+    VEGA_LITE_VERSION = "5.0.0"  # Must match schema file in 'static'.
     VEGA_LITE_URL = "https://vega.github.io/vega-lite/"
-    VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v4.json"
-    VEGA_EMBED_VERSION = "6.8.0"
+    VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v5.json"
+    VEGA_EMBED_VERSION = "6.15.1"
     VEGA_EMBED_URL = "https://github.com/vega/vega-embed"
     VEGA_LITE_TYPES = ("quantitative", "temporal",
                        "ordinal", "nominal", "geojson")
