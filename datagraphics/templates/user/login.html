@@ -36,7 +36,7 @@
   </div>
 </form>
 
-{% if config['MAIL_SERVER'] %}
+{% if config['USER_REGISTER'] and config['MAIL_SERVER'] %}
 <div class="row pt-5">
   <div class="col-md-4 offset-md-2">
     <a href="{{ url_for('.register') }}"
