@@ -4,7 +4,7 @@ import re
 import os.path
 import string
 
-__version__ = "0.7.11"
+__version__ = "0.7.12"
 
 class Constants:
     VERSION = __version__
@@ -12,11 +12,11 @@ class Constants:
     ROOT_DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
     # Currently, these are hardwired.
-    BOOTSTRAP_VERSION = "4.3.1"
+    BOOTSTRAP_VERSION = "4.6.0"
     BOOTSTRAP_URL = "https://getbootstrap.com/"
-    JQUERY_VERSION = "3.3.1"
+    JQUERY_VERSION = "3.5.1"
     JQUERY_URL = "https://jquery.com/"
-    DATATABLES_VERSION = "1.10.18"
+    DATATABLES_VERSION = "1.10.24"
     DATATABLES_URL = "https://datatables.net/"
     VEGA_VERSION = "5.12.1"
     VEGA_URL = "https://vega.github.io/vega/"

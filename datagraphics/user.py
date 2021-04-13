@@ -88,6 +88,10 @@ def logout():
 @blueprint.route("/register", methods=["GET", "POST"])
 def register():
     "Register a new user account."
+    if not flask.g.am_admin and not flask.current_app.config["USER_REGISTER"]:
+        utils.flash_error("Only admin can register new user accounts.")
+        return flask.redirect(flask.url_for("home"))
+
     if utils.http_GET():
         return flask.render_template("user/register.html")
 

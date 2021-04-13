@@ -37,6 +37,8 @@
 </form>
 
 {% if config['MAIL_SERVER'] %}
+
+{% if config['USER_REGISTER'] %}
 <div class="row pt-5">
   <div class="col-md-4 offset-md-2">
     <a href="{{ url_for('.register') }}"
@@ -44,6 +46,14 @@
       Register a new user account</a>
   </div>
 </div>
+{% else %}
+<div class="row pt-4">
+  <div class="col-md-10 offset-md-2">
+    It is not possible to register a new user account. Contact the
+    <a href="{{ url_for('about.contact') }}">admin for this site</a>.
+  </div>
+</div>
+{% endif %}
 
 <div class="row pt-4">
   <div class="col-md-4 offset-md-2">

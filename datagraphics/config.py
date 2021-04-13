@@ -44,6 +44,7 @@ DEFAULT_SETTINGS = dict(
     MAIL_USERNAME = None,
     MAIL_PASSWORD = None,
     MAIL_DEFAULT_SENDER = None,
+    USER_REGISTER = True,
     USER_ENABLE_IMMEDIATELY = False,
     USER_ENABLE_EMAIL_WHITELIST = [], # List of regexp's
     ADMIN_USER = {},                  # Keys: username, email, password
