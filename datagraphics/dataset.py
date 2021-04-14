@@ -95,7 +95,8 @@ def display(iuid):
                                  am_owner=am_owner(dataset),
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
-                                 possible_delete=possible_delete(dataset))
+                                 possible_delete=possible_delete(dataset),
+                                 commands=get_commands(iuid))
 
 @blueprint.route("/<iuid:iuid>/data")
 def data(iuid):
@@ -618,3 +619,70 @@ def possible_delete(dataset):
                                include_docs=True):
         if row.doc["owner"] == dataset["owner"]: return False
     return True
+
+def get_commands(iuid):
+    "Get commands and scripts populated with access key and URLs."
+    if not flask.g.current_user: return None
+    if not allow_edit(data): return None
+    apikey = flask.g.current_user.get("apikey")
+    if not apikey: return None
+    put_url = flask.url_for('api_dataset.content', iuid=iuid, ext='csv', _external=True)
+    delete_url = flask.url_for('api_dataset.serve', iuid=iuid, _external=True)
+    return {
+        "curl": {
+            "title": "curl commands",
+            "text": """<strong>curl</strong> is a command-line utility to
+transfer data to/from web servers. It is available for most computer operating
+systems. See <a target="_blank" href="https://curl.se/">curl.se</a>.""",
+            "content": f'curl {put_url} -H "x-apikey: {apikey}"' \
+            ' --upload-file path-to-content-file.csv',
+            "delete": f'curl {delete_url} -H "x-apikey: {apikey}" -X DELETE'},
+        "python": {
+            "title": "Python scripts using 'requests'",
+            "text": """<strong>requests</strong> is a Python package for HTTP.
+It is the <i>de facto</i> standard for Python. It must be downloaded from
+<a target="_blank" href="https://pypi.org/project/requests/">PyPi</a>
+since it is not part of the built-in Python packages.
+See <a target="_blank" href="https://requests.readthedocs.io/en/master/">
+Requests: HTTP for Humans</a>.""",
+            "content": f"""import requests
+
+url = "{put_url}"
+headers = {{"x-apikey": "{apikey}"}}
+with open("path-to-content-file.csv", "rb") as infile:
+    data = infile.read()
+
+response = requests.put(url, headers=headers, data=data)
+print(response.status_code)    # Outputs 204
+""",
+                "delete": f"""import requests
+
+url = "{delete_url}"
+headers = {{"x-apikey": "{apikey}"}}
+response = requests.delete(url, headers=headers)
+print(response.status_code)    # Outputs 204
+"""
+        },
+        "r": {
+            "title": "R scripts",
+            "text": """<strong>R</strong> is an open-source package for
+statistics and data analysis available for most computer operating systems.
+See <a target="_blank" href="https://www.r-project.org/">The R Project for
+Statistical Computing</a>. You need to have the 'httr' package installed
+for the code below to work:
+<code>install.packages("httr", dependencies=TRUE)</code>.
+""",
+            "content": f"""library("httr")
+
+file_data <- upload_file("path-to-content-file.csv")
+PUT("{put_url}",
+    body = file_data,
+    add_headers("x-apikey"="{apikey}"))
+""",
+            "delete": f"""library("httr")
+
+DELETE("{delete_url}",
+       add_headers("x-apikey"="{apikey}"))
+"""
+        }
+    }

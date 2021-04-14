@@ -45,7 +45,7 @@ def create():
 @flask_cors.cross_origin(methods=["GET"])
 def serve(iuid):
     """Return dataset's information (metadata), update it, or delete it.
-    The content of the dataset cannot be update via this resource.
+    The content of the dataset cannot be updated via this resource.
     """
     try:
         dataset = get_dataset(iuid)

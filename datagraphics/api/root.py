@@ -1,6 +1,7 @@
 "API Root resource."
 
 import flask
+import flask_cors
 
 from datagraphics import constants
 from datagraphics import utils
