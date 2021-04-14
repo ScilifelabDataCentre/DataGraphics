@@ -1,7 +1,7 @@
 "API About resources."
 
 import flask
-from flask_cors import CORS
+import flask_cors
 
 import datagraphics.about
 from datagraphics import constants
@@ -9,9 +9,8 @@ from datagraphics import utils
 
 blueprint = flask.Blueprint("api_about", __name__)
 
-CORS(blueprint, supports_credentials=True)
-
 @blueprint.route("/software")
+@flask_cors.cross_origin(methods=["GET"])
 def software():
     "API About: Information about the system software and versions."
     result = {"title": __doc__,

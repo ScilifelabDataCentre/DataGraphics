@@ -3,7 +3,6 @@
 import http.client
 
 import flask
-from flask_cors import CORS
 
 import datagraphics.user
 from datagraphics import constants
@@ -11,8 +10,6 @@ from datagraphics import utils
 from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_user", __name__)
-
-CORS(blueprint, supports_credentials=True)
 
 @blueprint.route("/<name:username>")
 def serve(username):

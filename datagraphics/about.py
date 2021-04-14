@@ -57,8 +57,11 @@ def contact():
 def settings():
     "Show settings, except for sensitive or too complex values."
     config = flask.current_app.config.copy()
-    for key in ["SECRET_KEY", "MAIL_PASSWORD", 
-                "ADMIN_USER", "COUCHDB_PASSWORD"]:
+    for key in ["SECRET_KEY", 
+                "MAIL_PASSWORD", 
+                "ADMIN_USER",
+                "COUCHDB_PASSWORD",
+                "STENCILS"]:
         if config.get(key):
             config[key] = "<hidden>"
     config.pop("VEGA_LITE_SCHEMA", None)
