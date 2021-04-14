@@ -1,6 +1,7 @@
 "API Schema resource."
 
 import flask
+import flask_cors
 
 from datagraphics import constants
 from datagraphics import utils
@@ -16,6 +17,7 @@ from datagraphics.api import users as api_users
 blueprint = flask.Blueprint("api_schema", __name__)
 
 @blueprint.route("")
+@flask_cors.cross_origin(methods=["GET"])
 def all():
     "Map of all JSON schemas for DataGraphics."
     return utils.jsonify(
@@ -56,51 +58,61 @@ def all():
     )
 
 @blueprint.route("root")
+@flask_cors.cross_origin(methods=["GET"])
 def root():
     "JSON schema for API Root resource."
     return utils.jsonify(api_root.schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("about")
+@flask_cors.cross_origin(methods=["GET"])
 def about():
     "JSON schema for API About resource."
     return utils.jsonify(api_about.schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("dataset")
+@flask_cors.cross_origin(methods=["GET"])
 def dataset():
     "JSON schema for API Dataset resource."
     return utils.jsonify(api_dataset.schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("datasets")
+@flask_cors.cross_origin(methods=["GET"])
 def datasets():
     "JSON schema for API Dataset resource."
     return utils.jsonify(api_datasets.schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("graphic")
+@flask_cors.cross_origin(methods=["GET"])
 def graphic():
     "JSON schema for API Graphic resource."
     return utils.jsonify(api_graphic.schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("graphics")
+@flask_cors.cross_origin(methods=["GET"])
 def graphics():
     "JSON schema for API Graphics resource."
     return utils.jsonify(api_graphics.schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("user")
+@flask_cors.cross_origin(methods=["GET"])
 def user():
     "JSON schema for API User resource."
     return utils.jsonify(api_user.schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("users")
+@flask_cors.cross_origin(methods=["GET"])
 def users():
     "JSON schema for API Users resource."
     return utils.jsonify(api_users.schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("logs")
+@flask_cors.cross_origin(methods=["GET"])
 def logs():
     "JSON schema for API Logs resource."
     return utils.jsonify(logs_schema, schema=constants.JSON_SCHEMA_URL)
 
 @blueprint.route("schemas")
+@flask_cors.cross_origin(methods=["GET"])
 def schemas():
     "JSON schema for API Schema resource."
     return utils.jsonify(schema, schema=constants.JSON_SCHEMA_URL)

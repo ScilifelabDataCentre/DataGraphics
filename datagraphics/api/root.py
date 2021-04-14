@@ -1,7 +1,7 @@
 "API Root resource."
 
 import flask
-from flask_cors import CORS
+import flask_cors
 
 from datagraphics import constants
 from datagraphics import utils
@@ -16,9 +16,8 @@ from datagraphics.graphics import (count_graphics_public,
 
 blueprint = flask.Blueprint("api", __name__)
 
-CORS(blueprint, supports_credentials=True)
-
 @blueprint.route("")
+@flask_cors.cross_origin(methods=["GET"])
 def root():
     "API Root; links to other resources."
     items = {

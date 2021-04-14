@@ -3,7 +3,7 @@
 import http.client
 
 import flask
-from flask_cors import CORS
+import flask_cors
 
 import datagraphics.dataset
 from datagraphics.graphic import (GraphicSaver,
@@ -16,8 +16,6 @@ from datagraphics import utils
 from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_graphic", __name__)
-
-CORS(blueprint, supports_credentials=True)
 
 @blueprint.route("/", methods=["POST"])
 def create():
@@ -47,6 +45,7 @@ def create():
                                               _external=True))
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
+@flask_cors.cross_origin(methods=["GET"])
 def serve(iuid):
     "Return graphic information, update it, or delete it."
     try:
@@ -101,6 +100,7 @@ def serve(iuid):
         return "", http.client.NO_CONTENT
 
 @blueprint.route("/<iuid:iuid>/logs")
+@flask_cors.cross_origin(methods=["GET"])
 def logs(iuid):
     "Return all log entries for the given graphic."
     try:

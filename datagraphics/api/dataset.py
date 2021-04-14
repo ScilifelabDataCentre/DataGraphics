@@ -4,7 +4,7 @@ import io
 import http.client
 
 import flask
-from flask_cors import CORS
+import flask_cors
 
 from datagraphics.dataset import (DatasetSaver,
                                   get_dataset,
@@ -18,8 +18,6 @@ from datagraphics import utils
 from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_dataset", __name__)
-
-CORS(blueprint, supports_credentials=True)
 
 @blueprint.route("/", methods=["POST"])
 def create():
@@ -44,9 +42,10 @@ def create():
                                               _external=True))
 
 @blueprint.route("/<iuid:iuid>", methods=["GET", "POST", "DELETE"])
+@flask_cors.cross_origin(methods=["GET"])
 def serve(iuid):
     """Return dataset's information (metadata), update it, or delete it.
-    The content of the dataset cannot be update via this resource.
+    The content of the dataset cannot be updated via this resource.
     """
     try:
         dataset = get_dataset(iuid)
@@ -102,6 +101,7 @@ def serve(iuid):
         return "", http.client.NO_CONTENT
 
 @blueprint.route("/<iuid:iuid>.<ext>", methods=["GET", "PUT"])
+@flask_cors.cross_origin(methods=["GET"])
 def content(iuid, ext):
     "Fetch or update the content of the dataset as JSON or CSV file."
     try:
@@ -144,6 +144,7 @@ def content(iuid, ext):
         return "", http.client.NO_CONTENT
 
 @blueprint.route("/<iuid:iuid>/logs")
+@flask_cors.cross_origin(methods=["GET"])
 def logs(iuid):
     "Return all log entries for the given dataset."
     try:

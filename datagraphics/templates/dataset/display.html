@@ -88,6 +88,59 @@
     </table>
   </div>
 </div>
+
+{% if commands %}
+{% for language in commands %}
+<div class="card my-4">
+  <div class="card-header" style="background: lightgrey;">
+    <h4 class="ml-5">{{ commands[language]['title'] }}</h4>
+    <small>{{ commands[language]['text'] | safe }}</small>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-10">
+        <h6 class="ml-5">Update the content of this dataset by uploading a file.</h6>
+        <p class="small">
+          Note that the filename of the uploaded file does not matter.
+          <br>
+          <strong>However</strong>, the content type (CSV or JSON) of
+          the uploaded file must match the extension of the dataset
+          URL, which can be either
+          <code>.csv</code> or <code>.json</code>. The CSV variant of
+          the URL is used in the code example below.
+        </p>
+      </div>
+      <div class="col-md text-right">
+        <button type="button"
+                class="btn btn-sm btn-outline-primary mx-1 clipboard"
+                data-clipboard-text="{{ commands[language]['content'] }}"
+                title="Copy the code to the clipboard for cut-and-paste.">
+          Copy</button>
+      </div>
+    </div>
+    <pre class="bg-light p-2 my-1 border rounded">{{ commands[language]['content'] }}</pre>
+  </div>
+  {% if allow_delete %}
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-10">
+        <h6 class="ml-5">Delete this dataset.</h6>
+      </div>
+      <div class="col-md text-right">
+        <button type="button"
+                class="btn btn-sm btn-outline-primary mx-1 clipboard"
+                data-clipboard-text="{{ commands[language]['delete'] }}"
+                title="Copy the code to the clipboard for cut-and-paste.">
+          Copy</button>
+      </div>
+    </div>
+    <pre class="bg-light p-2 my-1 border rounded">{{ commands[language]['delete'] }}</pre>
+  </div>
+  {% endif %} {# if allow_delete #}
+</div>
+{% endfor %} {# for language in commands #}
+{% endif %} {# if commands #}
+
 {% endblock %} {# block main #}
 
 {% block links %}
@@ -231,3 +284,8 @@
   </div>
 </div>
 {% endblock %} {# block info #}
+
+{% block javascript %}
+<script src="{{ url_for('static', filename='clipboard.min.js') }}"></script>
+<script>var clipboard = new ClipboardJS('.clipboard');</script>
+{% endblock %}

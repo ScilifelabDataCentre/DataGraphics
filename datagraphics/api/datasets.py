@@ -3,7 +3,7 @@
 import http.client
 
 import flask
-from flask_cors import CORS
+import flask_cors
 
 from datagraphics.datasets import (get_datasets_public,
                                    get_datasets_all,
@@ -16,9 +16,8 @@ from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_datasets", __name__)
 
-CORS(blueprint, supports_credentials=True)
-
 @blueprint.route("/public")
+@flask_cors.cross_origin(methods=["GET"])
 def public():
     "Get all public datasets."
     datasets = []
