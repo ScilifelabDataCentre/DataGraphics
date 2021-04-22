@@ -137,8 +137,7 @@ def content(iuid, ext):
             flask.abort(http.client.NOT_FOUND)
         try:
             with DatasetSaver(dataset) as saver:
-                saver.set_data(infile=io.BytesIO(flask.request.data),
-                               content_type=content_type)
+                saver.set_data(io.BytesIO(flask.request.data), content_type)
         except ValueError as error:
             return str(error), http.client.BAD_REQUEST
         return "", http.client.NO_CONTENT
