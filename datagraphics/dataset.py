@@ -99,7 +99,7 @@ def display(iuid):
                                  allow_edit=allow_edit(dataset),
                                  allow_delete=allow_delete(dataset),
                                  possible_delete=possible_delete(dataset),
-                                 commands=get_commands(iuid))
+                                 commands=get_commands(dataset))
 
 @blueprint.route("/<iuid:iuid>/data")
 def data(iuid):
@@ -639,14 +639,14 @@ def possible_delete(dataset):
         if row.doc["owner"] == dataset["owner"]: return False
     return True
 
-def get_commands(iuid):
+def get_commands(dataset):
     "Get commands and scripts populated with access key and URLs."
     if not flask.g.current_user: return None
-    if not allow_edit(data): return None
+    if not allow_edit(dataset): return None
     apikey = flask.g.current_user.get("apikey")
     if not apikey: return None
-    put_url = flask.url_for('api_dataset.content', iuid=iuid, ext='csv', _external=True)
-    delete_url = flask.url_for('api_dataset.serve', iuid=iuid, _external=True)
+    put_url = flask.url_for('api_dataset.content', iuid=dataset["_id"], ext='csv', _external=True)
+    delete_url = flask.url_for('api_dataset.serve', iuid=dataset["_id"], _external=True)
     return {
         "curl": {
             "title": "curl commands",
