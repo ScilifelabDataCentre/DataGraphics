@@ -1,6 +1,7 @@
 "Test the API Root resource."
 
 import http.client
+import unittest
 
 import api_base
 
@@ -14,3 +15,7 @@ class Root(api_base.Base):
         response = self.GET(url)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
+
+
+if __name__ == "__main__":
+    unittest.main()
