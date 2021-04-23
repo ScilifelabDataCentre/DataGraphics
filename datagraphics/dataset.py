@@ -8,6 +8,8 @@ import statistics
 
 import couchdb2
 import flask
+import requests
+import requests.exceptions
 
 import datagraphics.user
 from datagraphics import constants
@@ -59,7 +61,7 @@ blueprint = flask.Blueprint("dataset", __name__)
 @blueprint.route("/", methods=["GET", "POST"])
 @utils.login_required
 def create():
-    "Create a new dataset."
+    "Create a new dataset, from file or URL."
     if utils.http_GET():
         return flask.render_template("dataset/create.html")
 
@@ -69,7 +71,8 @@ def create():
                 saver.set_title()
                 saver.set_description()
                 saver.set_public(False)
-                saver.set_data()
+                if not saver.upload_file():
+                    saver.get_url_data()
         except ValueError as error:
             utils.flash_error(str(error))
             return flask.redirect(utils.url_referrer())
@@ -149,7 +152,7 @@ def edit(iuid):
                 if am_owner(dataset):
                     saver.set_editors()
                 saver.set_description()
-                saver.set_data()
+                saver.upload_file()
                 saver.set_vega_lite_types()
         except ValueError as error:
             utils.flash_error(str(error))
@@ -302,15 +305,33 @@ class DatasetSaver(EntitySaver):
         super().initialize()
         self.doc["meta"] = {}
 
-    def set_data(self, infile=None, content_type=None):
-        "Set the data for this dataset from the input file (CSV or JSON)."
-        if infile is None:
-            infile = flask.request.files.get("file")
-        if not infile: return
+    def upload_file(self):
+        """Upload a file from a web form and return True.
+        If no file given, return False.
+        """
+        infile = flask.request.files.get("file")
+        if not infile: return False
+        self.set_data(infile, infile.mimetype)  # Exclude parameters.
+        return True
 
-        if content_type is None:
-            content_type = infile.mimetype  # Exclude parameters.
-        data = None
+    def get_url_data(self):
+        "Get the data from a URL. Just skip if no URL."
+        url = flask.request.form.get("url")
+        if not url: return
+        try:
+            response = requests.get(url, timeout=5.0)
+        except requests.exceptions.TimeOut:
+            raise ValueError("Could not fetch data from URL; timeout.")
+        if response.status_code != 200:
+            raise ValueError(f"Could not fetch data from URL: {response.status_code}")
+        content_type = response.headers.get('content-type')
+        if not content_type:
+            raise ValueError("Unknown content type for data.")
+        content_type = content_type.split(";")[0]
+        self.set_data(io.BytesIO(response.content), content_type)
+
+    def set_data(self, infile, content_type):
+        "Set the data for this dataset from the input file (CSV or JSON)."
         if content_type == constants.JSON_MIMETYPE:
             data = self.get_json_data(infile)
         elif content_type == constants.CSV_MIMETYPE:
@@ -322,11 +343,9 @@ class DatasetSaver(EntitySaver):
                 try:
                     data = self.get_csv_data(infile)
                 except ValueError:  # Fails if it really was an Excel file.
-                    pass
-            if data is None:
-                pass  # TODO: Try Excel here, when and if implemented.
-        if data is None:
-            raise ValueError(f"Cannot handle data file of type {content_type}.")
+                    raise  # TODO: Try Excel here, when and if implemented.
+        else:
+            raise ValueError(f"Cannot handle content_type {content_type}")
         self.doc["n_records"] = len(data)
         self.update_meta(data)
 
@@ -542,7 +561,7 @@ class DatasetSaver(EntitySaver):
         self.set_description(dataset["description"])
         self.set_public(False)
         self.set_data(flask.g.db.get_attachment(dataset, "data.json"),
-                      content_type=constants.JSON_MIMETYPE)
+                      constants.JSON_MIMETYPE)
         self.set_vega_lite_types(dataset["meta"])
         if graphics:
             import datagraphics.graphic
