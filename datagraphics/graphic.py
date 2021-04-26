@@ -236,7 +236,7 @@ def download(iuid, ext):
         response = flask.jsonify(spec)
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
     elif ext == "js":
-        spec = json.dumps(spec)
+        spec = json.dumps(spec, ensure_ascii=False)
         response = flask.make_response(f'vegaEmbed("#{id}", {spec},'
                                        f' {{downloadFileName: "{slug}"}})'
                                        '.then(result=>console.log(result))'
