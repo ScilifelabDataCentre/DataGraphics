@@ -153,7 +153,9 @@ class AttachmentsSaver(BaseSaver):
             for att in self._add_attachments:
                 content = att.pop("content")
                 att["length"] = len(content)
-                md5 = hashlib.md5(content.encode("utf-8"))
+                if isinstance(content, str):
+                    content = content.encode("utf-8")
+                md5 = hashlib.md5(content)
                 att["digest"] = base64.b64encode(md5.digest()).decode("utf-8")
             result["attachments_added"] = self._add_attachments
         return result

@@ -350,7 +350,7 @@ class DatasetSaver(EntitySaver):
         self.update_meta(data)
 
         # Data in JSON format.
-        json_content = json.dumps(data)
+        json_content = json.dumps(data, ensure_ascii=False).encode("utf-8")
 
         # Data in CSV format.
         outfile = io.StringIO()
@@ -359,7 +359,7 @@ class DatasetSaver(EntitySaver):
         for record in data:
             writer.writerow(record)
         outfile.seek(0)
-        csv_content = outfile.read()
+        csv_content = outfile.read().encode("utf-8")
 
         if flask.g.current_user.get("quota_storage"):
             username = flask.g.current_user["username"]
@@ -368,12 +368,8 @@ class DatasetSaver(EntitySaver):
             if total > flask.g.current_user["quota_storage"]:
                 raise ValueError(f"File {infile.filename} not added;"
                                  " quota storage reached.")
-        self.add_attachment("data.json",
-                            json_content,
-                            constants.JSON_MIMETYPE)
-        self.add_attachment("data.csv",
-                            csv_content,
-                            constants.CSV_MIMETYPE)
+        self.add_attachment("data.json", json_content, constants.JSON_MIMETYPE)
+        self.add_attachment("data.csv", csv_content, constants.CSV_MIMETYPE)
 
     def get_json_data(self, infile):
         """Return the data in JSON format from the given JSON infile.
@@ -434,6 +430,9 @@ class DatasetSaver(EntitySaver):
         If the dataset is being updated, check against the 'meta' entry.
         """
         reader = csv.DictReader(io.StringIO(infile.read().decode("utf-8")))
+        # reader = csv.DictReader(infile)
+        # reader = csv.DictReader(io.StringIO(infile.read()))
+        # reader = csv.DictReader(io.BytesIO(infile.read()))
         data = list(reader)
         if not data:
             raise ValueError("No data in CSV file.")
