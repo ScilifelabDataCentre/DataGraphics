@@ -430,9 +430,6 @@ class DatasetSaver(EntitySaver):
         If the dataset is being updated, check against the 'meta' entry.
         """
         reader = csv.DictReader(io.StringIO(infile.read().decode("utf-8")))
-        # reader = csv.DictReader(infile)
-        # reader = csv.DictReader(io.StringIO(infile.read()))
-        # reader = csv.DictReader(io.BytesIO(infile.read()))
         data = list(reader)
         if not data:
             raise ValueError("No data in CSV file.")
