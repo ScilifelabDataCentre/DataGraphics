@@ -1,6 +1,6 @@
 {% include "graphic/vega_lite_libraries.html" %}
 <script type="text/javascript">
-  const spec = {{ graphic['specification'] | tojson() }};
+  const spec = {{ graphic['specification'] | tojson }};
   vegaEmbed('#graphic', spec, {downloadFileName: "{{ slug }}"})
   .then(result=>console.log(result))
   .catch(console.warn);
