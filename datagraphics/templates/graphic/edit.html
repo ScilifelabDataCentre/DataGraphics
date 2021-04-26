@@ -75,7 +75,7 @@
                 class="form-control text-monospace"
                 style="font-size: 80%"
                 aria-describedby="specificationHelp"
-                >{{ graphic['specification'] | tojson(indent=2) }}</textarea>
+                >{{ graphic['specification'] | tojson_noescape(indent=2) }}</textarea>
       <small id="specificationHelp" class="form-text text-muted">
         Specification of the graphic using
         <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> JSON.

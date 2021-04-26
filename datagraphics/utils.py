@@ -28,6 +28,7 @@ def init(app):
     """
     app.url_map.converters["name"] = NameConverter
     app.url_map.converters["iuid"] = IuidConverter
+    app.add_template_filter(tojson_noescape)
     app.add_template_filter(markdown)
     app.add_template_filter(emojize)
     app.add_template_filter(float_default)
@@ -242,6 +243,10 @@ def flash_warning(msg):
 def flash_message(msg):
     "Flash information message."
     flask.flash(str(msg), "message")
+
+def tojson_noescape(value, indent=None):
+    "Return stringified JSON without escaping any characters."
+    return json.dumps(value, indent=indent, ensure_ascii=False)
 
 def markdown(value):
     "Template filter: Convert Markdown to HMTL."

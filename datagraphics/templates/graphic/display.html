@@ -87,7 +87,7 @@
   </div>
   <div class="collapse" id="collapseSpecification">
     <div class="card-body border-dark" style="font-size: 80%">
-      <pre>{{ graphic['specification'] | tojson(indent=2) }}</pre>
+      <pre>{{ graphic['specification'] | tojson_noescape(indent=2) }}</pre>
     </div>
   </div>
 </div>
