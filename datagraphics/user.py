@@ -103,6 +103,7 @@ def register():
                 saver.set_role(constants.USER)
                 if flask.g.am_admin:
                     saver.set_password(flask.request.form.get("password") or None)
+                    saver.set_apikey()
                     saver.set_status(constants.ENABLED)
                 else:
                     saver.set_password()
@@ -112,7 +113,7 @@ def register():
             return flask.redirect(flask.url_for(".register"))
         utils.get_logger().info(f"registered user {user['username']}")
         if user["status"] == constants.ENABLED:
-            # Directly enabled; send code to the user.
+            # Directly enabled and code set. Send code to the user.
             if user["password"][:5] == "code:":
                 send_password_code(user, "registration")
                 utils.get_logger().info(f"enabled user {user['username']}")
@@ -314,6 +315,7 @@ def enable(username):
         return flask.redirect(flask.url_for("home"))
     with UserSaver(user) as saver:
         saver.set_status(constants.ENABLED)
+        saver.set_apikey()      # Better safety to set/change API key on enable.
     if user["password"][:5] == "code:" and \
        flask.current_app.config["MAIL_SERVER"]:
         send_password_code(user, "enabled")

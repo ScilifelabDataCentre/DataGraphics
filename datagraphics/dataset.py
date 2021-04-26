@@ -606,7 +606,8 @@ def am_owner(dataset):
     "Is the current user the owner of the dataset? Includes admin."
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == dataset["owner"]
+    if flask.g.current_user["username"] == dataset["owner"]: return True
+    return False
 
 def allow_view(dataset):
     "Is the current user allowed to view the dataset?"
@@ -614,20 +615,25 @@ def allow_view(dataset):
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
     if flask.g.current_user["username"] == dataset["owner"]: return True
-    return flask.g.current_user["username"] in dataset.get("editors", [])
+    if flask.g.current_user["username"] in dataset.get("editors", []):
+        return True
+    return False
 
 def allow_edit(dataset):
     "Is the current user allowed to edit the dataset?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
     if flask.g.current_user["username"] == dataset["owner"]: return True
-    return flask.g.current_user["username"] in dataset.get("editors", [])
+    if flask.g.current_user["username"] in dataset.get("editors", []):
+        return True
+    return False
 
 def allow_delete(dataset):
     "Is the current user allowed to delete the dataset?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == dataset["owner"]
+    if flask.g.current_user["username"] == dataset["owner"]: return True
+    return False
 
 def possible_delete(dataset):
     """Is it possible to delete the dataset? 
