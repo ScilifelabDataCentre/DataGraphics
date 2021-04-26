@@ -4,14 +4,13 @@ import re
 import os.path
 import string
 
-__version__ = "0.8.1"
+__version__ = "0.8.2"
 
 class Constants:
     VERSION = __version__
     URL = "https://github.com/pekrau/DataGraphics"
     ROOT_DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
-    # Currently, these are hardwired.
     BOOTSTRAP_VERSION = "4.6.0"
     BOOTSTRAP_URL = "https://getbootstrap.com/"
     JQUERY_VERSION = "3.5.1"

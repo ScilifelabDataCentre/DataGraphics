@@ -514,20 +514,25 @@ def allow_view(graphic):
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
     if flask.g.current_user["username"] == graphic["owner"]: return True
-    return flask.g.current_user["username"] in graphic.get("editors", [])
+    if flask.g.current_user["username"] in graphic.get("editors", []):
+        return True
+    return False
 
 def allow_edit(graphic):
     "Is the current user allowed to edit the graphic?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
     if flask.g.current_user["username"] == graphic["owner"]: return True
-    return flask.g.current_user["username"] in graphic.get("editors", [])
+    if flask.g.current_user["username"] in graphic.get("editors", []): 
+        return True
+    return False
 
 def allow_delete(graphic):
     "Is the current user allowed to delete the graphic?"
     if not flask.g.current_user: return False
     if flask.g.am_admin: return True
-    return flask.g.current_user["username"] == graphic["owner"]
+    if flask.g.current_user["username"] == graphic["owner"]: return True
+    return False
 
 def get_dataset(graphic):
     "Get the dataset for the graphic, if allowed. Else None."
