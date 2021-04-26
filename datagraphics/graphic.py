@@ -444,6 +444,7 @@ class GraphicSaver(EntitySaver):
         self.set_description(graphic["description"])
         self.set_public(False)
         if dataset is None:
+            self.doc["dataset"] = graphic["dataset"]
             self.set_specification(graphic["specification"])
         else:
             self.set_dataset(dataset)
