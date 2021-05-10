@@ -114,6 +114,43 @@ def debug():
     result.append("</table>")
     return jinja2.utils.Markup("\n".join(result))
 
+@app.route("/status")
+def status():
+    "Return JSON for the current status and some counts for the database."
+    return dict(status="ok",
+                n_datasets=datagraphics.datasets.count_datasets_public(),
+                n_graphics=datagraphics.graphics.count_graphics_public())
+
+@app.route("/sitemap")
+def sitemap():
+    "Return an XML sitemap."
+    pages = [dict(url=flask.url_for("home", _external=True),
+                  changefreq="daily",
+                  priority=1.0),
+             dict(url=flask.url_for("about.contact", _external=True),
+                  changefreq="yearly"),
+             dict(url=flask.url_for("about.documentation", _external=True),
+                  changefreq="monthly"),
+             dict(url=flask.url_for("about.software", _external=True),
+                  changefreq="yearly"),
+             dict(url=flask.url_for("datasets.public", _external=True),
+                  changefreq="daily",
+                  priority=1.0),
+             dict(url=flask.url_for("graphics.public", _external=True),
+                  changefreq="daily",
+                  priority=1.0)]
+    for dataset in datagraphics.datasets.get_datasets_public():
+        pages.append(dict(url=flask.url_for("dataset.display",
+                                            iuid=dataset[0],
+                                            _external=True),
+                          changefreq="monthly"))
+    for graphic in datagraphics.graphics.get_graphics_public():
+        pages.append(dict(url=flask.url_for("graphic.display",
+                                            iuid=graphic[0],
+                                            _external=True),
+                          changefreq="monthly"))
+    return flask.render_template("sitemap.xml", pages=pages)
+
 
 # Set up the URL map.
 app.register_blueprint(datagraphics.about.blueprint, url_prefix="/about")
