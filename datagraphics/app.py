@@ -143,12 +143,12 @@ def sitemap():
         pages.append(dict(url=flask.url_for("dataset.display",
                                             iuid=dataset[0],
                                             _external=True),
-                          changefreq="monthly"))
+                          changefreq="weekly"))
     for graphic in datagraphics.graphics.get_graphics_public():
         pages.append(dict(url=flask.url_for("graphic.display",
                                             iuid=graphic[0],
                                             _external=True),
-                          changefreq="monthly"))
+                          changefreq="weekly"))
     xml = flask.render_template("sitemap.xml", pages=pages)
     response = flask.current_app.make_response(xml)
     response.mimetype = constants.XML_MIMETYPE
