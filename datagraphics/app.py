@@ -149,7 +149,10 @@ def sitemap():
                                             iuid=graphic[0],
                                             _external=True),
                           changefreq="monthly"))
-    return flask.render_template("sitemap.xml", pages=pages)
+    xml = flask.render_template("sitemap.xml", pages=pages)
+    response = flask.current_app.make_response(xml)
+    response.mimetype = constants.XML_MIMETYPE
+    return response
 
 
 # Set up the URL map.
