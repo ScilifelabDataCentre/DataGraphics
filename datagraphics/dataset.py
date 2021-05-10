@@ -458,9 +458,11 @@ class DatasetSaver(EntitySaver):
                             meta[key]["type"] = "string"
 
         # Convert values; check data homogeneity. Checks with respect to 'meta'.
-        keys = list(meta.keys())
+        keys = set(meta.keys())
         for pos, record in enumerate(data, 1):
             for key, value in record.items():
+                # Ignore additional columns in new data.
+                if key not in keys: continue
                 if value:
                     try:
                         record[key] = TYPE_OBJECT_MAP2[meta[key]["type"]](value)
