@@ -87,11 +87,7 @@ class Base(unittest.TestCase):
                 self.assertEqual(r.status_code, http.client.OK)
                 schema = r.json()
             self.schemas[url] = schema
-        self.validate_schema(result, schema)
-        return result
-
-    def validate_schema(self, instance, schema):
-        "Validate the JSON instance versus the given JSON schema."
-        jsonschema.validate(instance=instance,
+        jsonschema.validate(instance=result,
                             schema=schema,
                             format_checker=jsonschema.draft7_format_checker)
+        return result
