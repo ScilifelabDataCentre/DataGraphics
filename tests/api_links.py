@@ -2,25 +2,29 @@
 
 import http.client
 import os.path
+import unittest
 
-import api_base
+import requests
+
+import utils
 
 
-class Links(api_base.Base):
+class Links(utils.ApiMixin, unittest.TestCase):
     "Walk all links in JSON from root."
 
     def test_links(self):
         self.visited = set()
-        self.visit(self.SETTINGS['ROOT_URL'])
+        url = f"{self.settings['BASE_URL']}api"
+        self.visit(url)
 
     def visit(self, url):
         if url in self.visited: return
-        response = self.GET(url)
+        response = requests.get(url, headers=self.headers)
         self.assertEqual(response.status_code, http.client.OK)
         self.visited.add(url)
         # URLs with explicit extensions are data; do not parse.
         if os.path.splitext(url)[1]: return
-        hrefs = Hrefs(base_url=self.SETTINGS['ROOT_URL'])
+        hrefs = Hrefs(base_url=f"{self.settings['BASE_URL']}api")
         hrefs.traverse(self.check_schema(response))
         for url in hrefs:
             self.visit(url)

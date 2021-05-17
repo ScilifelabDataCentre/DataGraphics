@@ -1,16 +1,19 @@
 "Test the API About resource."
 
 import http.client
+import unittest
 
-import api_base
+import requests
+
+import utils
 
 
-class About(api_base.Base):
+class About(utils.ApiMixin, unittest.TestCase):
     "Test the API About resources."
 
     def test_software(self):
         "Get software information."
-        url = f"{self.SETTINGS['ROOT_URL']}/about/software"
-        response = self.GET(url)
+        url = f"{self.settings['BASE_URL']}api//about/software"
+        response = requests.get(url, headers=self.headers)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
