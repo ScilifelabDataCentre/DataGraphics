@@ -62,14 +62,13 @@ def get_settings():
     """Get the settings from
     1) default
     2) settings file
-    3) environment variables
     """
     result = {
         "BROWSER": "Chrome",
         "BASE_URL": "http://127.0.0.1:5005/",
         "USERNAME": None,
         "PASSWORD": None,
-        "ACCESSKEY": None
+        "APIKEY": None
     }
 
     try:
@@ -78,10 +77,8 @@ def get_settings():
     except IOError:
         pass
     for key in result:
-        try:
-            result[key] = os.environ[key]
-        except KeyError:
-            pass
+        if result.get(key) is None:
+            raise KeyError(f"Missing {key} value in settings.")
     return result
 
 def get_browser_driver(name):
