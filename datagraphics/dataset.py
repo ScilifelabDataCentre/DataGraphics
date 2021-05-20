@@ -292,7 +292,7 @@ def logs(iuid):
     return flask.render_template(
         "logs.html",
         title=f"Dataset {dataset['title'] or 'No title'}",
-        cancel_url=flask.url_for(".display", iuid=iuid),
+        back_url=flask.url_for(".display", iuid=iuid),
         logs=utils.get_logs(iuid))
 
 

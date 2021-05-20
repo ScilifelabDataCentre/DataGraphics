@@ -270,7 +270,7 @@ def logs(iuid):
     return flask.render_template(
         "logs.html",
         title=f"Graphic {graphic['title']}",
-        cancel_url=flask.url_for(".display", iuid=iuid),
+        back_url=flask.url_for(".display", iuid=iuid),
         logs=utils.get_logs(iuid))
 
 

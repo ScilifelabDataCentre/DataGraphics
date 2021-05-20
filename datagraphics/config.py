@@ -67,7 +67,7 @@ def init(app):
                                                        filepath)))
     for filepath in filepaths:
         try:
-            app.config.from_json(filepath)
+            app.config.from_file(filepath, load=json.load)
         except FileNotFoundError:
             pass
         else:
