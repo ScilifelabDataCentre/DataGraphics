@@ -11,11 +11,8 @@ from datagraphics import utils
 
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
-    SERVER_NAME = "127.0.0.1:5005",   # For URL generation.
-    SERVER_HOST = "127.0.0.1",        # For app.run()
-    SERVER_PORT = "5005",             # For app.run()
+    SERVER_NAME = "127.0.0.1:5005",   # For URL generation; 'app.run' in devel.
     SITE_STATIC_DIRPATH = None,
-    DEBUG = False,
     LOG_DEBUG = False,
     LOG_NAME = "datagraphics",
     LOG_FILEPATH = None,
@@ -75,7 +72,7 @@ def init(app):
             break
 
     # Modify the configuration from environment variables.
-    for key, convert in [("DEBUG", utils.to_bool),
+    for key, convert in [("LOG_DEBUG", utils.to_bool),
                          ("SECRET_KEY", str),
                          ("COUCHDB_URL", str),
                          ("COUCHDB_USERNAME", str),
