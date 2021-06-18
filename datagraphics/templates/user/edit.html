@@ -87,9 +87,7 @@
 </div>
 {% endif %} {# if deletable #}
 <div class="mt-2">
-  <form action="{{ url_for('.display', username=user['username']) }}"
-	method="GET">
-    <button type="submit" class="btn btn-secondary btn-block">Cancel</button>
-  </form>
+  <a href="{{ url_for('.display', username=user['username']) }}"
+     role="button" class="btn btn-block btn-secondary">Cancel</a>
 </div>
 {% endblock %}
