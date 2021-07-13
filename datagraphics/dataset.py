@@ -318,8 +318,13 @@ class DatasetSaver(EntitySaver):
         "Get the data from a URL. Just skip if no URL."
         url = flask.request.form.get("url")
         if not url: return
+        apikey = flask.request.form.get("apikey")
+        if apikey:
+            headers = {"x-apikey": apikey}
+        else:
+            headers = {}
         try:
-            response = requests.get(url, timeout=5.0)
+            response = requests.get(url, headers=headers, timeout=5.0)
         except requests.exceptions.TimeOut:
             raise ValueError("Could not fetch data from URL; timeout.")
         if response.status_code != 200:

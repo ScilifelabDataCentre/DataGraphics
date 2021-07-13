@@ -44,8 +44,8 @@
       <input type="file" id="file" name="file"
 	     class="form-control-file" aria-describedby="fileHelp">
       <small id="fileHelp" class="form-text text-muted">
-        Upload the file containing the dataset itself. CSV or JSON
-        format. If given, will override any URL given below.
+        Upload the file containing the dataset itself from your local machine.
+        CSV or JSON format. If given, will override any URL given below.
       </small>
     </div>
   </div>
@@ -60,6 +60,19 @@
       <small id="urlHelp" class="form-text text-muted">
         URL to upload the dataset from. CSV or JSON format. This is
         ignored if a file is given above.
+      </small>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <label for="url"
+	   class="col-md-2 col-form-label text-right font-weight-bold">
+      API key</label>
+    <div class="col-md">
+      <input type="password" id="apikey" name="apikey"
+             class="form-control" aria-describedby="apikeyHelp">
+      <small id="apikeyHelp" class="form-text text-muted">
+        API key to use when accessing the URL given above.
       </small>
     </div>
   </div>
