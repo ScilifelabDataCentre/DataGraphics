@@ -324,7 +324,7 @@ class DatasetSaver(EntitySaver):
             raise ValueError("Could not fetch data from URL; timeout.")
         if response.status_code != 200:
             raise ValueError(f"Could not fetch data from URL: {response.status_code}")
-        content_type = response.headers.get('content-type')
+        content_type = response.headers.get('Content-Type')
         if not content_type:
             raise ValueError("Unknown content type for data.")
         content_type = content_type.split(";")[0]
