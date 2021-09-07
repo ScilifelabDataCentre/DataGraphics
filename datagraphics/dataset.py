@@ -125,7 +125,7 @@ def data(iuid):
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
 def edit(iuid):
-    "Edit the dataset, or delete it."
+    "Edit the metadata of the dataset, or delete it."
     try:
         dataset = get_dataset(iuid)
     except ValueError as error:
@@ -152,7 +152,6 @@ def edit(iuid):
                 if am_owner(dataset):
                     saver.set_editors()
                 saver.set_description()
-                saver.upload_file()
                 saver.set_vega_lite_types()
         except ValueError as error:
             utils.flash_error(str(error))
@@ -170,6 +169,34 @@ def edit(iuid):
             flask.g.db.delete(log)
         utils.flash_message("The dataset was deleted.")
         return flask.redirect(flask.url_for("datasets.display"))
+
+@blueprint.route("/<iuid:iuid>/update", methods=["GET", "POST"])
+@utils.login_required
+def update(iuid):
+    "Update the data contents of the dataset."
+    try:
+        dataset = get_dataset(iuid)
+    except ValueError as error:
+        utils.flash_error(str(error))
+        return flask.redirect(utils.url_referrer())
+
+    if utils.http_GET():
+        if not allow_edit(dataset):
+            utils.flash_error("Update access to dataset not allowed.")
+            return flask.redirect(flask.url_for(".display", iuid=iuid))
+        return flask.render_template("dataset/update.html", dataset=dataset)
+
+    elif utils.http_POST():
+        if not allow_edit(dataset):
+            utils.flash_error("Update access to dataset not allowed.")
+            return flask.redirect(flask.url_for(".display", iuid=iuid))
+        try:
+            with DatasetSaver(dataset) as saver:
+                if not saver.upload_file():
+                    saver.get_url_data()
+        except ValueError as error:
+            utils.flash_error(str(error))
+        return flask.redirect(flask.url_for(".display", iuid=iuid))
 
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
@@ -311,7 +338,7 @@ class DatasetSaver(EntitySaver):
         """
         infile = flask.request.files.get("file")
         if not infile: return False
-        self.set_data(infile, infile.mimetype)  # Exclude parameters.
+        self.set_data(infile, infile.mimetype)
         return True
 
     def get_url_data(self):
@@ -325,7 +352,7 @@ class DatasetSaver(EntitySaver):
             headers = {}
         try:
             response = requests.get(url, headers=headers, timeout=5.0)
-        except requests.exceptions.TimeOut:
+        except requests.exceptions.Timeout:
             raise ValueError("Could not fetch data from URL; timeout.")
         if response.status_code != 200:
             raise ValueError(f"Could not fetch data from URL: {response.status_code}")
@@ -380,21 +407,26 @@ class DatasetSaver(EntitySaver):
         """Return the data in JSON format from the given JSON infile.
         If the dataset is new, then define the 'meta' entry contents by 
         inspection of the data. Also set the Vega-Lite types.
-        If the dataset is being updated, check against the 'meta' entry.
+        If the dataset is being updated, check that the column definitions
+        match those in the 'meta' entry.
         """
         data = json.load(infile)
         if not data:
-            raise ValueError("No data in JSON file.")
-        if not isinstance(data, list):
-            raise ValueError("JSON data does not contain a list.")
-        first = data[0]
+            raise ValueError("No contents in JSON file.")
+
+        # Find the list of records; directly, or keys 'data' or 'records'.
+        for records in [data, data.get("data"), data.get("records")]:
+            if isinstance(records, list): break
+        else:
+            raise ValueError("Could not find list of data records in JSON file.")
+        first = records[0]
         if not first:
             raise ValueError("Empty first record in JSON data.")
         if not isinstance(first, dict):
             raise ValueError(f"JSON data record 0 '{first}' is not an object.")
 
         meta = self.doc["meta"]
-        new = not bool(meta)  # New dataset, or being updated?
+        new = not bool(meta)  # New dataset, else being updated.
 
         if new:
             # Figure out the types from the items in the first data record.
@@ -404,15 +436,20 @@ class DatasetSaver(EntitySaver):
                 try:
                     meta[key]["type"] = TYPE_NAME_MAP[type(value)]
                 except KeyError:
-                    raise ValueError(f"JSON data item 0 '{first}'"
-                                     " contains illegal type")
+                    raise ValueError("JSON data record 0 contains a value"
+                                     f" of an illegal type: {first}")
+        else:
+            for key in meta:
+                if key not in first:
+                    raise ValueError("JSON data record 0 lacks item with"
+                                     f" key '{key}': {first}")
 
         # Check data homogeneity. Checks with respect to 'meta'.
         keys = list(meta.keys())
-        for pos, record in enumerate(data):
+        for pos, record in enumerate(records):
             if not isinstance(record, dict):
-                raise ValueError(f"JSON data record {pos} '{record}'"
-                                 " is not an object.")
+                raise ValueError(f"JSON data record {pos} is"
+                                 f" not an object: {record}")
             for key in keys:
                 try:
                     value = record[key]
@@ -420,13 +457,13 @@ class DatasetSaver(EntitySaver):
                     record[key] = value = None
                 if value is not None and \
                    type(value) != TYPE_OBJECT_MAP[meta[key]["type"]]:
-                    raise ValueError(f"JSON data record {pos} '{record}'"
-                                     " contains wrong type.")
+                    raise ValueError(f"JSON data record {pos}, key '{key}'"
+                                     f" contains a value of the wrong type: {record}")
 
         # Set Vega-Lite types if new dataset.
         if new:
-            self.set_initial_vega_lite_types(data)
-        return data
+            self.set_initial_vega_lite_types(records)
+        return records
 
     def get_csv_data(self, infile):
         """Return the data in JSON format from the given CSV infile.
@@ -438,13 +475,13 @@ class DatasetSaver(EntitySaver):
         data = list(reader)
         if not data:
             raise ValueError("No data in CSV file.")
+        first = data[0]
 
         meta = self.doc["meta"]
         new = not bool(meta)  # New dataset, else being updated.
 
         if new:
             # Figure out the types from the items in the first data record.
-            first = data[0]
             for key in first:
                 meta[key] = {}
             for key, value in first.items():
@@ -461,6 +498,10 @@ class DatasetSaver(EntitySaver):
                             meta[key]["type"] = "boolean"
                         except ValueError:
                             meta[key]["type"] = "string"
+        else:
+            for key in meta:
+                if key not in first:
+                    raise ValueError(f"CSV data lacks column '{key}'.")
 
         # Convert values; check data homogeneity. Checks with respect to 'meta'.
         keys = set(meta.keys())
@@ -476,8 +517,9 @@ class DatasetSaver(EntitySaver):
                         if value.lower() in constants.NA_STRINGS:
                             record[key] = None
                         else:
-                            raise ValueError(f"CSV data record {pos} '{record}'"
-                                             f" '{key}' contains wrong type.")
+                            raise ValueError(f"CSV data record {pos},"
+                                             f" key '{key}' contains a value"
+                                             f" of the wrong type: {record}")
                 elif meta[key]["type"] != "string":
                     # An empty string is a string when type is 'string'.
                     # Otherwise the value is set as None.
