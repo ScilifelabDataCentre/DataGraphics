@@ -1,40 +1,20 @@
 {% extends 'base.html' %}
 
-{% block head_title %}Create dataset{% endblock %}
+{% block head_title %}Update {{ dataset['title'] }}{% endblock %}
 
-{% block body_title %}Create dataset{% endblock %}
+{% block body_title %}Update {{ dataset['title'] }}{% endblock %}
 
 {% block main %}
-<form action="{{ url_for('.create') }}"
+<p class="lead">
+  Update this dataset by uploading new data from a file or URL. The
+  new data must have the same column definitions. All values in this
+  dataset will be replaced by the new data.
+</p>
+
+<form action="{{ url_for('.update', iuid=dataset['_id']) }}"
       enctype="multipart/form-data"
       method="POST">
   {{ csrf_token() }}
-
-  <div class="form-group row">
-    <label for="title"
-	   class="col-md-2 col-form-label text-right font-weight-bold">
-      Title</label>
-    <div class="col-md">
-      <input type="text" id="title" name="title"
-             class="form-control" aria-describedby="titleHelp">
-      <small id="titleHelp" class="form-text text-muted">
-        Single-line descriptive title for the dataset.
-      </small>
-    </div>
-  </div>
-
-  <div class="form-group row">
-    <label for="description"
-	   class="col-md-2 col-form-label text-right font-weight-bold">
-      Description</label>
-    <div class="col-md">
-      <textarea id="description" name="description" rows="10"
-                class="form-control" aria-describedby="textHelp"></textarea>
-      <small id="descriptionHelp" class="form-text text-muted">
-        Description of the dataset. Formatted using Markdown.
-      </small>
-    </div>
-  </div>
 
   <div class="form-group row">
     <label for="file"
@@ -44,7 +24,7 @@
       <input type="file" id="file" name="file"
 	     class="form-control-file" aria-describedby="fileHelp">
       <small id="fileHelp" class="form-text text-muted">
-        Upload the file containing the dataset itself from your local machine.
+        Upload the file containing the new data from your local machine.
         CSV or JSON format. If given, will override any URL given below.
       </small>
     </div>
@@ -60,7 +40,7 @@
       <small id="urlHelp" class="form-text text-muted">
         URL to upload the dataset from. CSV or JSON format. This is
         appropriate for fetching data from a
-        <a href="https://github.com/pekrau/DbShare">DbShare</a>
+        <a href="https://github.com/pekrau/DbShare" target="_blank">DbShare</a>
         instance. This is ignored if a file is given above.
       </small>
     </div>
@@ -82,7 +62,7 @@
 
   <div class="form-group row">
     <div class="col-md-3 offset-md-2">
-      <button type="submit" class="btn btn-block btn-primary">Create</button>
+      <button type="submit" class="btn btn-block btn-primary">Update</button>
     </div>
   </div>
 </form>

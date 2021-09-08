@@ -70,7 +70,8 @@ def login():
             try:
                 next = flask.request.form["next"]
             except KeyError:
-                return flask.redirect(flask.url_for("home"))
+                return flask.redirect(
+                    flask.url_for("datasets.user", username=username))
             else:
                 return flask.redirect(next)
         except ValueError:
