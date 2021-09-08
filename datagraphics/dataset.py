@@ -415,9 +415,17 @@ class DatasetSaver(EntitySaver):
             raise ValueError("No contents in JSON file.")
 
         # Find the list of records; directly, or keys 'data' or 'records'.
-        for records in [data, data.get("data"), data.get("records")]:
-            if isinstance(records, list): break
-        else:
+        try:
+            if isinstance(data, list):
+                records = data
+            elif isinstance(data, dict):
+                for records in [data.get("data"), data.get("records")]:
+                    if isinstance(records, list): break
+                else:
+                    raise ValueError
+            else:
+                raise ValueError
+        except ValueError:
             raise ValueError("Could not find list of data records in JSON file.")
         first = records[0]
         if not first:
