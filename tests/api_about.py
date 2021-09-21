@@ -17,3 +17,7 @@ class About(utils.ApiMixin, unittest.TestCase):
         response = requests.get(url, headers=self.headers)
         self.assertEqual(response.status_code, http.client.OK)
         self.check_schema(response)
+
+
+if __name__ == "__main__":
+    unittest.main()

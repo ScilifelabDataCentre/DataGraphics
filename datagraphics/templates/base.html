@@ -125,7 +125,7 @@
 	       role="button" class="btn btn-outline-secondary my-2 my-sm-0">
               User {{ g.current_user['username'] }}</a>
             {% else %}
-            <form id="login-formlink"
+            <form id="login-form"
                   action="{{ url_for('user.login') }}"
                   class="form-inline my-2 my-sm-0"
                   method="GET">

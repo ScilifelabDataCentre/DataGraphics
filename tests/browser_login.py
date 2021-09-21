@@ -18,7 +18,7 @@ class LoginUser(utils.BrowserTestCase):
 
         # Home page.
         self.driver.get(self.settings["BASE_URL"])
-        elem = self.driver.find_element_by_xpath("//form[@id='login-formlink']")
+        elem = self.driver.find_element_by_xpath("//form[@id='login-form']")
         elem = elem.find_element_by_tag_name("button")
         elem.click()
 
@@ -77,7 +77,7 @@ class LoginUser(utils.BrowserTestCase):
 
         # Home page.
         self.driver.get(self.settings["BASE_URL"])
-        elem = self.driver.find_element_by_xpath("//form[@id='login-formlink']")
+        elem = self.driver.find_element_by_xpath("//form[@id='login-form']")
         elem = elem.find_element_by_tag_name("button")
         elem.click()
 

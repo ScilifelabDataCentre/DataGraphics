@@ -65,3 +65,7 @@ class Hrefs:
 
     def __iter__(self):
         yield from self.urls
+
+
+if __name__ == "__main__":
+    unittest.main()
