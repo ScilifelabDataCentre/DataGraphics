@@ -273,3 +273,7 @@ class Dataset(utils.ApiMixin, unittest.TestCase):
         url = f"{self.settings['BASE_URL']}api/dataset/{dataset['iuid']}"
         response = requests.delete(url, headers=self.headers)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
+
+
+if __name__ == "__main__":
+    unittest.main()

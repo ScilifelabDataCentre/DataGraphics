@@ -25,3 +25,7 @@ class User(utils.ApiMixin, unittest.TestCase):
         self.assertEqual(response.status_code, http.client.OK)
         users = self.check_schema(response)
         self.assertGreater(len(users), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

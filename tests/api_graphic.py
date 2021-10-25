@@ -93,3 +93,7 @@ class Graphic(utils.ApiMixin, unittest.TestCase):
         # Delete the dataset.
         response = requests.delete(dataset["$id"], headers=self.headers)
         self.assertEqual(response.status_code, http.client.NO_CONTENT)
+
+
+if __name__ == "__main__":
+    unittest.main()
