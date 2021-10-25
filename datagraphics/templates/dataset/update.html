@@ -6,9 +6,10 @@
 
 {% block main %}
 <p class="lead">
-  Update this dataset by uploading new data from a file or URL. The
+  Update the data of this dataset by uploading from a file or URL. The
   new data must have the same column definitions. All values in this
-  dataset will be replaced by the new data.
+  dataset will be replaced by the new data. To edit the metadata,
+  go to <a href="{{ url_for('.edit', iuid=dataset['_id']) }}">Edit</a>.
 </p>
 
 <form action="{{ url_for('.update', iuid=dataset['_id']) }}"

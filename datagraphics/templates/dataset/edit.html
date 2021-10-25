@@ -5,6 +5,10 @@
 {% block body_title %}Edit {{ dataset['title'] }}{% endblock %}
 
 {% block main %}
+<p class="lead">
+  This page is for editing metadata only. To update the data itself,
+  go to <a href="{{ url_for('.update', iuid=dataset['_id']) }}">Update</a>.
+</p>
 <form action="{{ url_for('.edit', iuid=dataset['_id']) }}"
       enctype="multipart/form-data"
       method="POST">
@@ -93,20 +97,6 @@
       </table>
       <small id="vega_lite_typesHelp" class="form-text text-muted">
         Vega-Lite types set for the data fields.
-      </small>
-    </div>
-  </div>
-  <div class="form-group row">
-    <label for="file"
-           class="col-md-2 col-form-label text-right font-weight-bold">
-      File</label>
-    <div class="col-md">
-      <input type="file" id="file" name="file"
-	     class="form-control-file"
-	     aria-describedby="fileHelp">
-      <small id="fileHelp" class="form-text text-muted">
-        File containing the dataset itself. If none given, then no change.
-        JSON or CSV format.
       </small>
     </div>
   </div>
