@@ -5,12 +5,17 @@
 {% block body_title %}Update {{ dataset['title'] }}{% endblock %}
 
 {% block main %}
-<p class="lead">
-  Update the data of this dataset by uploading from a file or URL. The
-  new data must have the same column definitions. All values in this
-  dataset will be replaced by the new data. To edit the metadata,
-  go to <a href="{{ url_for('.edit', iuid=dataset['_id']) }}">Edit</a>.
-</p>
+<div class="row">
+  <div class="col-md offset-md-1">
+    <p class="lead">
+      Update the data of this dataset by uploading from a file or
+      URL. The new data must have the same column definitions. All
+      values in this dataset will be replaced by the new data. To edit
+      the metadata, go to
+      <a href="{{ url_for('.edit', iuid=dataset['_id']) }}">Edit</a>.
+    </p>
+  </div>
+</div>
 
 <form action="{{ url_for('.update', iuid=dataset['_id']) }}"
       enctype="multipart/form-data"
