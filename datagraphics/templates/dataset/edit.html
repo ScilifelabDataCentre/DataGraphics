@@ -5,10 +5,15 @@
 {% block body_title %}Edit {{ dataset['title'] }}{% endblock %}
 
 {% block main %}
-<p class="lead">
-  This page is for editing metadata only. To update the data itself,
-  go to <a href="{{ url_for('.update', iuid=dataset['_id']) }}">Update</a>.
-</p>
+<div class="row">
+  <div class="col-md offset-md-1">
+    <p class="lead">
+      This page is for editing metadata only. To update the data itself,
+      go to <a href="{{ url_for('.update', iuid=dataset['_id']) }}">Update</a>.
+    </p>
+  </div>
+</div>
+
 <form action="{{ url_for('.edit', iuid=dataset['_id']) }}"
       enctype="multipart/form-data"
       method="POST">
