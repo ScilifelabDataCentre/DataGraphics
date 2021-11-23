@@ -50,19 +50,27 @@ DEFAULT_SETTINGS = dict(
 
 def init(app):
     """Perform the configuration of the Flask app.
-    Set the defaults, and then read JSON settings file.
+    Set the defaults, and then modify the values based on:
+    1) The settings file path environment variable DATAGRAPHICS_SETTINGS_FILEPATH.
+    2) The file 'settings.json' in this directory.
+    3) The file '../site/settings.json' relative to this directory.
+    Check the environment for variables and use if defined.
+    Raise IOError if settings file could not be read.
+    Raise KeyError if a settings variable is missing.
+    Raise ValueError if a settings variable value is invalid.
     Check the environment for a specific set of variables and use if defined.
     """
     # Set the defaults specified above.
     app.config.from_mapping(DEFAULT_SETTINGS)
+
     # Modify the configuration from a JSON settings file.
     try:
-        filepaths = [os.environ["SETTINGS_FILEPATH"]]
+        filepaths = [os.environ["DATAGRAPHICS_SETTINGS_FILEPATH"]]
     except KeyError:
         filepaths = []
     for filepath in ["settings.json", "../site/settings.json"]:
-        filepaths.append(os.path.normpath(os.path.join(constants.ROOT_DIRPATH,
-                                                       filepath)))
+        filepaths.append(
+            os.path.normpath(os.path.join(constants.ROOT_DIRPATH, filepath)))
     for filepath in filepaths:
         try:
             app.config.from_file(filepath, load=json.load)
@@ -73,25 +81,26 @@ def init(app):
             break
 
     # Modify the configuration from environment variables.
-    for key, convert in [("LOG_DEBUG", utils.to_bool),
-                         ("SECRET_KEY", str),
-                         ("COUCHDB_URL", str),
-                         ("COUCHDB_USERNAME", str),
-                         ("COUCHDB_PASSWORD", str),
-                         ("MAIL_SERVER", str),
-                         ("MAIL_USE_TLS", utils.to_bool),
-                         ("MAIL_USERNAME", str),
-                         ("MAIL_PASSWORD", str),
-                         ("MAIL_DEFAULT_SENDER", str)]:
+    for key, value in DEFAULT_SETTINGS.items():
         try:
-            app.config[key] = convert(os.environ[key])
-        except (KeyError, TypeError, ValueError):
+            new = os.environ[key]
+        except KeyError:
             pass
+        else:                   # Do NOT catch any exception! Means bad setup.
+            if isinstance(value, int):
+                app.config[key] = int(new)
+            elif isinstance(value, bool):
+                app.config[key] = bool(new)
+            else:
+                app.config[key] = new
 
     # Sanity check; should not execute if this fails.
-    assert app.config["SECRET_KEY"]
-    assert app.config["SALT_LENGTH"] > 6
-    assert app.config["MIN_PASSWORD_LENGTH"] > 4
+    if not app.config['SECRET_KEY']:
+        raise ValueError("SECRET_KEY not set")
+    if app.config['SALT_LENGTH'] <= 6:
+        raise ValueError("SALT_LENGTH is too short")
+    if app.config['MIN_PASSWORD_LENGTH'] <= 4:
+        raise ValueError("MIN_PASSWORD_LENGTH is too short")
 
     # Read in JSON Schema for Vega-Lite from file in 'static'.
     filepath = os.path.join(constants.ROOT_DIRPATH,
