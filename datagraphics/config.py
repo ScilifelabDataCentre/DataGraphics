@@ -35,6 +35,7 @@ DEFAULT_SETTINGS = dict(
     MIN_PASSWORD_LENGTH = 6,
     PERMANENT_SESSION_LIFETIME = 7 * 24 * 60 * 60, # in seconds: 1 week
     MAX_HOME_LIST_ITEMS = 10,
+    URL_UPDATE_TIMEOUT = 5.0,
     MAIL_SERVER = None,         # e.g. "localhost", if set up.
     MAIL_PORT = 25,
     MAIL_USE_TLS = False,
