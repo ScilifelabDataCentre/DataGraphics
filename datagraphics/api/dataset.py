@@ -272,6 +272,9 @@ schema = {
                 "additionalProperties": False
             }
         },
+        "update_url": {"type": "string"},
+        "update_apiheader": {"type": "string"},
+        "update_apikey": {"type": "string"},
         "logs": schema_definitions.logs_link
     },
     "required": ["$id", "timestamp", "iuid", "created", "modified",
