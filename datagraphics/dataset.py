@@ -192,8 +192,10 @@ def update(iuid):
             return flask.redirect(flask.url_for(".display", iuid=iuid))
         try:
             with DatasetSaver(dataset) as saver:
-                if not saver.upload_file():
+                if flask.request.form.get("update") == "update_by_url":
                     saver.get_url_data()
+                else:
+                    saver.upload_file()
         except ValueError as error:
             utils.flash_error(str(error))
         return flask.redirect(flask.url_for(".display", iuid=iuid))
@@ -333,29 +335,35 @@ class DatasetSaver(EntitySaver):
         self.doc["meta"] = {}
 
     def upload_file(self):
-        """Upload a file from a web form and return True.
-        If no file given, return False.
-        """
+        "Upload a file from a web form."
         infile = flask.request.files.get("file")
-        if not infile: return False
+        if not infile:
+            raise ValueError("No file specified.")
         self.set_data(infile, infile.mimetype)
-        return True
 
     def get_url_data(self):
-        "Get the data from a URL. Just skip if no URL."
+        "Get the data from a URL."
         url = flask.request.form.get("url")
-        if not url: return
+        if not url:
+            raise ValueError("No URL specified.")
+        apiheader = flask.request.form.get("apiheader") or "x-apikey"
         apikey = flask.request.form.get("apikey")
         if apikey:
-            headers = {"x-apikey": apikey}
+            headers = {apiheader: apikey}
         else:
             headers = {}
         try:
-            response = requests.get(url, headers=headers, timeout=5.0)
+            response = requests.get(url,
+                                    headers=headers,
+                                    timeout=flask.current_app.config["URL_UPDATE_TIMEOUT"])
         except requests.exceptions.Timeout:
             raise ValueError("Could not fetch data from URL; timeout.")
         if response.status_code != 200:
             raise ValueError(f"Could not fetch data from URL: {response.status_code}")
+        if flask.request.form.get("saveurl"):
+            self.doc["update_url"] = url
+            self.doc["update_apiheader"] = apiheader
+            self.doc["update_apikey"] = apikey
         content_type = response.headers.get('Content-Type')
         if not content_type:
             raise ValueError("Unknown content type for data.")
