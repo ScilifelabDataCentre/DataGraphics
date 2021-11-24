@@ -25,7 +25,8 @@ def init(app):
 
 DESIGN_DOC = {
     "views": {
-        "username": {"map": "function(doc) {if (doc.doctype !== 'user') return; emit(doc.username, null);}"},
+        "username": {"reduce": "_count",
+                     "map": "function(doc) {if (doc.doctype !== 'user') return; emit(doc.username, null);}"},
         "email": {"map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.email, null);}"},
         "apikey": {"map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.apikey, null);}"},
         "role": {"map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.role, null);}"},
