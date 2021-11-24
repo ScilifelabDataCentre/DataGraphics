@@ -71,20 +71,28 @@ def get_logger(app=None):
         _logger.addHandler(loghandler)
     return _logger
 
-def get_dbserver(app=None):
-    "Get the connection to the CouchDB database server."
-    if app is None:
-        app = flask.current_app
-    return couchdb2.Server(href=app.config["COUCHDB_URL"],
-                           username=app.config["COUCHDB_USERNAME"],
-                           password=app.config["COUCHDB_PASSWORD"])
+def set_db(app=None):
+    "Sets the database connection and creates the document cache."
+    flask.g.db = get_db(app=app)
 
-def get_db(dbserver=None, app=None):
+def get_db(app=None):
     if app is None:
         app = flask.current_app
-    if dbserver is None:
-        dbserver = get_dbserver(app=app)
-    return dbserver[app.config["COUCHDB_DBNAME"]]
+    server = couchdb2.Server(href=app.config["COUCHDB_URL"],
+                             username=app.config["COUCHDB_USERNAME"],
+                             password=app.config["COUCHDB_PASSWORD"])
+    return server[app.config["COUCHDB_DBNAME"]]
+
+def get_count(designname, viewname, key=None):
+    "Get the count for the given view and key."
+    if key is None:
+        result = flask.g.db.view(designname, viewname, reduce=True)
+    else:
+        result = flask.g.db.view(designname, viewname, key=key, reduce=True)
+    if result:
+        return result[0].value
+    else:
+        return 0
 
 def get_logs(docid, cleanup=True):
     """Return the list of log entries for the given document identifier,
@@ -155,10 +163,10 @@ class IuidConverter(werkzeug.routing.BaseConverter):
 class Timer:
     "CPU timer."
     def __init__(self):
-        self.start = time.process_time()
+        self.start = time.perf_counter()
     def __call__(self):
         "Return CPU time (in seconds) since start of this timer."
-        return time.process_time() - self.start
+        return time.perf_counter() - self.start
     @property
     def milliseconds(self):
         "Return CPU time (in milliseconds) since start of this timer."
