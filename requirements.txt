@@ -1,6 +1,7 @@
 attrs==21.2.0
 blinker==1.4
 certifi==2021.10.8
+chardet==4.0.0
 charset-normalizer==2.0.8
 click==8.0.3
 CouchDB2==1.13.0
