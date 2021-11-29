@@ -128,7 +128,7 @@
 {% if allow_edit %}
 <div class="mt-4">
   <form action="{{ url_for('.edit', iuid=graphic['_id']) }}">
-    <button type="submit" class="btn btn-block btn-sm btn-primary">
+    <button type="submit" class="btn btn-block btn-primary">
       Edit</button>
   </form>
 </div>
@@ -137,7 +137,7 @@
   <form action="{{ url_for('.private', iuid=graphic['_id']) }}"
         method="POST">
     {{ csrf_token() }}
-    <button type="submit" class="btn btn-block btn-sm btn-warning"
+    <button type="submit" class="btn btn-block btn-warning"
             title="Set the graphic to private access.">
       Set private</button>
   </form>
@@ -145,7 +145,7 @@
   <form action="{{ url_for('.public', iuid=graphic['_id']) }}"
         method="POST">
     {{ csrf_token() }}
-    <button type="submit" class="btn btn-block btn-sm btn-success"
+    <button type="submit" class="btn btn-block btn-success"
             title="Set the graphic to public access.">
       Set public</button>
   </form>
@@ -158,7 +158,7 @@
 	method="POST">
     {{ csrf_token() }}
     <input type="hidden" name="_http_method" value="DELETE">
-    <button type="submit" class="btn btn-block btn-sm btn-danger"
+    <button type="submit" class="btn btn-block btn-danger"
 	    onclick="return confirm('Really delete the graphic?')">
       Delete</button>
   </form>
@@ -169,7 +169,7 @@
   <form action="{{ url_for('.copy', iuid=graphic['_id']) }}"
         method="POST">
     {{ csrf_token() }}
-    <button type="submit" class="btn btn-block btn-sm btn-info">
+    <button type="submit" class="btn btn-block btn-info">
       Copy graphic</button>
   </form>
 </div>

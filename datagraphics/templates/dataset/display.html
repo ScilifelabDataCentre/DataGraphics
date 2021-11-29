@@ -148,13 +148,13 @@
   <div class="card-header">Download</div>
   <div class="card-body">
     <div>
-      <a href="{{ url_for('.download', iuid=dataset['_id'], ext='json') }}"
+      <a href="{{ url_for('api_dataset.content', iuid=dataset['_id'], ext='json') }}"
          title="Download the dataset content in JSON format."
          role="button"
          class="badge badge-pill badge-primary">JSON file</a>
     </div>
     <div>
-      <a href="{{ url_for('.download', iuid=dataset['_id'], ext='csv') }}"
+      <a href="{{ url_for('api_dataset.content', iuid=dataset['_id'], ext='csv') }}"
          title="Download the dataset content in CSV format."
          role="button"
          class="badge badge-pill badge-primary">CSV file</a>
@@ -167,14 +167,14 @@
 {% if allow_edit %}
 <div class="mt-4">
   <form action="{{ url_for('.edit', iuid=dataset['_id']) }}">
-    <button type="submit" class="btn btn-block btn-sm btn-primary"
+    <button type="submit" class="btn btn-block btn-primary"
             title="Edit the metadata of this dataset.">
       Edit</button>
   </form>
 </div>
 <div class="mt-2">
   <form action="{{ url_for('.update', iuid=dataset['_id']) }}">
-    <button type="submit" class="btn btn-block btn-sm btn-primary"
+    <button type="submit" class="btn btn-block btn-primary"
             title="Update the data contents by upload.">
       Update</button>
   </form>
@@ -186,7 +186,7 @@
   <form action="{{ url_for('.private', iuid=dataset['_id']) }}"
         method="POST">
     {{ csrf_token() }}
-    <button type="submit" class="btn btn-block btn-sm btn-warning"
+    <button type="submit" class="btn btn-block btn-warning"
             title="Set the dataset to private access.">
       Set private</button>
   </form>
@@ -194,7 +194,7 @@
   <form action="{{ url_for('.public', iuid=dataset['_id']) }}"
         method="POST">
     {{ csrf_token() }}
-    <button type="submit" class="btn btn-block btn-sm btn-success"
+    <button type="submit" class="btn btn-block btn-success"
             title="Set the dataset to public access.">
       Set public</button>
   </form>
@@ -207,7 +207,7 @@
 	method="POST">
     {{ csrf_token() }}
     <input type="hidden" name="_http_method" value="DELETE">
-    <button type="submit" class="btn btn-block btn-sm btn-danger"
+    <button type="submit" class="btn btn-block btn-danger"
             {% if not possible_delete %}
             disabled title="Dataset can't be deleted; it is used in a graphic owned by the user."
             {% endif %}
@@ -221,7 +221,7 @@
   <form action="{{ url_for('.copy', iuid=dataset['_id']) }}"
         method="POST">
     {{ csrf_token() }}
-    <button type="submit" class="btn btn-block btn-sm btn-primary"
+    <button type="submit" class="btn btn-block btn-primary"
             title="Make a copy of this dataset.">
       Copy dataset</button>
   </form>
@@ -230,7 +230,7 @@
   <form action="{{ url_for('.copy_graphics', iuid=dataset['_id']) }}"
         method="POST">
     {{ csrf_token() }}
-    <button type="submit" class="btn btn-block btn-sm btn-primary"
+    <button type="submit" class="btn btn-block btn-primary"
             title="Make copies of this dataset and all graphics using it.">
       Copy dataset and its graphics</button>
   </form>
@@ -240,7 +240,7 @@
   <form action="{{ url_for('graphic.create') }}"
 	method="GET">
     <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
-    <button type="submit" class="btn btn-sm btn-block btn-info">
+    <button type="submit" class="btn btn-block btn-info">
       Create graphic</button>
   </form>
 </div>
@@ -248,7 +248,7 @@
   <form action="{{ url_for('graphic.stencil') }}"
 	method="GET">
     <input type="hidden" name="dataset" value="{{ dataset['_id'] }}">
-    <button type="submit" class="btn btn-sm btn-block btn-info">
+    <button type="submit" class="btn btn-block btn-info">
       Create graphic from stencil</button>
   </form>
 </div>

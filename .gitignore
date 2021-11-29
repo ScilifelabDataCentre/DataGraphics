@@ -1,5 +1,6 @@
 *.log
 *~
-!example_settings.json
+!settings_template.json
 *settings.json
+.pytest_cache
 __pycache__

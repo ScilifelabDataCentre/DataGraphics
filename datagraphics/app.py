@@ -74,8 +74,7 @@ def setup_template_context():
 def prepare():
     "Open the database connection; get the current user."
     flask.g.timer = utils.Timer()
-    flask.g.dbserver = utils.get_dbserver()
-    flask.g.db = utils.get_db(dbserver=flask.g.dbserver)
+    flask.g.db = utils.get_db()
     flask.g.cache = {}          # key: iuid, value: doc
     flask.g.current_user = datagraphics.user.get_current_user()
     flask.g.am_admin = flask.g.current_user and \

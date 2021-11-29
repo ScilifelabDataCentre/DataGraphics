@@ -5,84 +5,149 @@
 {% block body_title %}Create dataset{% endblock %}
 
 {% block main %}
+<div class="row">
+  <div class="col-md offset-md-1">
+    <p class="lead">
+      Create a dataset by uploading from a file or URL. The column
+      definitions are inferred from the first record of the data.
+    </p>
+  </div>
+</div>
+
 <form action="{{ url_for('.create') }}"
       enctype="multipart/form-data"
       method="POST">
   {{ csrf_token() }}
 
-  <div class="form-group row">
-    <label for="title"
-	   class="col-md-2 col-form-label text-right font-weight-bold">
-      Title</label>
-    <div class="col-md">
-      <input type="text" id="title" name="title"
-             class="form-control" aria-describedby="titleHelp">
-      <small id="titleHelp" class="form-text text-muted">
-        Single-line descriptive title for the dataset.
-      </small>
+  <div class="card bg-light">
+    <h5 class="card-header">Create from file contents</h5>
+    <div class="card-body">
+
+      <div class="form-group row">
+        <label for="title"
+	       class="col-md-2 col-form-label text-right font-weight-bold">
+          Title</label>
+        <div class="col-md">
+          <input type="text" id="title" name="title"
+                 class="form-control" aria-describedby="fileTitleHelp">
+          <small id="fileTitleHelp" class="form-text text-muted">
+            Single-line descriptive title for the dataset.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="file"
+	       class="col-md-2 col-form-label text-right font-weight-bold">
+          File</label>
+        <div class="col-md">
+          <input type="file" id="file" name="file"
+	         class="form-control-file" aria-describedby="fileHelp">
+          <small id="fileHelp" class="form-text text-muted">
+            Upload the file containing the data from your local machine.
+            CSV or JSON format.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-md-3 offset-md-2">
+          <button type="submit" name="create" id="create_by_file"
+                  value="by_file"
+                  class="btn btn-block btn-primary">
+            Create by file</button>
+        </div>
+      </div>
     </div>
   </div>
+</form>
 
-  <div class="form-group row">
-    <label for="description"
-	   class="col-md-2 col-form-label text-right font-weight-bold">
-      Description</label>
-    <div class="col-md">
-      <textarea id="description" name="description" rows="10"
-                class="form-control" aria-describedby="textHelp"></textarea>
-      <small id="descriptionHelp" class="form-text text-muted">
-        Description of the dataset. Formatted using Markdown.
-      </small>
-    </div>
-  </div>
+<br>
 
-  <div class="form-group row">
-    <label for="file"
-	   class="col-md-2 col-form-label text-right font-weight-bold">
-      File</label>
-    <div class="col-md">
-      <input type="file" id="file" name="file"
-	     class="form-control-file" aria-describedby="fileHelp">
-      <small id="fileHelp" class="form-text text-muted">
-        Upload the file containing the dataset itself from your local machine.
-        CSV or JSON format. If given, will override any URL given below.
-      </small>
-    </div>
-  </div>
+<form action="{{ url_for('.create') }}"
+      method="POST">
+  {{ csrf_token() }}
 
-  <div class="form-group row">
-    <label for="url"
-	   class="col-md-2 col-form-label text-right font-weight-bold">
-      URL</label>
-    <div class="col-md">
-      <input type="text" id="url" name="url"
-             class="form-control" aria-describedby="urlHelp">
-      <small id="urlHelp" class="form-text text-muted">
-        URL to upload the dataset from. CSV or JSON format. This is
-        appropriate for fetching data from a
-        <a href="https://github.com/pekrau/DbShare">DbShare</a>
-        instance. This is ignored if a file is given above.
-      </small>
-    </div>
-  </div>
+  <div class="card bg-light">
+    <h5 class="card-header">Create by fetching from URL</h5>
+    <div class="card-body">
 
-  <div class="form-group row">
-    <label for="url"
-	   class="col-md-2 col-form-label text-right font-weight-bold">
-      API key</label>
-    <div class="col-md">
-      <input type="password" id="apikey" name="apikey"
-             class="form-control" aria-describedby="apikeyHelp">
-      <small id="apikeyHelp" class="form-text text-muted">
-        API key to use when accessing the URL given above, if it is
-        not publicly accessible. This works with DbShare.
-      </small>
-    </div>
-  </div>
+      <div class="form-group row">
+        <label for="title"
+	       class="col-md-2 col-form-label text-right font-weight-bold">
+          Title</label>
+        <div class="col-md">
+          <input type="text" id="title" name="title"
+                 class="form-control" aria-describedby="urlTitleHelp">
+          <small id="urlTitleHelp" class="form-text text-muted">
+            Single-line descriptive title for the dataset.
+          </small>
+        </div>
+      </div>
 
-  <div class="form-group row">
-    <div class="col-md-3 offset-md-2">
-      <button type="submit" class="btn btn-block btn-primary">Create</button>
+      <div class="form-group row">
+        <label for="url"
+	       class="col-md-2 col-form-label text-right font-weight-bold">
+          URL</label>
+        <div class="col-md">
+          <input type="text" id="url" name="url"
+                 class="form-control" aria-describedby="urlHelp">
+          <small id="urlHelp" class="form-text text-muted">
+            URL to upload the dataset from, which must provide CSV or
+            JSON format.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="url"
+	       class="col-md-2 col-form-label text-right font-weight-bold">
+          API key</label>
+        <div class="col-md">
+          <input type="password" id="apikey" name="apikey"
+                 class="form-control" aria-describedby="apikeyHelp">
+          <small id="apikeyHelp" class="form-text text-muted">
+            API key to use when accessing the URL given above, if it is
+            not publicly accessible.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="url"
+	       class="col-md-2 col-form-label text-right font-weight-bold">
+          API key header</label>
+        <div class="col-md">
+          <input type="text" id="apiheader" name="apiheader"
+                 class="form-control" aria-describedby="headerHelp">
+          <small id="headerlHelp" class="form-text text-muted">
+            Header to use when providing an API key.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <label for="saveurl" class="col-md-2 text-right">Save URL</label>
+        <div class="col-md">
+          <div class="form-check">
+            <input type="checkbox" name="saveurl" id="saveurl" checked
+                   class="form-check-input"
+                   value="true">
+            <label class="form-check-label" for="saveurl">
+              Save the URL and API key values.
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-md-3 offset-md-2">
+          <button type="submit" name="create" id="create_by_url"
+                  value="by_url"
+                  class="btn btn-block btn-primary">
+            Create by URL</button>
+        </div>
+      </div>
     </div>
   </div>
 </form>

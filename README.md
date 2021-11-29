@@ -30,13 +30,13 @@ For an example of how to use the API to update dataset contents, see
    
 4. Create your JSON file `settings.json` in either the directory
    `{SOURCE}/site` or `{SOURCE}/datagraphics` by making a copy of 
-   `{SOURCE}/site/example_settings.json`. Edit as appropriate for your site.
+   `{SOURCE}/site/settings_template.json`. Edit as appropriate for your site.
 
    For security, the `settings.json` should be readable only for the Linux
    account that runs the Flask server process.
 
    The `settings.json` file may contain an entry `ADMIN_USER` which will
-   create an admin user if it doesn't exist. See the `example_settings.json`
+   create an admin user if it doesn't exist. See the `settings_template.json`
    file for how it should look. The password for this user ought to be
    changed as soon as it has been created, for security.
    
@@ -82,7 +82,7 @@ For an example of how to use the API to update dataset contents, see
 
 `docker-compose`, `curl`, and `sed` are needed.
 
-1. Create a settings file: `cp site/example_settings.json datagraphics/settings.json`
+1. Create a settings file: `cp site/settings_template.json datagraphics/settings.json`
 2. Change the host to `db`: `sed -i 's/127.0.0.1:5984/db:5984/' datagraphics/settings.json`
 3. Start the database: `docker-compose up db`
 4. Create the database `datagraphics`: `curl -u 'couchdb_db_account:couchdb_db_account_pwd' -X PUT http://localhost:5984/datagraphics`

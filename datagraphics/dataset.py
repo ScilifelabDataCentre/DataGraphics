@@ -6,6 +6,7 @@ import json
 import http.client
 import statistics
 
+import chardet
 import couchdb2
 import flask
 import requests
@@ -69,10 +70,11 @@ def create():
         try:
             with DatasetSaver() as saver:
                 saver.set_title()
-                saver.set_description()
                 saver.set_public(False)
-                if not saver.upload_file():
+                if flask.request.form.get("create") == "by_url":
                     saver.get_url_data()
+                else:
+                    saver.upload_file()
         except ValueError as error:
             utils.flash_error(str(error))
             return flask.redirect(utils.url_referrer())
@@ -192,7 +194,7 @@ def update(iuid):
             return flask.redirect(flask.url_for(".display", iuid=iuid))
         try:
             with DatasetSaver(dataset) as saver:
-                if flask.request.form.get("update") == "update_by_url":
+                if flask.request.form.get("update") == "by_url":
                     saver.get_url_data()
                 else:
                     saver.upload_file()
@@ -274,38 +276,6 @@ def private(iuid):
     else:
         utils.flash_error("Only owner may make dataset private.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
-
-@blueprint.route("/<iuid:iuid>.<ext>")
-def download(iuid, ext):
-    """Download the content of the dataset as JSON or CSV file.
-    This is for use in the HTML pages, not for API calls.
-    """
-    try:
-        dataset = get_dataset(iuid)
-    except ValueError as error:
-        utils.flash_error(str(error))
-        return flask.redirect(utils.url_referrer())
-    if not allow_view(dataset):
-        utils.flash_error("View access to dataset is not allowed.")
-        return flask.redirect(utils.url_referrer())
-    if not dataset.get("_attachments", None):
-        utils.flash_error("Dataset does not contain any data.")
-        return flask.redirect(utils.url_referrer())
-    if ext == "json":
-        outfile = flask.g.db.get_attachment(dataset, "data.json")
-        response = flask.make_response(outfile.read())
-        response.headers.set("Content-Type", constants.JSON_MIMETYPE)
-    elif ext == "csv":
-        outfile = flask.g.db.get_attachment(dataset, "data.csv")
-        response = flask.make_response(outfile.read())
-        response.headers.set("Content-Type", constants.CSV_MIMETYPE)
-    else:
-        utils.flash_error("Invalid file type requested.")
-        return flask.redirect(utils.url_referrer())
-    slug = utils.slugify(dataset['title'])
-    response.headers.set("Content-Disposition", "attachment", 
-                         filename=f"{slug}.{ext}")
-    return response
 
 @blueprint.route("/<iuid:iuid>/logs")
 def logs(iuid):
@@ -487,7 +457,10 @@ class DatasetSaver(EntitySaver):
         inspection of the data. Also set the Vega-Lite types.
         If the dataset is being updated, check against the 'meta' entry.
         """
-        reader = csv.DictReader(io.StringIO(infile.read().decode("utf-8")))
+        data = infile.read()
+        detected = chardet.detect(data)
+        data = data.decode(detected["encoding"])
+        reader = csv.DictReader(io.StringIO(data))
         data = list(reader)
         if not data:
             raise ValueError("No data in CSV file.")

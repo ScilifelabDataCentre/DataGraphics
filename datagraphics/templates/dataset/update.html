@@ -22,7 +22,7 @@
       method="POST">
   {{ csrf_token() }}
 
-  <div class="card">
+  <div class="card bg-light">
     <h5 class="card-header">Update by file contents</h5>
     <div class="card-body">
       <div class="form-group row">
@@ -42,7 +42,7 @@
       <div class="form-group row">
         <div class="col-md-3 offset-md-2">
           <button type="submit" name="update" id="update_by_file"
-                  value="update_by_file"
+                  value="by_file"
                   class="btn btn-block btn-primary">
             Update by file</button>
         </div>
@@ -57,7 +57,7 @@
       method="POST">
   {{ csrf_token() }}
 
-  <div class="card">
+  <div class="card bg-light">
     <h5 class="card-header">Update by fetching from URL</h5>
     <div class="card-body">
       <div class="form-group row">
@@ -121,7 +121,7 @@
       <div class="form-group row">
         <div class="col-md-3 offset-md-2">
           <button type="submit" name="update" id="update_by_url"
-                  value="update_by_url"
+                  value="by_url"
                   class="btn btn-block btn-primary">
             Update by URL</button>
         </div>
