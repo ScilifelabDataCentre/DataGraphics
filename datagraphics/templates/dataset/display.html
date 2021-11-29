@@ -148,13 +148,13 @@
   <div class="card-header">Download</div>
   <div class="card-body">
     <div>
-      <a href="{{ url_for('api_dataset.content', iuid=dataset['_id'], ext='json') }}"
+      <a href="{{ url_for('dataset.download', iuid=dataset['_id'], ext='json') }}"
          title="Download the dataset content in JSON format."
          role="button"
          class="badge badge-pill badge-primary">JSON file</a>
     </div>
     <div>
-      <a href="{{ url_for('api_dataset.content', iuid=dataset['_id'], ext='csv') }}"
+      <a href="{{ url_for('dataset.download', iuid=dataset['_id'], ext='csv') }}"
          title="Download the dataset content in CSV format."
          role="button"
          class="badge badge-pill badge-primary">CSV file</a>
