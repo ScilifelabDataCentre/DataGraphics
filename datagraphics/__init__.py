@@ -4,7 +4,7 @@ import re
 import os.path
 import string
 
-__version__ = "0.12.0"
+__version__ = "0.12.1"
 
 class Constants:
     VERSION = __version__
@@ -13,10 +13,19 @@ class Constants:
 
     BOOTSTRAP_VERSION = "4.6.1"
     BOOTSTRAP_URL = "https://getbootstrap.com/"
+    BOOTSTRAP_CDN_CSS_URL = "https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+    BOOTSTRAP_CDN_CSS_INTEGRITY = "sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn"
+    BOOTSTRAP_CDN_JS_URL = "https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+    BOOTSTRAP_CDN_JS_INTEGRITY = "sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
     JQUERY_VERSION = "3.5.1"
     JQUERY_URL = "https://jquery.com/"
+    JQUERY_CDN_URL = "https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    JQUERY_CDN_INTEGRITY = "sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     DATATABLES_VERSION = "1.10.24"
     DATATABLES_URL = "https://datatables.net/"
+    DATATABLES_CDN_CSS_URL = "https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap4.min.css"
+    DATATABLES_CDN_JQUERY_JS_URL = "https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"
+    DATATABLES_CDN_BOOTSTRAP_JS_URL = "https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"
     VEGA_VERSION = "5.19.1"
     VEGA_URL = "https://vega.github.io/vega/"
     VEGA_LITE_VERSION = "5.0.0"  # Must match schema file in 'static'.

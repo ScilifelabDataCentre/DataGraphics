@@ -14,13 +14,13 @@ blueprint = flask.Blueprint("about", __name__)
 
 @blueprint.route("/software")
 def software():
-    "Show software versions."
+    "Software version information."
     return flask.render_template("about/software.html",
                                  software=get_software())
 
 def get_software():
     v = sys.version_info
-    return sorted([
+    return [
         ("DataGraphics", constants.VERSION, constants.URL),
         ("Python", f"{v.major}.{v.minor}.{v.micro}", "https://www.python.org/"),
         ("Flask", flask.__version__, "http://flask.pocoo.org/"),
@@ -36,7 +36,7 @@ def get_software():
         ("Vega", constants.VEGA_VERSION, constants.VEGA_URL),
         ("Vega-Lite", constants.VEGA_LITE_VERSION, constants.VEGA_LITE_URL),
         ("Vega-Embed", constants.VEGA_EMBED_VERSION, constants.VEGA_EMBED_URL),
-    ], key=lambda t: t[0].lower())
+    ]
 
 @blueprint.route("/documentation")
 @blueprint.route("/documentation/<page>")
