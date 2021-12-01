@@ -4,7 +4,7 @@ import re
 import os.path
 import string
 
-__version__ = "0.12.3"
+__version__ = "0.12.4"
 
 class Constants:
     VERSION = __version__
@@ -20,8 +20,8 @@ class Constants:
 
     JQUERY_VERSION = "3.5.1"
     JQUERY_URL = "https://jquery.com/"
-    JQUERY_URL = "https://code.jquery.com/jquery-3.5.1.slim.min.js"
-    JQUERY_INTEGRITY = "sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    JQUERY_JS_URL = "https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    JQUERY_JS_INTEGRITY = "sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
 
     DATATABLES_VERSION = "1.10.24"
     DATATABLES_URL = "https://datatables.net/"
