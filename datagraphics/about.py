@@ -39,6 +39,7 @@ def get_software():
         ("requests", requests.__version__, "https://docs.python-requests.org/"),
         ("Bootstrap", constants.BOOTSTRAP_VERSION, constants.BOOTSTRAP_URL),
         ("jQuery", constants.JQUERY_VERSION, constants.JQUERY_URL),
+        ('jQuery.localtime', '0.9.1', 'https://github.com/GregDThomas/jquery-localtime'),
         ("DataTables", constants.DATATABLES_VERSION, constants.DATATABLES_URL),
         ("Vega", constants.VEGA_VERSION, constants.VEGA_URL),
         ("Vega-Lite", constants.VEGA_LITE_VERSION, constants.VEGA_LITE_URL),
