@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block head_title %}DataGraphics{% endblock %}</title>
     <link rel="icon" href="{{ url_for('static', filename='logo32.png') }}">
-    <link rel="stylesheet" href="{{ constants.BOOTSTRAP_CDN_CSS_URL }}"
-          integrity="{{ constants.BOOTSTRAP_CDN_CSS_INTEGRITY }}"
-          crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ constants.DATATABLES_CDN_URL }}">
+    <link rel="stylesheet" crossorigin="anonymous"
+          href="{{ constants.BOOTSTRAP_CSS_URL }}"
+          integrity="{{ constants.BOOTSTRAP_CSS_INTEGRITY }}">
+    <link rel="stylesheet" href="{{ constants.DATATABLES_URL }}">
     {% block style %}
     {% endblock %}
   </head>
@@ -229,14 +229,14 @@
       {% endblock %} {# block footer #}
     </div>
 
-    <script src="{{ constants.JQUERY_CDN_URL }}"
-            integrity="{{ constants.JQUERY_CDN_INTEGRITY }}"
+    <script src="{{ constants.JQUERY_URL }}"
+            integrity="{{ constants.JQUERY_INTEGRITY }}"
             crossorigin="anonymous"></script>
-    <script src="{{ constants.BOOTSTRAP_CDN_JS_URL }}"
-            integrity="{{ constants.BOOTSTRAP_CDN_JS_INTEGRITY }}"
+    <script src="{{ constants.BOOTSTRAP_JS_URL }}"
+            integrity="{{ constants.BOOTSTRAP_JS_INTEGRITY }}"
             crossorigin="anonymous"></script>
-    <script src="{{ constants.DATATABLES_CDN_JQUERY_JS_URL }}"></script>
-    <script src="{{ constants.DATATABLES_CDN_BOOTSTRAP_JS_URL }}"></script>
+    <script src="{{ constants.DATATABLES_JQUERY_JS_URL }}"></script>
+    <script src="{{ constants.DATATABLES_BOOTSTRAP_JS_URL }}"></script>
     <script src="{{ url_for('static', filename='jquery.localtime-0.9.1.min.js') }}"></script>
     {% block javascript %}
     {% endblock %}

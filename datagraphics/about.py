@@ -2,9 +2,13 @@
 
 import sys
 
+import certifi
+import chardet
 import couchdb2
 import flask
 import jsonschema
+import marko
+import requests
 
 from datagraphics import constants
 from datagraphics import utils
@@ -24,12 +28,13 @@ def get_software():
         ("DataGraphics", constants.VERSION, constants.URL),
         ("Python", f"{v.major}.{v.minor}.{v.micro}", "https://www.python.org/"),
         ("Flask", flask.__version__, "http://flask.pocoo.org/"),
-        ("CouchDB server", flask.g.db.server.version, 
-         "https://couchdb.apache.org/"),
-        ("CouchDB2 interface", couchdb2.__version__, 
-         "https://pypi.org/project/couchdb2"),
-        ("jsonschema", jsonschema.__version__, 
-         "https://pypi.org/project/jsonschema"),
+        ("certifi", certifi.__version__, "https://pypi.org/project/certifi/"),
+        ("chardet", chardet.__version__, "https://pypi.org/project/chardet/"),
+        ("CouchDB server", flask.g.db.server.version, "https://couchdb.apache.org/"),
+        ("CouchDB2 interface", couchdb2.__version__, "https://pypi.org/project/couchdb2"),
+        ("jsonschema", jsonschema.__version__, "https://pypi.org/project/jsonschema"),
+        ("Marko", marko.__version__, "https://pypi.org/project/marko/"),
+        ("requests", requests.__version__, "https://docs.python-requests.org/"),
         ("Bootstrap", constants.BOOTSTRAP_VERSION, constants.BOOTSTRAP_URL),
         ("jQuery", constants.JQUERY_VERSION, constants.JQUERY_URL),
         ("DataTables", constants.DATATABLES_VERSION, constants.DATATABLES_URL),
