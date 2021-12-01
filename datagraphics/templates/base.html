@@ -98,9 +98,7 @@
             </div>
           </li>
           {% endif %} {# if g.am_admin #}
-        </ul>
 
-        <ul class="navbar-nav justify-content-end">
           <li class="nav-item dropdown">
             <a href="#" id="navbarAbout" class="nav-link dropdown-toggle"
                role="button" data-toggle="dropdown"
@@ -116,7 +114,9 @@
                  href="{{ url_for('about.schemas') }}">API JSON Schemas</a>
 	    </div>
           </li>
+        </ul>
 
+        <ul class="navbar-nav justify-content-end">
           <li class="mx-1">
             {% if g.current_user %}
             <a href="{{ url_for('user.display', username=g.current_user['username']) }}"
