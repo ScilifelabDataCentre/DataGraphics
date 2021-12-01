@@ -6,6 +6,7 @@ import certifi
 import chardet
 import couchdb2
 import flask
+import jinja2
 import jsonschema
 import marko
 import requests
@@ -32,6 +33,7 @@ def get_software():
         ("chardet", chardet.__version__, "https://pypi.org/project/chardet/"),
         ("CouchDB server", flask.g.db.server.version, "https://couchdb.apache.org/"),
         ("CouchDB2 interface", couchdb2.__version__, "https://pypi.org/project/couchdb2"),
+        ("Jinja2", jinja2.__version__, "https://pypi.org/project/Jinja2/"),
         ("jsonschema", jsonschema.__version__, "https://pypi.org/project/jsonschema"),
         ("Marko", marko.__version__, "https://pypi.org/project/marko/"),
         ("requests", requests.__version__, "https://docs.python-requests.org/"),
