@@ -70,7 +70,7 @@ def init(app):
         filepaths = []
     for filepath in ["settings.json", "../site/settings.json"]:
         filepaths.append(
-            os.path.normpath(os.path.join(constants.ROOT_DIRPATH, filepath)))
+            os.path.normpath(os.path.join(constants.ROOT, filepath)))
     for filepath in filepaths:
         try:
             app.config.from_file(filepath, load=json.load)
@@ -103,7 +103,7 @@ def init(app):
         raise ValueError("MIN_PASSWORD_LENGTH is too short")
 
     # Read in JSON Schema for Vega-Lite from file in 'static'.
-    filepath = os.path.join(constants.ROOT_DIRPATH,
+    filepath = os.path.join(constants.ROOT,
                             f"static/v{constants.VEGA_LITE_VERSION}.json")
     with open(filepath) as infile:
         app.config["VEGA_LITE_SCHEMA"] = json.load(infile)
@@ -111,8 +111,7 @@ def init(app):
     # Read in stencil JSON specifications from files in 'stencils'.
     app.config["STENCILS"] = {}
     for rootpath in ["stencils", "../site/stencils"]:
-        rootpath = os.path.normpath(os.path.join(constants.ROOT_DIRPATH,
-                                                 rootpath))
+        rootpath = os.path.normpath(os.path.join(constants.ROOT, rootpath))
         if not os.path.exists(rootpath) or not os.path.isdir(rootpath): continue
         for filename in os.listdir(rootpath):
             name, ext = os.path.splitext(filename)

@@ -9,7 +9,7 @@ __version__ = "0.12.5"
 class Constants:
     VERSION = __version__
     URL = "https://github.com/pekrau/DataGraphics"
-    ROOT_DIRPATH = os.path.dirname(os.path.abspath(__file__))
+    ROOT = os.path.dirname(os.path.abspath(__file__))
 
     BOOTSTRAP_VERSION = "4.6.1"
     BOOTSTRAP_URL = "https://getbootstrap.com/"
@@ -44,6 +44,7 @@ class Constants:
     VEGA_LITE_TYPES = ("quantitative", "temporal",
                        "ordinal", "nominal", "geojson")
 
+    # Patterns
     IUID_RX = re.compile(r"^[a-f0-9]{32,32}$")
     NAME_RX = re.compile(r"^[a-z][a-z0-9_-]*$", re.I)
     EMAIL_RX = re.compile(r"^[a-z0-9_.+-]+@[a-z0-9-]+\.[a-z0-9-.]+$")
