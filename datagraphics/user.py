@@ -56,11 +56,13 @@ def login():
 
     elif utils.http_POST():
         try:
-            do_login(flask.request.form.get("username"), flask.request.form.get("password"))
+            do_login(
+                flask.request.form.get("username"), flask.request.form.get("password")
+            )
             try:
                 url = flask.session.pop("login_target_url")
             except KeyError:
-                url flask.redirect(flask.url_for("datasets.user", username=username))
+                url = flask.redirect(flask.url_for("datasets.user", username=username))
             return flask.redirect(url)
         except ValueError:
             utils.flash_error("Invalid user or password, or account disabled.")
@@ -473,9 +475,11 @@ def get_current_user():
 def create_admin():
     "Create admin user if none, and specified in the settings."
     config = flask.current_app.config
-    if not config.get("ADMIN_USER"): return
+    if not config.get("ADMIN_USER"):
+        return
     user = get_user(username=config["ADMIN_USER"]["username"])
-    if user: return
+    if user:
+        return
     try:
         with UserSaver() as saver:
             saver.set_username(config["ADMIN_USER"]["username"])
@@ -483,9 +487,12 @@ def create_admin():
             saver.set_role(constants.ADMIN)
             saver.set_status(constants.ENABLED)
             saver.set_password(config["ADMIN_USER"]["password"])
-        utils.get_logger().info(f"Created admin user {config['ADMIN_USER']['username']}")
+        utils.get_logger().info(
+            f"Created admin user {config['ADMIN_USER']['username']}"
+        )
     except ValueError as error:
         utils.get_logger().error("Could not create admin user; misconfiguration.")
+
 
 def do_login(username, password):
     """Set the session cookie if successful login.
