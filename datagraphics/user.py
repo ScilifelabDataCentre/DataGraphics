@@ -49,24 +49,7 @@ def login():
     """Login to a user account.
     Creates the admin user specified in the settings.json, if not done.
     """
-    app = flask.current_app
-    if app.config.get("ADMIN_USER"):
-        user = get_user(username=app.config["ADMIN_USER"]["username"])
-        if user is None:
-            try:
-                with UserSaver() as saver:
-                    saver.set_username(app.config["ADMIN_USER"]["username"])
-                    saver.set_email(app.config["ADMIN_USER"]["email"])
-                    saver.set_role(constants.ADMIN)
-                    saver.set_status(constants.ENABLED)
-                    saver.set_password(app.config["ADMIN_USER"]["password"])
-                utils.get_logger().info(
-                    "Created admin user " + app.config["ADMIN_USER"]["username"]
-                )
-            except ValueError as error:
-                utils.get_logger().error(
-                    "Could not create admin user;" " misconfiguration."
-                )
+    create_admin()
 
     if utils.http_GET():
         return flask.render_template("user/login.html")
@@ -486,6 +469,23 @@ def get_current_user():
         return None
     return user
 
+
+def create_admin():
+    "Create admin user if none, and specified in the settings."
+    config = flask.current_app.config
+    if not config.get("ADMIN_USER"): return
+    user = get_user(username=config["ADMIN_USER"]["username"])
+    if user: return
+    try:
+        with UserSaver() as saver:
+            saver.set_username(config["ADMIN_USER"]["username"])
+            saver.set_email(config["ADMIN_USER"]["email"])
+            saver.set_role(constants.ADMIN)
+            saver.set_status(constants.ENABLED)
+            saver.set_password(config["ADMIN_USER"]["password"])
+        utils.get_logger().info(f"Created admin user {config['ADMIN_USER']['username']}")
+    except ValueError as error:
+        utils.get_logger().error("Could not create admin user; misconfiguration.")
 
 def do_login(username, password):
     """Set the session cookie if successful login.
