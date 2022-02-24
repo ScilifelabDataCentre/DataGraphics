@@ -21,20 +21,30 @@ def init(app):
     if db.put_design("graphics", DESIGN_DOC):
         logger.info("Updated graphics design document.")
 
+
 DESIGN_DOC = {
     "views": {
-        "public_modified": {"reduce": "_count",
-                            "map": "function(doc) {if (doc.doctype !== 'graphic' || !doc.public) return; emit(doc.modified, doc.title);}"},
-        "owner_modified": {"reduce": "_count",
-                           "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit([doc.owner, doc.modified], doc.title);}"},
-        "editor_modified": {"reduce": "_count",
-                            "map": "function(doc) {if (doc.doctype !== 'graphic') return; if (!doc.editors) return; for (var i=0; i<doc.editors.length; i++) { emit([doc.editors[i], doc.modified], doc.title);}}"},
-        "dataset": {"reduce": "_count",
-                    "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}"}
+        "public_modified": {
+            "reduce": "_count",
+            "map": "function(doc) {if (doc.doctype !== 'graphic' || !doc.public) return; emit(doc.modified, doc.title);}",
+        },
+        "owner_modified": {
+            "reduce": "_count",
+            "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit([doc.owner, doc.modified], doc.title);}",
+        },
+        "editor_modified": {
+            "reduce": "_count",
+            "map": "function(doc) {if (doc.doctype !== 'graphic') return; if (!doc.editors) return; for (var i=0; i<doc.editors.length; i++) { emit([doc.editors[i], doc.modified], doc.title);}}",
+        },
+        "dataset": {
+            "reduce": "_count",
+            "map": "function(doc) {if (doc.doctype !== 'graphic') return; emit(doc.dataset, doc.title);}",
+        },
     }
 }
 
 blueprint = flask.Blueprint("graphic", __name__)
+
 
 @blueprint.route("/", methods=["GET", "POST"])
 @utils.login_required
@@ -53,14 +63,20 @@ def create():
         return flask.redirect(utils.url_referrer())
 
     if utils.http_GET():
-        graphic = {"$schema": constants.VEGA_LITE_SCHEMA_URL,
-                   "data": {"url": flask.url_for("api_dataset.content",
-                                                 iuid=dataset["_id"],
-                                                 ext="csv",
-                                                 _external=True)}}
-        return flask.render_template("graphic/create.html",
-                                     dataset=dataset,
-                                     graphic=graphic)
+        graphic = {
+            "$schema": constants.VEGA_LITE_SCHEMA_URL,
+            "data": {
+                "url": flask.url_for(
+                    "api_dataset.content",
+                    iuid=dataset["_id"],
+                    ext="csv",
+                    _external=True,
+                )
+            },
+        }
+        return flask.render_template(
+            "graphic/create.html", dataset=dataset, graphic=graphic
+        )
 
     elif utils.http_POST():
         try:
@@ -75,6 +91,7 @@ def create():
             return flask.redirect(utils.url_referrer())
         return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
+
 @blueprint.route("/<iuid:iuid>")
 def display(iuid):
     "Display the graphic."
@@ -88,25 +105,34 @@ def display(iuid):
         return flask.redirect(utils.url_referrer())
     dataset = get_dataset(graphic)
     if dataset:
-        other_graphics = [gr 
-                          for gr in datagraphics.dataset.get_graphics(dataset)
-                          if gr["_id"] != graphic["_id"]]
+        other_graphics = [
+            gr
+            for gr in datagraphics.dataset.get_graphics(dataset)
+            if gr["_id"] != graphic["_id"]
+        ]
     else:
         other_graphics = []
-    if flask.g.current_user and \
-       flask.g.current_user["username"] == graphic["owner"] and \
-       dataset["owner"] != graphic["owner"]:
-        utils.flash_warning("The dataset is not owned by you."
-                            " This graphic may become invalid if the owner of"
-                            " the dataset deletes it or makes it inaccessible.")
-    return flask.render_template("graphic/display.html",
-                                 graphic=graphic,
-                                 slug=utils.slugify(graphic['title']),
-                                 dataset=dataset,
-                                 other_graphics=other_graphics,
-                                 am_owner=am_owner(graphic),
-                                 allow_edit=allow_edit(graphic),
-                                 allow_delete=allow_delete(graphic))
+    if (
+        flask.g.current_user
+        and flask.g.current_user["username"] == graphic["owner"]
+        and dataset["owner"] != graphic["owner"]
+    ):
+        utils.flash_warning(
+            "The dataset is not owned by you."
+            " This graphic may become invalid if the owner of"
+            " the dataset deletes it or makes it inaccessible."
+        )
+    return flask.render_template(
+        "graphic/display.html",
+        graphic=graphic,
+        slug=utils.slugify(graphic["title"]),
+        dataset=dataset,
+        other_graphics=other_graphics,
+        am_owner=am_owner(graphic),
+        allow_edit=allow_edit(graphic),
+        allow_delete=allow_delete(graphic),
+    )
+
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
@@ -122,9 +148,9 @@ def edit(iuid):
         if not allow_edit(graphic):
             utils.flash_error("Edit access to graphic not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
-        return flask.render_template("graphic/edit.html",
-                                     am_owner=am_owner(graphic),
-                                     graphic=graphic)
+        return flask.render_template(
+            "graphic/edit.html", am_owner=am_owner(graphic), graphic=graphic
+        )
 
     elif utils.http_POST():
         if not allow_edit(graphic):
@@ -152,8 +178,8 @@ def edit(iuid):
         for log in utils.get_logs(graphic["_id"], cleanup=False):
             flask.g.db.delete(log)
         utils.flash_message("The graphic was deleted.")
-        return flask.redirect(
-            flask.url_for("dataset.display", iuid=graphic["dataset"]))
+        return flask.redirect(flask.url_for("dataset.display", iuid=graphic["dataset"]))
+
 
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
@@ -175,6 +201,7 @@ def copy(iuid):
         return flask.redirect(utils.url_referrer())
     return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
+
 @blueprint.route("/<iuid:iuid>/public", methods=["POST"])
 @utils.login_required
 def public(iuid):
@@ -191,6 +218,7 @@ def public(iuid):
     else:
         utils.flash_error("Only owner may make graphic public.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
+
 
 @blueprint.route("/<iuid:iuid>/private", methods=["POST"])
 @utils.login_required
@@ -209,6 +237,7 @@ def private(iuid):
         utils.flash_error("Only owner may make graphic private.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
+
 @blueprint.route("/<iuid:iuid>.<ext>")
 def download(iuid, ext):
     "Download the JSON or JavaScript specification of the Vega-Lite graphic."
@@ -226,7 +255,7 @@ def download(iuid, ext):
         return flask.redirect(utils.url_referrer())
 
     spec = graphic["specification"]
-    slug = utils.slugify(graphic['title'])
+    slug = utils.slugify(graphic["title"])
     id = flask.request.args.get("id") or "graphic"
 
     if utils.to_bool(flask.request.args.get("inline")):
@@ -237,24 +266,25 @@ def download(iuid, ext):
         response.headers.set("Content-Type", constants.JSON_MIMETYPE)
     elif ext == "js":
         spec = json.dumps(spec, ensure_ascii=False)
-        response = flask.make_response(f'vegaEmbed("#{id}", {spec},'
-                                       f' {{downloadFileName: "{slug}"}})'
-                                       '.then(result=>console.log(result))'
-                                       '.catch(console.warn);')
+        response = flask.make_response(
+            f'vegaEmbed("#{id}", {spec},'
+            f' {{downloadFileName: "{slug}"}})'
+            ".then(result=>console.log(result))"
+            ".catch(console.warn);"
+        )
         response.headers.set("Content-Type", constants.JS_MIMETYPE)
     elif ext == "html":
-        html = flask.render_template("graphic/vega_lite.html",
-                                     graphic=graphic,
-                                     id=id,
-                                     slug=slug)
+        html = flask.render_template(
+            "graphic/vega_lite.html", graphic=graphic, id=id, slug=slug
+        )
         response = flask.make_response(html)
         response.headers.set("Content-Type", constants.HTML_MIMETYPE)
     else:
         utils.flash_error("Invalid file type requested.")
         return flask.redirect(utils.url_referrer())
-    response.headers.set("Content-Disposition", "attachment", 
-                         filename=f"{slug}.{ext}")
+    response.headers.set("Content-Disposition", "attachment", filename=f"{slug}.{ext}")
     return response
+
 
 @blueprint.route("/<iuid:iuid>/logs")
 def logs(iuid):
@@ -271,7 +301,8 @@ def logs(iuid):
         "logs.html",
         title=f"Graphic {graphic['title']}",
         back_url=flask.url_for(".display", iuid=iuid),
-        logs=utils.get_logs(iuid))
+        logs=utils.get_logs(iuid),
+    )
 
 
 @blueprint.route("/stencil", methods=["GET", "POST"])
@@ -294,26 +325,28 @@ def stencil():
         stencils = []
         for name in flask.current_app.config["STENCILS"]:
             header = deepcopy(flask.current_app.config["STENCILS"][name]["header"])
-            field_variables = [v for v in header["variables"]
-                               if v.get("class") == "field"]
-            header["combinations"] = combinations(field_variables,
-                                                  dataset["meta"].items())
+            field_variables = [
+                v for v in header["variables"] if v.get("class") == "field"
+            ]
+            header["combinations"] = combinations(
+                field_variables, dataset["meta"].items()
+            )
             if header["combinations"]:
                 stencils.append(header)
         stencils.sort(key=lambda h: (h.get("weight", 0), h["title"]))
-        return flask.render_template("graphic/stencil.html",
-                                     dataset=dataset,
-                                     stencils=stencils)
+        return flask.render_template(
+            "graphic/stencil.html", dataset=dataset, stencils=stencils
+        )
     elif utils.http_POST():
         try:
-            spec = deepcopy(flask.current_app.config["STENCILS"]\
-                            [flask.request.form["stencil"]])
+            spec = deepcopy(
+                flask.current_app.config["STENCILS"][flask.request.form["stencil"]]
+            )
             header = spec.pop("header")
             setfields = SetFields(flask.request.form["combination"])
-            url = flask.url_for("api_dataset.content",
-                                iuid=dataset["_id"],
-                                ext="csv",
-                                _external=True)
+            url = flask.url_for(
+                "api_dataset.content", iuid=dataset["_id"], ext="csv", _external=True
+            )
             for variable in header["variables"]:
                 if variable.get("class") == "dataset":
                     setfields.lookup["/".join(variable["path"])] = url
@@ -329,6 +362,7 @@ def stencil():
             return flask.redirect(utils.url_referrer())
         return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
+
 def combinations(variables, field_items, current=None):
     """Return all combinations of variables in the stencil
     with fields in the dataset.
@@ -338,22 +372,28 @@ def combinations(variables, field_items, current=None):
         current = []
     pos = len(current)
     for name, field in field_items:
-        if not field.get("vega_lite_types"): continue
-        if variables[pos]["type"] not in field["vega_lite_types"]: continue
-        if name in current: continue
+        if not field.get("vega_lite_types"):
+            continue
+        if variables[pos]["type"] not in field["vega_lite_types"]:
+            continue
+        if name in current:
+            continue
         extended = current + [name]
         if pos + 1 == len(variables):
             value = []
             title = []
-            for vname, vtitle, fname in zip([v["name"] for v in variables], 
-                                            [v["title"] for v in variables],
-                                            extended):
+            for vname, vtitle, fname in zip(
+                [v["name"] for v in variables],
+                [v["title"] for v in variables],
+                extended,
+            ):
                 value.append(f"{vname}={fname}")
                 title.append(f"{vtitle} = {fname}")
             result.append((";".join(value), "; ".join(title)))
         else:
             result.extend(combinations(variables, field_items, extended))
     return result
+
 
 class SetFields(utils.JsonTraverser):
     "Set the fields in the specification according to the combination."
@@ -397,30 +437,48 @@ class GraphicSaver(EntitySaver):
 
         # Change the dataset URLs if origin is different from current.
         if origin_dataset_id is not None:
-            old_data_urls = set([flask.url_for("api_dataset.content",
-                                               iuid=origin_dataset_id,
-                                               ext="csv",
-                                               _external=True),
-                                 flask.url_for("api_dataset.content",
-                                               iuid=origin_dataset_id,
-                                               ext="json",
-                                               _external=True)])
-            new_data_url = flask.url_for("api_dataset.content",
-                                         iuid=self.doc["dataset"],
-                                         ext="csv",
-                                         _external=True)
+            old_data_urls = set(
+                [
+                    flask.url_for(
+                        "api_dataset.content",
+                        iuid=origin_dataset_id,
+                        ext="csv",
+                        _external=True,
+                    ),
+                    flask.url_for(
+                        "api_dataset.content",
+                        iuid=origin_dataset_id,
+                        ext="json",
+                        _external=True,
+                    ),
+                ]
+            )
+            new_data_url = flask.url_for(
+                "api_dataset.content",
+                iuid=self.doc["dataset"],
+                ext="csv",
+                _external=True,
+            )
             replacer = ReplaceDataUrl(old_data_urls, new_data_url)
             replacer.traverse(specification)
 
         # Sanity and validation check of the specification.
-        dataset_urls = set([flask.url_for("api_dataset.content",
-                                          iuid=self.doc["dataset"],
-                                          ext="csv",
-                                          _external=True),
-                            flask.url_for("api_dataset.content",
-                                          iuid=self.doc["dataset"],
-                                          ext="json",
-                                          _external=True)])
+        dataset_urls = set(
+            [
+                flask.url_for(
+                    "api_dataset.content",
+                    iuid=self.doc["dataset"],
+                    ext="csv",
+                    _external=True,
+                ),
+                flask.url_for(
+                    "api_dataset.content",
+                    iuid=self.doc["dataset"],
+                    ext="json",
+                    _external=True,
+                ),
+            ]
+        )
         data_urls = DataUrls()
         data_urls.traverse(specification)
         if dataset_urls.intersection(data_urls):
@@ -448,8 +506,9 @@ class GraphicSaver(EntitySaver):
             self.set_specification(graphic["specification"])
         else:
             self.set_dataset(dataset)
-            self.set_specification(graphic["specification"],
-                                   origin_dataset_id=graphic["dataset"])
+            self.set_specification(
+                graphic["specification"], origin_dataset_id=graphic["dataset"]
+            )
 
 
 class DataUrls(utils.JsonTraverser):
@@ -487,6 +546,7 @@ class ReplaceDataUrl(utils.JsonTraverser):
 
 # Utility functions
 
+
 def get_graphic(iuid):
     "Get the graphic given its IUID."
     if not iuid:
@@ -503,37 +563,54 @@ def get_graphic(iuid):
     flask.g.cache[iuid] = doc
     return doc
 
+
 def am_owner(graphic):
     "Is the current user the owner of the graphic? Includes admin."
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
     return flask.g.current_user["username"] == graphic["owner"]
+
 
 def allow_view(graphic):
     "Is the current user allowed to view the graphic?"
-    if graphic.get("public"): return True
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
-    if flask.g.current_user["username"] == graphic["owner"]: return True
+    if graphic.get("public"):
+        return True
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
+    if flask.g.current_user["username"] == graphic["owner"]:
+        return True
     if flask.g.current_user["username"] in graphic.get("editors", []):
         return True
     return False
 
+
 def allow_edit(graphic):
     "Is the current user allowed to edit the graphic?"
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
-    if flask.g.current_user["username"] == graphic["owner"]: return True
-    if flask.g.current_user["username"] in graphic.get("editors", []): 
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
+    if flask.g.current_user["username"] == graphic["owner"]:
+        return True
+    if flask.g.current_user["username"] in graphic.get("editors", []):
         return True
     return False
 
+
 def allow_delete(graphic):
     "Is the current user allowed to delete the graphic?"
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
-    if flask.g.current_user["username"] == graphic["owner"]: return True
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
+    if flask.g.current_user["username"] == graphic["owner"]:
+        return True
     return False
+
 
 def get_dataset(graphic):
     "Get the dataset for the graphic, if allowed. Else None."

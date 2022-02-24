@@ -21,8 +21,7 @@ class BaseSaver:
     def __init__(self, doc=None):
         if doc is None:
             self.original = {}
-            self.doc = {"_id": utils.get_iuid(),
-                        "created": utils.get_time()}
+            self.doc = {"_id": utils.get_iuid(), "created": utils.get_time()}
             self.initialize()
         else:
             self.original = copy.deepcopy(doc)
@@ -33,7 +32,8 @@ class BaseSaver:
         return self
 
     def __exit__(self, etyp, einst, etb):
-        if etyp is not None: return False
+        if etyp is not None:
+            return False
         self.finish()
         self.doc["doctype"] = self.DOCTYPE
         self.doc["modified"] = utils.get_time()
@@ -73,11 +73,19 @@ class BaseSaver:
         'removed': dictionary of items removed; original values.
         """
         added = list(set(self.doc).difference(self.original or {}))
-        updated = dict([(k, self.original[k])
-                        for k in set(self.doc).intersection(self.original or {})
-                        if self.doc[k] != self.original[k]])
-        removed = dict([(k, self.original[k])
-                        for k in set(self.original or {}).difference(self.doc)])
+        updated = dict(
+            [
+                (k, self.original[k])
+                for k in set(self.doc).intersection(self.original or {})
+                if self.doc[k] != self.original[k]
+            ]
+        )
+        removed = dict(
+            [
+                (k, self.original[k])
+                for k in set(self.original or {}).difference(self.doc)
+            ]
+        )
         for key in ["_id", "_rev", "modified"]:
             try:
                 added.remove(key)
@@ -90,13 +98,15 @@ class BaseSaver:
                 updated[key] = "***"
             if key in removed:
                 removed[key] = "***"
-        entry = {"_id": utils.get_iuid(),
-                 "doctype": constants.DOCTYPE_LOG,
-                 "docid": self.doc["_id"],
-                 "added": added,
-                 "updated": updated,
-                 "removed": removed,
-                 "timestamp": utils.get_time()}
+        entry = {
+            "_id": utils.get_iuid(),
+            "doctype": constants.DOCTYPE_LOG,
+            "docid": self.doc["_id"],
+            "added": added,
+            "updated": updated,
+            "removed": removed,
+            "timestamp": utils.get_time(),
+        }
         entry.update(self.add_log_items())
         if hasattr(flask.g, "current_user") and flask.g.current_user:
             entry["username"] = flask.g.current_user["username"]
@@ -131,15 +141,17 @@ class AttachmentsSaver(BaseSaver):
             rev = flask.g.db.delete_attachment(self.doc, filename)
             self.doc["_rev"] = rev
         for attachment in self._add_attachments:
-            flask.g.db.put_attachment(self.doc,
-                                      attachment["content"],
-                                      filename=attachment["filename"],
-                                      content_type=attachment["mimetype"])
+            flask.g.db.put_attachment(
+                self.doc,
+                attachment["content"],
+                filename=attachment["filename"],
+                content_type=attachment["mimetype"],
+            )
 
     def add_attachment(self, filename, content, mimetype):
-        self._add_attachments.append({"filename": filename,
-                                      "content": content,
-                                      "mimetype": mimetype})
+        self._add_attachments.append(
+            {"filename": filename, "content": content, "mimetype": mimetype}
+        )
 
     def delete_attachment(self, filename):
         self._delete_attachments.add(filename)
@@ -171,7 +183,8 @@ class EntitySaver(AttachmentsSaver):
         "Change the owner."
         if not owner:
             owner = flask.request.form.get("owner")
-        if not owner: return
+        if not owner:
+            return
         if not datagraphics.user.get_user(owner):
             raise ValueError(f"No user account '{owner}' to set as owner.")
         self.doc["owner"] = owner
@@ -182,12 +195,11 @@ class EntitySaver(AttachmentsSaver):
         if editors:
             for editor in editors:
                 if not datagraphics.user.get_user(editor):
-                    raise ValueError(f"No user account '{editor}'"
-                                     " to set as editor.")
+                    raise ValueError(f"No user account '{editor}'" " to set as editor.")
             self.doc["editors"] = editors
         else:
             self.doc.pop("editors", None)
-            
+
     def set_title(self, title=None):
         "Set the title."
         if title is None:
@@ -199,7 +211,7 @@ class EntitySaver(AttachmentsSaver):
         if description is None:
             description = flask.request.form.get("description") or ""
         # Remove carriage-returns from string.
-        self.doc["description"] = description.replace('\r', '')
+        self.doc["description"] = description.replace("\r", "")
 
     def set_public(self, public=None):
         if public is None:

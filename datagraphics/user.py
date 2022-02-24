@@ -10,11 +10,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from datagraphics import constants
 from datagraphics import utils
-from datagraphics.datasets import (count_datasets_owner,
-                                   count_datasets_editor)
-from datagraphics.graphics import (count_graphics_owner,
-                                   count_graphics_editor)
+from datagraphics.datasets import count_datasets_owner, count_datasets_editor
+from datagraphics.graphics import count_graphics_owner, count_graphics_editor
 from datagraphics.saver import BaseSaver
+
 
 def init(app):
     "Initialize; update CouchDB design document."
@@ -23,61 +22,52 @@ def init(app):
     if db.put_design("users", DESIGN_DOC):
         logger.info("Updated users design document.")
 
+
 DESIGN_DOC = {
     "views": {
-        "username": {"reduce": "_count",
-                     "map": "function(doc) {if (doc.doctype !== 'user') return; emit(doc.username, null);}"},
-        "email": {"map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.email, null);}"},
-        "apikey": {"map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.apikey, null);}"},
-        "role": {"map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.role, null);}"},
-    },
+        "username": {
+            "reduce": "_count",
+            "map": "function(doc) {if (doc.doctype !== 'user') return; emit(doc.username, null);}",
+        },
+        "email": {
+            "map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.email, null);}"
+        },
+        "apikey": {
+            "map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.apikey, null);}"
+        },
+        "role": {
+            "map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.role, null);}"
+        },
+    }
 }
 
 blueprint = flask.Blueprint("user", __name__)
+
 
 @blueprint.route("/login", methods=["GET", "POST"])
 def login():
     """Login to a user account.
     Creates the admin user specified in the settings.json, if not done.
     """
-    app = flask.current_app
-    if app.config.get("ADMIN_USER"):
-        user = get_user(username=app.config["ADMIN_USER"]["username"])
-        if user is None:
-            try:
-                with UserSaver() as saver:
-                    saver.set_username(app.config["ADMIN_USER"]["username"])
-                    saver.set_email(app.config["ADMIN_USER"]["email"])
-                    saver.set_role(constants.ADMIN)
-                    saver.set_status(constants.ENABLED)
-                    saver.set_password(app.config["ADMIN_USER"]["password"])
-                utils.get_logger().info("Created admin user " +
-                                        app.config["ADMIN_USER"]["username"])
-            except ValueError as error:
-                utils.get_logger().error("Could not create admin user;"
-                                         " misconfiguration.")
+    create_admin()
 
     if utils.http_GET():
-        return flask.render_template("user/login.html",
-                                     next=flask.request.args.get("next"))
-    if utils.http_POST():
-        username = flask.request.form.get("username")
-        password = flask.request.form.get("password")
+        return flask.render_template("user/login.html")
+
+    elif utils.http_POST():
         try:
-            if username and password:
-                do_login(username, password)
-            else:
-                raise ValueError
+            do_login(
+                flask.request.form.get("username"), flask.request.form.get("password")
+            )
             try:
-                next = flask.request.form["next"]
+                url = flask.session.pop("login_target_url")
             except KeyError:
-                return flask.redirect(
-                    flask.url_for("datasets.user", username=username))
-            else:
-                return flask.redirect(next)
+                url = flask.redirect(flask.url_for("datasets.user", username=username))
+            return flask.redirect(url)
         except ValueError:
             utils.flash_error("Invalid user or password, or account disabled.")
             return flask.redirect(flask.url_for(".login"))
+
 
 @blueprint.route("/logout", methods=["POST"])
 def logout():
@@ -86,6 +76,7 @@ def logout():
     if username:
         utils.get_logger().info(f"logged out {username}")
     return flask.redirect(flask.url_for("home"))
+
 
 @blueprint.route("/register", methods=["GET", "POST"])
 def register():
@@ -122,23 +113,27 @@ def register():
                 utils.flash_message("User account created; check your email.")
             # Directly enabled and password set. No email to anyone.
             else:
-                utils.get_logger().info(f"enabled user {user['username']}"
-                                        " and set password")
+                utils.get_logger().info(
+                    f"enabled user {user['username']}" " and set password"
+                )
                 utils.flash_message("User account created and password set.")
         # Was set to 'pending'; send email to admins.
         else:
             admins = get_users(constants.ADMIN, status=constants.ENABLED)
             emails = [u["email"] for u in admins]
-            message = flask_mail.Message("DataGraphics user account pending",
-                                         recipients=emails)
-            url = flask.url_for(".display", username=user["username"],
-                                _external=True)
+            message = flask_mail.Message(
+                "DataGraphics user account pending", recipients=emails
+            )
+            url = flask.url_for(".display", username=user["username"], _external=True)
             message.body = f"To enable the user account, go to {url}"
             utils.mail.send(message)
             utils.get_logger().info(f"pending user {user['username']}")
-            utils.flash_message("User account created; an email will be sent"
-                                " when it has been enabled by the admin.")
+            utils.flash_message(
+                "User account created; an email will be sent"
+                " when it has been enabled by the admin."
+            )
         return flask.redirect(flask.url_for("home"))
+
 
 @blueprint.route("/reset", methods=["GET", "POST"])
 def reset():
@@ -146,7 +141,7 @@ def reset():
     if not flask.current_app.config["MAIL_SERVER"]:
         utils.flash_error("Cannot reset password; no email server defined.")
         return flask.redirect(flask.url_for("home"))
-        
+
     if utils.http_GET():
         email = flask.request.args.get("email") or ""
         email = email.lower()
@@ -155,8 +150,10 @@ def reset():
     elif utils.http_POST():
         try:
             user = get_user(email=flask.request.form["email"])
-            if user is None: raise KeyError
-            if user["status"] != constants.ENABLED: raise KeyError
+            if user is None:
+                raise KeyError
+            if user["status"] != constants.ENABLED:
+                raise KeyError
         except KeyError:
             pass
         else:
@@ -167,6 +164,7 @@ def reset():
         utils.flash_message("An email has been sent if the user account exists.")
         return flask.redirect(flask.url_for("home"))
 
+
 @blueprint.route("/password", methods=["GET", "POST"])
 def password():
     "Set the password for a user account, and login user."
@@ -174,22 +172,25 @@ def password():
         return flask.render_template(
             "user/password.html",
             username=flask.request.args.get("username"),
-            code=flask.request.args.get("code"))
+            code=flask.request.args.get("code"),
+        )
 
     elif utils.http_POST():
         try:
             code = ""
             try:
                 username = flask.request.form.get("username") or ""
-                if not username: raise ValueError
+                if not username:
+                    raise ValueError
                 user = get_user(username=username)
-                if user is None: raise ValueError
-                if flask.g.am_admin and \
-                   flask.g.current_user["username"] != username:
-                    pass        # No check for either code or current password.
+                if user is None:
+                    raise ValueError
+                if flask.g.am_admin and flask.g.current_user["username"] != username:
+                    pass  # No check for either code or current password.
                 elif flask.current_app.config["MAIL_SERVER"]:
                     code = flask.request.form.get("code") or ""
-                    if user["password"] != f"code:{code}": raise ValueError
+                    if user["password"] != f"code:{code}":
+                        raise ValueError
                 else:
                     password = flask.request.form.get("current_password") or ""
                     if not check_password_hash(user["password"], password):
@@ -207,9 +208,9 @@ def password():
                     raise ValueError("Wrong password entered; confirm failed.")
         except ValueError as error:
             utils.flash_error(str(error))
-            return flask.redirect(flask.url_for(".password",
-                                                username=username,
-                                                code=code))
+            return flask.redirect(
+                flask.url_for(".password", username=username, code=code)
+            )
         else:
             with UserSaver(user) as saver:
                 saver.set_password(password)
@@ -217,6 +218,7 @@ def password():
             if not flask.g.current_user:
                 do_login(username, password)
         return flask.redirect(flask.url_for("home"))
+
 
 @blueprint.route("/display/<name:username>")
 @utils.login_required
@@ -229,14 +231,16 @@ def display(username):
     if not am_admin_or_self(user):
         utils.flash_error("Access not allowed.")
         return flask.redirect(flask.url_for("home"))
-    user["count"] = {"datasets": count_datasets_owner(username),
-                     "datasets_editor": count_datasets_editor(username),
-                     "graphics": count_graphics_owner(username),
-                     "graphics_editor": count_graphics_editor(username)}
+    user["count"] = {
+        "datasets": count_datasets_owner(username),
+        "datasets_editor": count_datasets_editor(username),
+        "graphics": count_graphics_owner(username),
+        "graphics_editor": count_graphics_editor(username),
+    }
     return flask.render_template("user/display.html", user=user)
 
-@blueprint.route("/display/<name:username>/edit",
-                 methods=["GET", "POST", "DELETE"])
+
+@blueprint.route("/display/<name:username>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
 def edit(username):
     "Edit the user display. Or delete the user."
@@ -249,9 +253,9 @@ def edit(username):
         return flask.redirect(flask.url_for("home"))
 
     if utils.http_GET():
-        return flask.render_template("user/edit.html",
-                                     user=user,
-                                     deletable=is_empty(user))
+        return flask.render_template(
+            "user/edit.html", user=user, deletable=is_empty(user)
+        )
 
     elif utils.http_POST():
         with UserSaver(user) as saver:
@@ -263,8 +267,7 @@ def edit(username):
                 saver.set_role(flask.request.form.get("role"))
             if flask.request.form.get("apikey"):
                 saver.set_apikey()
-        return flask.redirect(
-            flask.url_for(".display", username=user["username"]))
+        return flask.redirect(flask.url_for(".display", username=user["username"]))
 
     elif utils.http_DELETE():
         if not is_empty(user):
@@ -279,6 +282,7 @@ def edit(username):
             return flask.redirect(flask.url_for(".all"))
         else:
             return flask.redirect(flask.url_for("home"))
+
 
 @blueprint.route("/display/<name:username>/logs")
 @utils.login_required
@@ -296,13 +300,16 @@ def logs(username):
         title=f"User {user['username']}",
         back_url=flask.url_for(".display", username=user["username"]),
         api_logs_url=flask.url_for("api_user.logs", username=user["username"]),
-        logs=utils.get_logs(user["_id"]))
+        logs=utils.get_logs(user["_id"]),
+    )
+
 
 @blueprint.route("/all")
 @utils.admin_required
 def all():
     "Display list of all users."
     return flask.render_template("user/all.html", users=get_users())
+
 
 @blueprint.route("/enable/<name:username>", methods=["POST"])
 @utils.admin_required
@@ -317,12 +324,12 @@ def enable(username):
         return flask.redirect(flask.url_for("home"))
     with UserSaver(user) as saver:
         saver.set_status(constants.ENABLED)
-        saver.set_apikey()      # Better safety to set/change API key on enable.
-    if user["password"][:5] == "code:" and \
-       flask.current_app.config["MAIL_SERVER"]:
+        saver.set_apikey()  # Better safety to set/change API key on enable.
+    if user["password"][:5] == "code:" and flask.current_app.config["MAIL_SERVER"]:
         send_password_code(user, "enabled")
     utils.get_logger().info(f"enabled user {username}")
     return flask.redirect(flask.url_for(".display", username=username))
+
 
 @blueprint.route("/disable/<name:username>", methods=["POST"])
 @utils.admin_required
@@ -401,7 +408,8 @@ class UserSaver(BaseSaver):
             if len(password) < config["MIN_PASSWORD_LENGTH"]:
                 raise ValueError("password too short")
             self.doc["password"] = generate_password_hash(
-                password, salt_length=config["SALT_LENGTH"])
+                password, salt_length=config["SALT_LENGTH"]
+            )
 
     def set_apikey(self):
         "Set a new API key."
@@ -410,19 +418,17 @@ class UserSaver(BaseSaver):
 
 # Utility functions
 
+
 def get_user(username=None, email=None, apikey=None):
     """Return the user for the given username, email or apikey.
     Return None if no such user.
     """
     if username:
-        rows = flask.g.db.view("users", "username", 
-                               key=username, include_docs=True)
+        rows = flask.g.db.view("users", "username", key=username, include_docs=True)
     elif email:
-        rows = flask.g.db.view("users", "email",
-                               key=email.lower(), include_docs=True)
+        rows = flask.g.db.view("users", "email", key=email.lower(), include_docs=True)
     elif apikey:
-        rows = flask.g.db.view("users", "apikey", 
-                               key=apikey, include_docs=True)
+        rows = flask.g.db.view("users", "apikey", key=apikey, include_docs=True)
     else:
         return None
     if len(rows) == 1:
@@ -430,41 +436,75 @@ def get_user(username=None, email=None, apikey=None):
     else:
         return None
 
+
 def get_users(role=None, status=None):
     "Get the users optionally specified by role and status."
     assert role is None or role in constants.USER_ROLES
     assert status is None or status in constants.USER_STATUSES
     if role is None:
-        result = [r.doc for r in 
-                  flask.g.db.view("users", "role", include_docs=True)]
+        result = [r.doc for r in flask.g.db.view("users", "role", include_docs=True)]
     else:
-        result = [r.doc for r in 
-                  flask.g.db.view("users", "role", key=role, include_docs=True)]
+        result = [
+            r.doc for r in flask.g.db.view("users", "role", key=role, include_docs=True)
+        ]
     if status is not None:
         result = [d for d in result if d["status"] == status]
     for user in result:
-        user["count"] = {"datasets": count_datasets_owner(user["username"]),
-                         "graphics": count_graphics_owner(user["username"])}
+        user["count"] = {
+            "datasets": count_datasets_owner(user["username"]),
+            "graphics": count_graphics_owner(user["username"]),
+        }
         user["storage"] = get_storage(user["username"])
     return result
+
 
 def get_current_user():
     """Return the user for the current session.
     Return None if no such user, or disabled.
     """
-    user = get_user(username=flask.session.get("username"),
-                    apikey=flask.request.headers.get("x-apikey"))
+    user = get_user(
+        username=flask.session.get("username"),
+        apikey=flask.request.headers.get("x-apikey"),
+    )
     if user is None or user["status"] != constants.ENABLED:
         flask.session.pop("username", None)
         return None
     return user
 
+
+def create_admin():
+    "Create admin user if none, and specified in the settings."
+    config = flask.current_app.config
+    if not config.get("ADMIN_USER"):
+        return
+    user = get_user(username=config["ADMIN_USER"]["username"])
+    if user:
+        return
+    try:
+        with UserSaver() as saver:
+            saver.set_username(config["ADMIN_USER"]["username"])
+            saver.set_email(config["ADMIN_USER"]["email"])
+            saver.set_role(constants.ADMIN)
+            saver.set_status(constants.ENABLED)
+            saver.set_password(config["ADMIN_USER"]["password"])
+        utils.get_logger().info(
+            f"Created admin user {config['ADMIN_USER']['username']}"
+        )
+    except ValueError as error:
+        utils.get_logger().error("Could not create admin user; misconfiguration.")
+
+
 def do_login(username, password):
     """Set the session cookie if successful login.
     Raise ValueError if some problem.
     """
+    if not username:
+        raise ValueError
+    if not password:
+        raise ValueError
     user = get_user(username=username)
-    if user is None: raise ValueError
+    if user is None:
+        raise ValueError
     if not check_password_hash(user["password"], password):
         raise ValueError
     if user["status"] != constants.ENABLED:
@@ -473,29 +513,40 @@ def do_login(username, password):
     flask.session.permanent = True
     utils.get_logger().info(f"logged in {user['username']}")
 
+
 def send_password_code(user, action):
     "Send an email with the one-time code to the user's email address."
-    message = flask_mail.Message("DataGraphics user account {action}",
-                                 recipients=[user["email"]])
-    url = flask.url_for(".password",
-                        username=user["username"],
-                        code=user["password"][len("code:"):],
-                        _external=True)
+    message = flask_mail.Message(
+        "DataGraphics user account {action}", recipients=[user["email"]]
+    )
+    url = flask.url_for(
+        ".password",
+        username=user["username"],
+        code=user["password"][len("code:") :],
+        _external=True,
+    )
     message.body = f"To set your password, go to {url}"
     utils.mail.send(message)
 
+
 def is_empty(user):
     "Is the given user account empty? No data associated with it."
-    return count_datasets_owner(user["username"]) == 0 and \
-        count_graphics_owner(user["username"]) == 0
+    return (
+        count_datasets_owner(user["username"]) == 0
+        and count_graphics_owner(user["username"]) == 0
+    )
+
 
 def am_admin_or_self(user=None, username=None):
     "Is the current user admin, or the same as the given user?"
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
     if user is not None:
         username = user["username"]
     return flask.g.current_user["username"] == username
+
 
 def am_admin_and_not_self(user):
     "Is the current user admin, but not the same as the given user?"
@@ -503,12 +554,14 @@ def am_admin_and_not_self(user):
         return flask.g.current_user["username"] != user["username"]
     return False
 
+
 def get_storage(username):
     "Return the sum of attachments file sizes for the given user."
-    rows = list(flask.g.db.view("datasets", "file_size",
-                                key=username,
-                                reduce=True,
-                                group_level=1))
+    rows = list(
+        flask.g.db.view(
+            "datasets", "file_size", key=username, reduce=True, group_level=1
+        )
+    )
     if rows:
         return rows[0].value
     else:

@@ -11,6 +11,7 @@ from datagraphics.api import schema_definitions
 
 blueprint = flask.Blueprint("api_user", __name__)
 
+
 @blueprint.route("/<name:username>")
 def serve(username):
     "Information about the given user."
@@ -23,9 +24,8 @@ def serve(username):
     user.pop("password", None)
     user.pop("apikey", None)
     set_links(user)
-    return utils.jsonify(user,
-                         schema=flask.url_for("api_schema.user",
-                                              _external=True))
+    return utils.jsonify(user, schema=flask.url_for("api_schema.user", _external=True))
+
 
 @blueprint.route("/<name:username>/logs")
 def logs(username):
@@ -36,20 +36,23 @@ def logs(username):
     # XXX Use 'allow' function
     if not datagraphics.user.am_admin_or_self(user):
         flask.abort(http.client.FORBIDDEN)
-    entity = {"type": "user",
-              "username": user["username"],
-              "href": flask.url_for(".serve",
-                                    username=user["username"],
-                                    _external=True)}
-    return utils.jsonify({"entity": entity,
-                          "logs": utils.get_logs(user["_id"])},
-                         schema=flask.url_for("api_schema.logs",_external=True))
+    entity = {
+        "type": "user",
+        "username": user["username"],
+        "href": flask.url_for(".serve", username=user["username"], _external=True),
+    }
+    return utils.jsonify(
+        {"entity": entity, "logs": utils.get_logs(user["_id"])},
+        schema=flask.url_for("api_schema.logs", _external=True),
+    )
+
 
 def set_links(user):
     "Set the links in the user object."
-    user["logs"] = {"href": flask.url_for(".logs", 
-                                          username=user["username"],
-                                          _external=True)}
+    user["logs"] = {
+        "href": flask.url_for(".logs", username=user["username"], _external=True)
+    }
+
 
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
@@ -61,13 +64,10 @@ schema = {
         "iuid": {"type": "string", "pattern": "^[0-9a-f]{32,32}$"},
         "created": {"type": "string", "format": "date-time"},
         "modified": {"type": "string", "format": "date-time"},
-        "status": {
-            "type": "string",
-            "enum": ["pending", "enabled", "disabled"]
-        },
+        "status": {"type": "string", "enum": ["pending", "enabled", "disabled"]},
         "username": {"type": "string"},
         "email": {"type": "string", "format": "email"},
         "role": {"type": "string", "enum": ["admin", "user"]},
-        "logs": schema_definitions.logs_link
-    }
+        "logs": schema_definitions.logs_link,
+    },
 }
