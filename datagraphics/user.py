@@ -69,23 +69,16 @@ def login():
                 )
 
     if utils.http_GET():
-        return flask.render_template(
-            "user/login.html", next=flask.request.args.get("next")
-        )
-    if utils.http_POST():
-        username = flask.request.form.get("username")
-        password = flask.request.form.get("password")
+        return flask.render_template("user/login.html")
+
+    elif utils.http_POST():
         try:
-            if username and password:
-                do_login(username, password)
-            else:
-                raise ValueError
+            do_login(flask.request.form.get("username"), flask.request.form.get("password"))
             try:
-                next = flask.request.form["next"]
+                url = flask.session.pop("login_target_url")
             except KeyError:
-                return flask.redirect(flask.url_for("datasets.user", username=username))
-            else:
-                return flask.redirect(next)
+                url flask.redirect(flask.url_for("datasets.user", username=username))
+            return flask.redirect(url)
         except ValueError:
             utils.flash_error("Invalid user or password, or account disabled.")
             return flask.redirect(flask.url_for(".login"))
@@ -498,6 +491,10 @@ def do_login(username, password):
     """Set the session cookie if successful login.
     Raise ValueError if some problem.
     """
+    if not username:
+        raise ValueError
+    if not password:
+        raise ValueError
     user = get_user(username=username)
     if user is None:
         raise ValueError
