@@ -68,7 +68,7 @@ DESIGN_DOC = {
             "reduce": "_sum",
             "map": "function(doc) {if (doc.doctype !== 'dataset' || !doc._attachments) return; for (var key in doc._attachments) if (doc._attachments.hasOwnProperty(key)) emit(doc.owner, doc._attachments[key].length);}",
         },
-    }
+    },
 }
 
 blueprint = flask.Blueprint("dataset", __name__)
@@ -245,7 +245,7 @@ def copy(iuid):
 @blueprint.route("/<iuid:iuid>/copy_graphics", methods=["POST"])
 @utils.login_required
 def copy_graphics(iuid):
-    """Copy the dataset, including its data content, 
+    """Copy the dataset, including its data content,
     and also all its graphics viewable by the user."""
     try:
         dataset = get_dataset(iuid)
@@ -445,7 +445,7 @@ class DatasetSaver(EntitySaver):
 
     def get_json_data(self, infile):
         """Return the data in JSON format from the given JSON infile.
-        If the dataset is new, then define the 'meta' entry contents by 
+        If the dataset is new, then define the 'meta' entry contents by
         inspection of the data. Also set the Vega-Lite types.
         If the dataset is being updated, check that the column definitions
         match those in the 'meta' entry.
@@ -524,7 +524,7 @@ class DatasetSaver(EntitySaver):
 
     def get_csv_data(self, infile):
         """Return the data in JSON format from the given CSV infile.
-        If the dataset is new, then define the 'meta' entry contents by 
+        If the dataset is new, then define the 'meta' entry contents by
         inspection of the data. Also set the Vega-Lite types.
         If the dataset is being updated, check against the 'meta' entry.
         """
@@ -773,7 +773,7 @@ def allow_delete(dataset):
 
 
 def possible_delete(dataset):
-    """Is it possible to delete the dataset? 
+    """Is it possible to delete the dataset?
     Not if there is a graphic owned by the same user.
     """
     for row in flask.g.db.view(

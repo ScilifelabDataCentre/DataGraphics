@@ -38,7 +38,7 @@ DESIGN_DOC = {
         "role": {
             "map": "function(doc) {if (doc.doctype !== 'user') return;  emit(doc.role, null);}"
         },
-    }
+    },
 }
 
 blueprint = flask.Blueprint("user", __name__)
@@ -46,15 +46,14 @@ blueprint = flask.Blueprint("user", __name__)
 
 @blueprint.route("/login", methods=["GET", "POST"])
 def login():
-    """Login to a user account.
-    Creates the admin user specified in the settings.json, if not done.
-    """
-    create_admin()
-
+    "Login to a user account."
     if utils.http_GET():
-        return flask.render_template("user/login.html")
-
-    elif utils.http_POST():
+        return flask.render_template(
+            "user/login.html", next=flask.request.args.get("next")
+        )
+    if utils.http_POST():
+        username = flask.request.form.get("username")
+        password = flask.request.form.get("password")
         try:
             do_login(
                 flask.request.form.get("username"), flask.request.form.get("password")
@@ -62,8 +61,9 @@ def login():
             try:
                 url = flask.session.pop("login_target_url")
             except KeyError:
-                url = flask.redirect(flask.url_for("datasets.user", username=username))
-            return flask.redirect(url)
+                return flask.redirect(flask.url_for("datasets.user", username=username))
+            else:
+                return flask.redirect(next)
         except ValueError:
             utils.flash_error("Invalid user or password, or account disabled.")
             return flask.redirect(flask.url_for(".login"))
@@ -419,6 +419,35 @@ class UserSaver(BaseSaver):
 # Utility functions
 
 
+def create_first_admin():
+    """Check if an admin user is specified by settings.
+    If it is, and it has not been created, create it.
+    Called by 'app' before first request.
+    """
+    flask.g.db = utils.get_db()
+    config = flask.current_app.config
+    if not (
+        config["ADMIN_USERNAME"] and config["ADMIN_EMAIL"] and config["ADMIN_PASSWORD"]
+    ):
+        utils.get_logger().info("ADMIN account not specified in settings.")
+        return
+    if get_user(username=config["ADMIN_USERNAME"]):
+        utils.get_logger().info(
+            f"Admin user '{config['ADMIN_USERNAME']}'" " exists already."
+        )
+        return
+    try:
+        with UserSaver() as saver:
+            saver.set_username(config["ADMIN_USERNAME"])
+            saver.set_email(config["ADMIN_EMAIL"])
+            saver.set_password(config["ADMIN_PASSWORD"])
+            saver.set_role(constants.ADMIN)
+            saver.set_status(constants.ENABLED)
+        utils.get_logger().info(f"Admin user '{config['ADMIN_USERNAME']}' created.")
+    except ValueError as error:
+        utils.get_logger().error("Could not create admin user; misconfiguration.")
+
+
 def get_user(username=None, email=None, apikey=None):
     """Return the user for the given username, email or apikey.
     Return None if no such user.
@@ -470,28 +499,6 @@ def get_current_user():
         flask.session.pop("username", None)
         return None
     return user
-
-
-def create_admin():
-    "Create admin user if none, and specified in the settings."
-    config = flask.current_app.config
-    if not config.get("ADMIN_USER"):
-        return
-    user = get_user(username=config["ADMIN_USER"]["username"])
-    if user:
-        return
-    try:
-        with UserSaver() as saver:
-            saver.set_username(config["ADMIN_USER"]["username"])
-            saver.set_email(config["ADMIN_USER"]["email"])
-            saver.set_role(constants.ADMIN)
-            saver.set_status(constants.ENABLED)
-            saver.set_password(config["ADMIN_USER"]["password"])
-        utils.get_logger().info(
-            f"Created admin user {config['ADMIN_USER']['username']}"
-        )
-    except ValueError as error:
-        utils.get_logger().error("Could not create admin user; misconfiguration.")
 
 
 def do_login(username, password):

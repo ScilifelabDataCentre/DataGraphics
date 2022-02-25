@@ -44,7 +44,7 @@ DESIGN_DOC = {
         "doc": {
             "map": "function(doc) {if (doc.doctype !== 'log') return; emit([doc.docid, doc.timestamp], null);}"
         }
-    }
+    },
 }
 
 # Global logger instance.

@@ -1,4 +1,4 @@
-"Serve data and graphics on the web using Vega-Lite graphics."
+"DataGraphics: Serve data and graphics on the web using Vega-Lite graphics."
 
 import flask
 import jinja2.utils
@@ -73,6 +73,12 @@ def setup_template_context():
         am_admin_or_self=datagraphics.user.am_admin_or_self,
         url_referrer=utils.url_referrer,
     )
+
+
+@app.before_first_request
+def initialize():
+    "Initialization before handling first request."
+    datagraphics.user.create_first_admin()
 
 
 @app.before_request

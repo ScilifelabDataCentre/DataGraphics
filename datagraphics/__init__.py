@@ -1,10 +1,10 @@
-"Serve data and graphics on the web using Vega-Lite graphics."
+"DataGraphics: Serve data and graphics on the web using Vega-Lite graphics."
 
 import re
 import os.path
 import string
 
-__version__ = "0.12.2"
+__version__ = "0.12.6"
 
 
 class Constants:

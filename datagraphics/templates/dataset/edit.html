@@ -72,7 +72,8 @@
                 class="form-control" aria-describedby="descriptionHelp"
                 >{{ dataset['description'] or '' }}</textarea>
       <small id="descriptionHelp" class="form-text text-muted">
-        Description of the dataset. Formatted using Markdown.
+        Description of the dataset in
+        <a target="_blank" href="{{ config['MARKDOWN_URL'] }}">Markdown format</a>.
       </small>
     </div>
   </div>
