@@ -83,9 +83,7 @@ def root():
 schema = {
     "$schema": constants.JSON_SCHEMA_URL,
     "title": "JSON Schema for API Root resource.",
-    "definitions": {
-        "link": schema_definitions.link,
-    },
+    "definitions": {"link": schema_definitions.link},
     "type": "object",
     "properties": {
         "$id": {"type": "string", "format": "uri"},

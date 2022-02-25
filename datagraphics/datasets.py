@@ -108,10 +108,9 @@ def count_datasets_owner(username):
         endkey=(username, "ZZZZZZ"),
         reduce=True,
     )
-    rows = list(view)
-    if rows:
-        return rows[0].value
-    else:
+    try:
+        return list(view)[0].value
+    except IndexError:
         return 0
 
 
@@ -150,10 +149,9 @@ def count_datasets_editor(username):
         endkey=(username, "ZZZZZZ"),
         reduce=True,
     )
-    rows = list(view)
-    if rows:
-        return rows[0].value
-    else:
+    try:
+        return list(view)[0].value
+    except IndexError:
         return 0
 
 
@@ -186,11 +184,11 @@ def get_datasets_public(full=False, limit=None):
 
 def count_datasets_public():
     "Return the number of public datasets."
-    view = flask.g.db.view("datasets", "public_modified", reduce=True)
-    rows = list(view)
-    if rows:
-        return rows[0].value
-    else:
+    try:
+        return list(flask.g.db.view("datasets", "public_modified", reduce=True))[
+            0
+        ].value
+    except IndexError:
         return 0
 
 
@@ -222,19 +220,16 @@ def get_datasets_all(full=False):
 
 def count_datasets_all():
     "Return the total number of datasets."
-    view = flask.g.db.view("datasets", "owner_modified", reduce=True)
-    rows = list(view)
-    if rows:
-        return rows[0].value
-    else:
+    try:
+        return list(flask.g.db.view("datasets", "owner_modified", reduce=True))[0].value
+    except IndexError:
         return 0
 
 
 def count_graphics(dataset_iuid):
     "Return the number of graphics for the dataset given by its iuid."
     view = flask.g.db.view("graphics", "dataset", key=dataset_iuid, reduce=True)
-    rows = list(view)
-    if rows:
-        return rows[0].value
-    else:
+    try:
+        return list(view)[0].value
+    except IndexError:
         return 0

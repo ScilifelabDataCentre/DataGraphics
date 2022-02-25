@@ -55,12 +55,11 @@ def login():
         username = flask.request.form.get("username")
         password = flask.request.form.get("password")
         try:
-            if username and password:
-                do_login(username, password)
-            else:
-                raise ValueError
+            do_login(
+                flask.request.form.get("username"), flask.request.form.get("password")
+            )
             try:
-                next = flask.request.form["next"]
+                url = flask.session.pop("login_target_url")
             except KeyError:
                 return flask.redirect(flask.url_for("datasets.user", username=username))
             else:
@@ -506,6 +505,10 @@ def do_login(username, password):
     """Set the session cookie if successful login.
     Raise ValueError if some problem.
     """
+    if not username:
+        raise ValueError
+    if not password:
+        raise ValueError
     user = get_user(username=username)
     if user is None:
         raise ValueError
