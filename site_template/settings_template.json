@@ -6,8 +6,7 @@
     "COUCHDB_PASSWORD": "couchdb_db_account_pwd",
     "MAIL_SERVER": "localhost",
     "MAIL_DEFAULT_SENDER": "Me Myself <a.non@uni.org>",
-    "ADMIN_USER": {"username": "admin_username",
-                   "email": "admin.user@uni.org",
-                   "password": "Explicit password, must change after creation."
-                  }
+    "ADMIN_USERNAME": "admin_username",
+    "ADMIN_EMAIL": "admin.user@uni.org",
+    "ADMIN_PASSWORD": "change-this-after-creation"
 }

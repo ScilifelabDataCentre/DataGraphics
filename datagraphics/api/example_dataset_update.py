@@ -1,6 +1,6 @@
 "Example of how to update the content of a dataset."
 
-import requests     # The well-known third-party package.
+import requests  # The well-known third-party package.
 
 # The API key authenticates a specific account in the system.
 # That account must either be the owner of the dataset,
@@ -21,21 +21,21 @@ JSON_URL = "http://127.0.0.1:5005/api/dataset/6e5696ff2059423ca40d3f59936a6671.j
 
 # This data could be read from file using 'json.load()' instead.
 
-data = [{"date": "2020-05-01", "count": 1345, "class": "negative"},
-        {"date": "2020-05-01", "count": 45, "class": "positive"},
-        {"date": "2020-05-01", "count": 1, "class": "failed"},
-        {"date": "2020-05-02", "count": 1670, "class": "negative"},
-        {"date": "2020-05-02", "count": 39, "class": "positive"},
-        {"date": "2020-05-02", "count": 0, "class": "failed"},
-        {"date": "2020-05-03", "count": 1509, "class": "negative"},
-        {"date": "2020-05-03", "count": 44, "class": "positive"},
-        {"date": "2020-05-03", "count": 3, "class": "failed"}]
+data = [
+    {"date": "2020-05-01", "count": 1345, "class": "negative"},
+    {"date": "2020-05-01", "count": 45, "class": "positive"},
+    {"date": "2020-05-01", "count": 1, "class": "failed"},
+    {"date": "2020-05-02", "count": 1670, "class": "negative"},
+    {"date": "2020-05-02", "count": 39, "class": "positive"},
+    {"date": "2020-05-02", "count": 0, "class": "failed"},
+    {"date": "2020-05-03", "count": 1509, "class": "negative"},
+    {"date": "2020-05-03", "count": 44, "class": "positive"},
+    {"date": "2020-05-03", "count": 3, "class": "failed"},
+]
 
 # ==== How to upload JSON file data. ====
 
-response = requests.put(JSON_URL,
-                        headers={'x-apikey': APIKEY},
-                        json=data)
+response = requests.put(JSON_URL, headers={"x-apikey": APIKEY}, json=data)
 print(response)  # Success if this is 204 (= HTTP "No Content").
 
 # If the API key is bad, the response will be 403 ("Forbidden").
@@ -62,7 +62,5 @@ with tempfile.TemporaryFile("w+t") as outfile:
 
 CSV_URL = "http://127.0.0.1:5005/api/dataset/6e5696ff2059423ca40d3f59936a6671.csv"
 
-response = requests.put(CSV_URL,
-                        headers={'x-apikey': APIKEY},
-                        data=csv_data)
+response = requests.put(CSV_URL, headers={"x-apikey": APIKEY}, data=csv_data)
 print(response)  # Success if this is 204 (= HTTP "No Content").

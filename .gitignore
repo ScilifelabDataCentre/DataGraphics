@@ -1,6 +1,6 @@
 *.log
 *~
-!settings_template.json
-*settings.json
+site
+settings.json
 .pytest_cache
 __pycache__

@@ -10,11 +10,13 @@ import jsonschema
 import pytest
 import requests
 
+
 @pytest.fixture(scope="module")
 def schemas():
     "Return the schema definitions lookup."
     with open("schema.json") as infile:
         return json.load(infile)
+
 
 @pytest.fixture(scope="module")
 def settings():
@@ -27,7 +29,7 @@ def settings():
         "BASE_URL": "http://127.0.0.1:5005/",
         "USERNAME": None,
         "PASSWORD": None,
-        "APIKEY": None
+        "APIKEY": None,
     }
 
     try:
@@ -42,9 +44,11 @@ def settings():
     result["BASE_URL"] = result["BASE_URL"].rstrip("/") + "/"
     return result
 
+
 @pytest.fixture(scope="module")
 def headers(settings):
     return {"x-apikey": settings["APIKEY"]}
+
 
 def test_software_info(settings, headers, schemas):
     "Get the software info data, compare to its schema."
@@ -52,6 +56,7 @@ def test_software_info(settings, headers, schemas):
     response = requests.get(url, headers=headers)
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
+
 
 def test_root_data(settings, schemas):
     "Get root information, compare to its schema."
@@ -61,12 +66,14 @@ def test_root_data(settings, schemas):
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
 
+
 def test_user_data(settings, headers, schemas):
     "Get user information."
     url = f"{settings['BASE_URL']}api/user/{settings['USERNAME']}"
     response = requests.get(url, headers=headers)
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
+
 
 def test_user_datasets(settings, headers, schemas):
     "Datasets access."
@@ -75,6 +82,7 @@ def test_user_datasets(settings, headers, schemas):
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
 
+
 def test_create_dataset(settings, headers, schemas):
     "Datasets create, update, delete."
     url = f"{settings['BASE_URL']}api/dataset/"
@@ -82,9 +90,9 @@ def test_create_dataset(settings, headers, schemas):
     description = "My description."
 
     # Create the dataset.
-    response = requests.post(url, headers=headers,
-                             json={"title": title,
-                                   "description": description})
+    response = requests.post(
+        url, headers=headers, json={"title": title, "description": description}
+    )
     assert response.status_code == http.client.OK
     dataset = check_schema(response, schemas)
     url = f"{settings['BASE_URL']}api/dataset/{dataset['iuid']}"
@@ -95,9 +103,9 @@ def test_create_dataset(settings, headers, schemas):
 
     # Update the dataset information.
     title = "New title"
-    response = requests.post(dataset["$id"], headers=headers,
-                             json={"title": title, 
-                                   "public": True})
+    response = requests.post(
+        dataset["$id"], headers=headers, json={"title": title, "public": True}
+    )
     assert response.status_code == http.client.OK
     dataset = check_schema(response, schemas)
     assert dataset["title"] == title
@@ -107,6 +115,7 @@ def test_create_dataset(settings, headers, schemas):
     response = requests.delete(dataset["$id"], headers=headers)
     assert response.status_code == http.client.NO_CONTENT
 
+
 def test_upload_json_dataset(settings, headers, schemas):
     "Create, upload, update and destroy a dataset using JSON."
     url = f"{settings['BASE_URL']}api/dataset/"
@@ -115,14 +124,12 @@ def test_upload_json_dataset(settings, headers, schemas):
     first = dict()
     first["col1"] = 1
     first["col2"] = "apa"
-    data = [first,
-            {"col1": 2, "col2": "blarg"},
-            {"col1": 3, "col2": None}]
+    data = [first, {"col1": 2, "col2": "blarg"}, {"col1": 3, "col2": None}]
 
     # Create the dataset.
-    response = requests.post(url, headers=headers,
-                             json={"title": title,
-                                   "description": description})
+    response = requests.post(
+        url, headers=headers, json={"title": title, "description": description}
+    )
     assert response.status_code == http.client.OK
     dataset = check_schema(response, schemas)
 
@@ -164,6 +171,7 @@ def test_upload_json_dataset(settings, headers, schemas):
     response = requests.delete(url, headers=headers)
     assert response.status_code == http.client.NO_CONTENT
 
+
 def test_upload_csv_dataset(settings, headers, schemas):
     "Create, upload and destroy a dataset using CSV."
     url = f"{settings['BASE_URL']}api/dataset/"
@@ -172,14 +180,12 @@ def test_upload_csv_dataset(settings, headers, schemas):
     first = dict()
     first["col1"] = 1
     first["col2"] = "apa"
-    data = [first,
-            {"col1": 2, "col2": "blarg"},
-            {"col1": 3, "col2": None}]
+    data = [first, {"col1": 2, "col2": "blarg"}, {"col1": 3, "col2": None}]
 
     # Create the dataset.
-    response = requests.post(url, headers=headers,
-                             json={"title": title,
-                                   "description": description})
+    response = requests.post(
+        url, headers=headers, json={"title": title, "description": description}
+    )
     assert response.status_code == http.client.OK
     dataset = check_schema(response, schemas)
 
@@ -233,6 +239,7 @@ def test_upload_csv_dataset(settings, headers, schemas):
     response = requests.delete(url, headers=headers)
     assert response.status_code == http.client.NO_CONTENT
 
+
 def test_upload_dataset_update_bad(settings, headers, schemas):
     "Create, upload dataset and attempt bad update."
     url = f"{settings['BASE_URL']}api/dataset/"
@@ -241,15 +248,12 @@ def test_upload_dataset_update_bad(settings, headers, schemas):
     first = dict()
     first["col1"] = 1
     first["col2"] = "apa"
-    data = [first,
-            {"col1": 2, "col2": "blarg"},
-            {"col1": 3, "col2": None}]
+    data = [first, {"col1": 2, "col2": "blarg"}, {"col1": 3, "col2": None}]
 
     # Create the dataset.
-    response = requests.post(url,
-                             headers=headers,
-                             json={"title": title,
-                                   "description": description})
+    response = requests.post(
+        url, headers=headers, json={"title": title, "description": description}
+    )
     assert response.status_code == http.client.OK
     dataset = check_schema(response, schemas)
 
@@ -268,7 +272,7 @@ def test_upload_dataset_update_bad(settings, headers, schemas):
     assert sorted(dataset["meta"].keys()) == sorted(data[0].keys())
 
     # Upload JSON data content with data that doesn't fit.
-    bad_data = data[:]      # Shallow copy
+    bad_data = data[:]  # Shallow copy
     bad_data.append({"col1": "a string, not an integer", "col2": -1})
     url = f"{settings['BASE_URL']}api/dataset/{dataset['iuid']}.json"
     response = requests.put(url, headers=headers, json=bad_data)
@@ -288,12 +292,14 @@ def test_upload_dataset_update_bad(settings, headers, schemas):
     response = requests.delete(url, headers=headers)
     assert response.status_code == http.client.NO_CONTENT
 
+
 def test_public_graphics(settings, headers, schemas):
     "Get public graphics."
     url = f"{settings['BASE_URL']}api/graphics/public"
     response = requests.get(url, headers=headers)
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
+
 
 def test_user_graphics(settings, headers, schemas):
     "Get user's graphics."
@@ -302,21 +308,23 @@ def test_user_graphics(settings, headers, schemas):
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
 
+
 def test_create_graphic(settings, headers, schemas):
     "Create, update and delete a graphic."
 
     # First create the dataset.
     url = f"{settings['BASE_URL']}api/dataset/"
-    response = requests.post(url, headers=headers,
-                             json={"title": "test"})
+    response = requests.post(url, headers=headers, json={"title": "test"})
     assert response.status_code == http.client.OK
     dataset = check_schema(response, schemas)
 
     # Upload JSON data content to the dataset.
-    data = [{"col1": 1, "col2": 3.0, "col3": "c1"},
-            {"col1": 2, "col2": 4.1, "col3": "c2"},
-            {"col1": 3, "col2": 3.3, "col3": "c1"}]
-    response = requests.put(dataset["$id"] + ".json", headers=headers,json=data)
+    data = [
+        {"col1": 1, "col2": 3.0, "col3": "c1"},
+        {"col1": 2, "col2": 4.1, "col3": "c2"},
+        {"col1": 3, "col2": 3.3, "col3": "c1"},
+    ]
+    response = requests.put(dataset["$id"] + ".json", headers=headers, json=data)
     assert response.status_code == http.client.NO_CONTENT
 
     # Get the updated dataset containing the data content URLs.
@@ -326,27 +334,28 @@ def test_create_graphic(settings, headers, schemas):
 
     # Create the graphic, which will have an error.
     url = f"{settings['BASE_URL']}api/graphic/"
-    response = requests.post(url, headers=headers,
-                             json={"title": "test",
-                                   "dataset": dataset["iuid"]})
+    response = requests.post(
+        url, headers=headers, json={"title": "test", "dataset": dataset["iuid"]}
+    )
     assert response.status_code == http.client.OK
     graphic = check_schema(response, schemas)
     assert bool(graphic["error"])
 
     # Update the specification to make it correct.
-    response = requests.post(graphic["$id"], headers=headers,
-                             json={"specification":
-                                   {"data": 
-                                    {"url": dataset["content"]["csv"]["href"]},
-                                    "mark": "point",
-                                    "encoding": {
-                                        "x": {"field": "col1",
-                                              "type": "quantitative"},
-                                        "y": {"field": "col2",
-                                              "type": "quantitative"}
-                                    }
-                                   }
-                             })
+    response = requests.post(
+        graphic["$id"],
+        headers=headers,
+        json={
+            "specification": {
+                "data": {"url": dataset["content"]["csv"]["href"]},
+                "mark": "point",
+                "encoding": {
+                    "x": {"field": "col1", "type": "quantitative"},
+                    "y": {"field": "col2", "type": "quantitative"},
+                },
+            }
+        },
+    )
     assert response.status_code == http.client.OK
     graphic = check_schema(response, schemas)
     assert not bool(graphic["error"])
@@ -359,6 +368,7 @@ def test_create_graphic(settings, headers, schemas):
     response = requests.delete(dataset["$id"], headers=headers)
     assert response.status_code == http.client.NO_CONTENT
 
+
 def test_links(settings, headers):
     "Check that all links from the root and onwards can be traversed."
     base_url = f"{settings['BASE_URL']}api"
@@ -367,13 +377,16 @@ def test_links(settings, headers):
     while not_yet_visited:
         url = not_yet_visited.pop()
         # A URL containing an extension is data, and should not be visited.
-        if os.path.splitext(url)[1]: continue
+        if os.path.splitext(url)[1]:
+            continue
         # Do not follow links to external resources.
-        if not url.startswith(base_url): continue
+        if not url.startswith(base_url):
+            continue
         response = requests.get(url, headers=headers)
         assert response.status_code == http.client.OK
         visited.add(url)
         traverse(response.json(), visited, not_yet_visited)
+
 
 def traverse(data, visited, not_yet_visited):
     "Pick out href's and traverse down the structure."
@@ -385,8 +398,9 @@ def traverse(data, visited, not_yet_visited):
     elif isinstance(data, list):
         for value in data:
             traverse(value, visited, not_yet_visited)
-    else:                       # Ignore all other data.
+    else:  # Ignore all other data.
         pass
+
 
 def check_schema(response, schemas):
     """Return the response JSON after checking it
@@ -394,7 +408,7 @@ def check_schema(response, schemas):
     """
     result = response.json()
     try:
-        url = response.links['schema']['url']
+        url = response.links["schema"]["url"]
     except KeyError:
         raise ValueError(f"No schema schema for {response.url}")
     try:
@@ -404,7 +418,7 @@ def check_schema(response, schemas):
         assert r.status_code == http.client.OK
         schema = r.json()
         schemas[url] = schema
-    jsonschema.validate(instance=result,
-                        schema=schema,
-                        format_checker=jsonschema.draft7_format_checker)
+    jsonschema.validate(
+        instance=result, schema=schema, format_checker=jsonschema.draft7_format_checker
+    )
     return result

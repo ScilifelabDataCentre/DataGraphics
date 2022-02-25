@@ -18,24 +18,29 @@ from datagraphics import utils
 
 from datagraphics.saver import EntitySaver
 
-TYPE_NAME_MAP = {int:   "integer",
-                 float: "number",
-                 bool:  "boolean",
-                 str:   "string"}
+TYPE_NAME_MAP = {int: "integer", float: "number", bool: "boolean", str: "string"}
 
 TYPE_OBJECT_MAP = dict((n, o) for o, n in TYPE_NAME_MAP.items())
 
+
 def bool2(v):
     "Convert to boolean from CSV string value."
-    if v == "True": return True
-    if v == "true": return True
-    if v == "False": return False
-    if v == "false": return False
-    if not v: return None
+    if v == "True":
+        return True
+    if v == "true":
+        return True
+    if v == "False":
+        return False
+    if v == "false":
+        return False
+    if not v:
+        return None
     raise ValueError(f"invalid bool '{v}'")
+
 
 TYPE_OBJECT_MAP2 = TYPE_OBJECT_MAP.copy()
 TYPE_OBJECT_MAP2["boolean"] = bool2
+
 
 def init(app):
     "Initialize; update CouchDB design document."
@@ -44,20 +49,30 @@ def init(app):
     if db.put_design("datasets", DESIGN_DOC):
         logger.info("Updated datasets design document.")
 
+
 DESIGN_DOC = {
     "views": {
-        "public_modified": {"reduce": "_count",
-                            "map": "function(doc) {if (doc.doctype !== 'dataset' || !doc.public) return; emit(doc.modified, doc.title);}"},
-        "owner_modified": {"reduce": "_count",
-                           "map": "function(doc) {if (doc.doctype !== 'dataset') return; emit([doc.owner, doc.modified], doc.title);}"},
-        "editor_modified": {"reduce": "_count",
-                            "map": "function(doc) {if (doc.doctype !== 'dataset') return; if (!doc.editors) return; for (var i=0; i<doc.editors.length; i++) { emit([doc.editors[i], doc.modified], doc.title);}}"},
-        "file_size": {"reduce": "_sum",
-                      "map": "function(doc) {if (doc.doctype !== 'dataset' || !doc._attachments) return; for (var key in doc._attachments) if (doc._attachments.hasOwnProperty(key)) emit(doc.owner, doc._attachments[key].length);}"}
+        "public_modified": {
+            "reduce": "_count",
+            "map": "function(doc) {if (doc.doctype !== 'dataset' || !doc.public) return; emit(doc.modified, doc.title);}",
+        },
+        "owner_modified": {
+            "reduce": "_count",
+            "map": "function(doc) {if (doc.doctype !== 'dataset') return; emit([doc.owner, doc.modified], doc.title);}",
+        },
+        "editor_modified": {
+            "reduce": "_count",
+            "map": "function(doc) {if (doc.doctype !== 'dataset') return; if (!doc.editors) return; for (var i=0; i<doc.editors.length; i++) { emit([doc.editors[i], doc.modified], doc.title);}}",
+        },
+        "file_size": {
+            "reduce": "_sum",
+            "map": "function(doc) {if (doc.doctype !== 'dataset' || !doc._attachments) return; for (var key in doc._attachments) if (doc._attachments.hasOwnProperty(key)) emit(doc.owner, doc._attachments[key].length);}",
+        },
     },
 }
 
 blueprint = flask.Blueprint("dataset", __name__)
+
 
 @blueprint.route("/", methods=["GET", "POST"])
 @utils.login_required
@@ -80,6 +95,7 @@ def create():
             return flask.redirect(utils.url_referrer())
         return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
+
 @blueprint.route("/<iuid:iuid>")
 def display(iuid):
     "Display the dataset."
@@ -91,17 +107,19 @@ def display(iuid):
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
         return flask.redirect(utils.url_referrer())
-    storage = sum([s['length'] 
-                   for s in dataset.get('_attachments', {}).values()])
-    return flask.render_template("dataset/display.html",
-                                 dataset=dataset,
-                                 graphics=get_graphics(dataset),
-                                 storage=storage,
-                                 am_owner=am_owner(dataset),
-                                 allow_edit=allow_edit(dataset),
-                                 allow_delete=allow_delete(dataset),
-                                 possible_delete=possible_delete(dataset),
-                                 commands=get_commands(dataset))
+    storage = sum([s["length"] for s in dataset.get("_attachments", {}).values()])
+    return flask.render_template(
+        "dataset/display.html",
+        dataset=dataset,
+        graphics=get_graphics(dataset),
+        storage=storage,
+        am_owner=am_owner(dataset),
+        allow_edit=allow_edit(dataset),
+        allow_delete=allow_delete(dataset),
+        possible_delete=possible_delete(dataset),
+        commands=get_commands(dataset),
+    )
+
 
 @blueprint.route("/<iuid:iuid>/data")
 def data(iuid):
@@ -120,9 +138,8 @@ def data(iuid):
     if len(data) > max_records:
         data = data[:max_records]
         utils.flash_message(f"Only the first {max_records} records are displayed.")
-    return flask.render_template("dataset/data.html",
-                                 dataset=dataset,
-                                 data=data)
+    return flask.render_template("dataset/data.html", dataset=dataset, data=data)
+
 
 @blueprint.route("/<iuid:iuid>/edit", methods=["GET", "POST", "DELETE"])
 @utils.login_required
@@ -138,9 +155,9 @@ def edit(iuid):
         if not allow_edit(dataset):
             utils.flash_error("Edit access to dataset not allowed.")
             return flask.redirect(flask.url_for(".display", iuid=iuid))
-        return flask.render_template("dataset/edit.html",
-                                     am_owner=am_owner(dataset),
-                                     dataset=dataset)
+        return flask.render_template(
+            "dataset/edit.html", am_owner=am_owner(dataset), dataset=dataset
+        )
 
     elif utils.http_POST():
         if not allow_edit(dataset):
@@ -172,6 +189,7 @@ def edit(iuid):
         utils.flash_message("The dataset was deleted.")
         return flask.redirect(flask.url_for("datasets.display"))
 
+
 @blueprint.route("/<iuid:iuid>/update", methods=["GET", "POST"])
 @utils.login_required
 def update(iuid):
@@ -202,6 +220,7 @@ def update(iuid):
             utils.flash_error(str(error))
         return flask.redirect(flask.url_for(".display", iuid=iuid))
 
+
 @blueprint.route("/<iuid:iuid>/copy", methods=["POST"])
 @utils.login_required
 def copy(iuid):
@@ -222,10 +241,11 @@ def copy(iuid):
         return flask.redirect(utils.url_referrer())
     return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
 
+
 @blueprint.route("/<iuid:iuid>/copy_graphics", methods=["POST"])
 @utils.login_required
 def copy_graphics(iuid):
-    """Copy the dataset, including its data content, 
+    """Copy the dataset, including its data content,
     and also all its graphics viewable by the user."""
     try:
         dataset = get_dataset(iuid)
@@ -242,6 +262,7 @@ def copy_graphics(iuid):
         utils.flash_error(str(error))
         return flask.redirect(utils.url_referrer())
     return flask.redirect(flask.url_for(".display", iuid=saver.doc["_id"]))
+
 
 @blueprint.route("/<iuid:iuid>/public", methods=["POST"])
 @utils.login_required
@@ -260,6 +281,7 @@ def public(iuid):
         utils.flash_error("Only owner may make dataset public.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
 
+
 @blueprint.route("/<iuid:iuid>/private", methods=["POST"])
 @utils.login_required
 def private(iuid):
@@ -276,6 +298,7 @@ def private(iuid):
     else:
         utils.flash_error("Only owner may make dataset private.")
     return flask.redirect(flask.url_for(".display", iuid=iuid))
+
 
 @blueprint.route("/<iuid:iuid>.<ext>")
 def download(iuid, ext):
@@ -304,10 +327,10 @@ def download(iuid, ext):
     else:
         utils.flash_error("Invalid file type requested.")
         return flask.redirect(utils.url_referrer())
-    slug = utils.slugify(dataset['title'])
-    response.headers.set("Content-Disposition", "attachment", 
-                         filename=f"{slug}.{ext}")
+    slug = utils.slugify(dataset["title"])
+    response.headers.set("Content-Disposition", "attachment", filename=f"{slug}.{ext}")
     return response
+
 
 @blueprint.route("/<iuid:iuid>/logs")
 def logs(iuid):
@@ -324,7 +347,8 @@ def logs(iuid):
         "logs.html",
         title=f"Dataset {dataset['title'] or 'No title'}",
         back_url=flask.url_for(".display", iuid=iuid),
-        logs=utils.get_logs(iuid))
+        logs=utils.get_logs(iuid),
+    )
 
 
 class DatasetSaver(EntitySaver):
@@ -355,9 +379,11 @@ class DatasetSaver(EntitySaver):
         else:
             headers = {}
         try:
-            response = requests.get(url,
-                                    headers=headers,
-                                    timeout=flask.current_app.config["URL_UPDATE_TIMEOUT"])
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=flask.current_app.config["URL_UPDATE_TIMEOUT"],
+            )
         except requests.exceptions.Timeout:
             raise ValueError("Could not fetch data from URL; timeout.")
         if response.status_code != 200:
@@ -366,7 +392,7 @@ class DatasetSaver(EntitySaver):
             self.doc["update_url"] = url
             self.doc["update_apiheader"] = apiheader
             self.doc["update_apikey"] = apikey
-        content_type = response.headers.get('Content-Type')
+        content_type = response.headers.get("Content-Type")
         if not content_type:
             raise ValueError("Unknown content type for data.")
         content_type = content_type.split(";")[0]
@@ -405,17 +431,21 @@ class DatasetSaver(EntitySaver):
 
         if flask.g.current_user.get("quota_storage"):
             username = flask.g.current_user["username"]
-            total = len(json_content) + len(csv_content) + \
-                    datagraphics.user.get_storage(username)
+            total = (
+                len(json_content)
+                + len(csv_content)
+                + datagraphics.user.get_storage(username)
+            )
             if total > flask.g.current_user["quota_storage"]:
-                raise ValueError(f"File {infile.filename} not added;"
-                                 " quota storage reached.")
+                raise ValueError(
+                    f"File {infile.filename} not added;" " quota storage reached."
+                )
         self.add_attachment("data.json", json_content, constants.JSON_MIMETYPE)
         self.add_attachment("data.csv", csv_content, constants.CSV_MIMETYPE)
 
     def get_json_data(self, infile):
         """Return the data in JSON format from the given JSON infile.
-        If the dataset is new, then define the 'meta' entry contents by 
+        If the dataset is new, then define the 'meta' entry contents by
         inspection of the data. Also set the Vega-Lite types.
         If the dataset is being updated, check that the column definitions
         match those in the 'meta' entry.
@@ -430,7 +460,8 @@ class DatasetSaver(EntitySaver):
                 records = data
             elif isinstance(data, dict):
                 for records in [data.get("data"), data.get("records")]:
-                    if isinstance(records, list): break
+                    if isinstance(records, list):
+                        break
                 else:
                     raise ValueError
             else:
@@ -454,29 +485,37 @@ class DatasetSaver(EntitySaver):
                 try:
                     meta[key]["type"] = TYPE_NAME_MAP[type(value)]
                 except KeyError:
-                    raise ValueError("JSON data record 0 contains a value"
-                                     f" of an illegal type: {first}")
+                    raise ValueError(
+                        "JSON data record 0 contains a value"
+                        f" of an illegal type: {first}"
+                    )
         else:
             for key in meta:
                 if key not in first:
-                    raise ValueError("JSON data record 0 lacks item with"
-                                     f" key '{key}': {first}")
+                    raise ValueError(
+                        "JSON data record 0 lacks item with" f" key '{key}': {first}"
+                    )
 
         # Check data homogeneity. Checks with respect to 'meta'.
         keys = list(meta.keys())
         for pos, record in enumerate(records):
             if not isinstance(record, dict):
-                raise ValueError(f"JSON data record {pos} is"
-                                 f" not an object: {record}")
+                raise ValueError(
+                    f"JSON data record {pos} is" f" not an object: {record}"
+                )
             for key in keys:
                 try:
                     value = record[key]
                 except KeyError:
                     record[key] = value = None
-                if value is not None and \
-                   type(value) != TYPE_OBJECT_MAP[meta[key]["type"]]:
-                    raise ValueError(f"JSON data record {pos}, key '{key}'"
-                                     f" contains a value of the wrong type: {record}")
+                if (
+                    value is not None
+                    and type(value) != TYPE_OBJECT_MAP[meta[key]["type"]]
+                ):
+                    raise ValueError(
+                        f"JSON data record {pos}, key '{key}'"
+                        f" contains a value of the wrong type: {record}"
+                    )
 
         # Set Vega-Lite types if new dataset.
         if new:
@@ -485,7 +524,7 @@ class DatasetSaver(EntitySaver):
 
     def get_csv_data(self, infile):
         """Return the data in JSON format from the given CSV infile.
-        If the dataset is new, then define the 'meta' entry contents by 
+        If the dataset is new, then define the 'meta' entry contents by
         inspection of the data. Also set the Vega-Lite types.
         If the dataset is being updated, check against the 'meta' entry.
         """
@@ -529,7 +568,8 @@ class DatasetSaver(EntitySaver):
         for pos, record in enumerate(data, 1):
             for key, value in record.items():
                 # Ignore additional columns in new data.
-                if key not in keys: continue
+                if key not in keys:
+                    continue
                 if value:
                     try:
                         record[key] = TYPE_OBJECT_MAP2[meta[key]["type"]](value)
@@ -538,9 +578,11 @@ class DatasetSaver(EntitySaver):
                         if value.lower() in constants.NA_STRINGS:
                             record[key] = None
                         else:
-                            raise ValueError(f"CSV data record {pos},"
-                                             f" key '{key}' contains a value"
-                                             f" of the wrong type: {record}")
+                            raise ValueError(
+                                f"CSV data record {pos},"
+                                f" key '{key}' contains a value"
+                                f" of the wrong type: {record}"
+                            )
                 elif meta[key]["type"] != "string":
                     # An empty string is a string when type is 'string'.
                     # Otherwise the value is set as None.
@@ -561,10 +603,15 @@ class DatasetSaver(EntitySaver):
             elif meta["type"] == "boolean":
                 meta["vega_lite_types"] = ["nominal"]
             elif meta["type"] == "string":
-                for rx in (constants.YEAR_RX, constants.DATE_RX,
-                           constants.DATETIME_RX, constants.TIME_RX):
+                for rx in (
+                    constants.YEAR_RX,
+                    constants.DATE_RX,
+                    constants.DATETIME_RX,
+                    constants.TIME_RX,
+                ):
                     for record in data:
-                        if not rx.match(record[key]): break
+                        if not rx.match(record[key]):
+                            break
                     else:
                         meta["vega_lite_types"] = ["temporal"]
                         break
@@ -616,8 +663,9 @@ class DatasetSaver(EntitySaver):
                 types = orig_meta[key].get("vega_lite_types") or []
             else:
                 types = flask.request.form.getlist(f"vega_lite_types_{key}")
-            meta["vega_lite_types"] = [t for t in types
-                                       if t in constants.VEGA_LITE_TYPES]
+            meta["vega_lite_types"] = [
+                t for t in types if t in constants.VEGA_LITE_TYPES
+            ]
 
     def copy(self, dataset, graphics=False):
         """Copy everything from the given dataset into this.
@@ -626,17 +674,20 @@ class DatasetSaver(EntitySaver):
         self.set_editors(dataset.get("editors") or [])
         self.set_description(dataset["description"])
         self.set_public(False)
-        self.set_data(flask.g.db.get_attachment(dataset, "data.json"),
-                      constants.JSON_MIMETYPE)
+        self.set_data(
+            flask.g.db.get_attachment(dataset, "data.json"), constants.JSON_MIMETYPE
+        )
         self.set_vega_lite_types(dataset["meta"])
         if graphics:
             import datagraphics.graphic
+
             for graphic in get_graphics(dataset):
                 with datagraphics.graphic.GraphicSaver() as saver:
                     saver.copy(graphic, dataset=self.doc)
 
 
 # Utility functions
+
 
 def get_dataset(iuid):
     "Get the dataset given its IUID."
@@ -654,80 +705,108 @@ def get_dataset(iuid):
     flask.g.cache[iuid] = doc
     return doc
 
+
 def get_graphics(dataset):
     """Get the graphics entities the dataset is used for.
     Exclude those this user is not allowed to view.
     """
     from datagraphics.graphic import allow_view
+
     result = []
-    for row in flask.g.db.view("graphics", "dataset",
-                               key=dataset["_id"],
-                               include_docs=True):
+    for row in flask.g.db.view(
+        "graphics", "dataset", key=dataset["_id"], include_docs=True
+    ):
         if allow_view(row.doc):
             flask.g.cache[row.doc["_id"]] = row.doc
             result.append(row.doc)
     return sorted(result, key=lambda g: g["title"])
 
+
 def am_owner(dataset):
     "Is the current user the owner of the dataset? Includes admin."
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
-    if flask.g.current_user["username"] == dataset["owner"]: return True
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
+    if flask.g.current_user["username"] == dataset["owner"]:
+        return True
     return False
+
 
 def allow_view(dataset):
     "Is the current user allowed to view the dataset?"
-    if dataset.get("public"): return True
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
-    if flask.g.current_user["username"] == dataset["owner"]: return True
+    if dataset.get("public"):
+        return True
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
+    if flask.g.current_user["username"] == dataset["owner"]:
+        return True
     if flask.g.current_user["username"] in dataset.get("editors", []):
         return True
     return False
+
 
 def allow_edit(dataset):
     "Is the current user allowed to edit the dataset?"
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
-    if flask.g.current_user["username"] == dataset["owner"]: return True
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
+    if flask.g.current_user["username"] == dataset["owner"]:
+        return True
     if flask.g.current_user["username"] in dataset.get("editors", []):
         return True
     return False
 
+
 def allow_delete(dataset):
     "Is the current user allowed to delete the dataset?"
-    if not flask.g.current_user: return False
-    if flask.g.am_admin: return True
-    if flask.g.current_user["username"] == dataset["owner"]: return True
+    if not flask.g.current_user:
+        return False
+    if flask.g.am_admin:
+        return True
+    if flask.g.current_user["username"] == dataset["owner"]:
+        return True
     return False
 
+
 def possible_delete(dataset):
-    """Is it possible to delete the dataset? 
+    """Is it possible to delete the dataset?
     Not if there is a graphic owned by the same user.
     """
-    for row in flask.g.db.view("graphics", "dataset",
-                               key=dataset["_id"],
-                               include_docs=True):
-        if row.doc["owner"] == dataset["owner"]: return False
+    for row in flask.g.db.view(
+        "graphics", "dataset", key=dataset["_id"], include_docs=True
+    ):
+        if row.doc["owner"] == dataset["owner"]:
+            return False
     return True
+
 
 def get_commands(dataset):
     "Get commands and scripts populated with access key and URLs."
-    if not flask.g.current_user: return None
-    if not allow_edit(dataset): return None
+    if not flask.g.current_user:
+        return None
+    if not allow_edit(dataset):
+        return None
     apikey = flask.g.current_user.get("apikey")
-    if not apikey: return None
-    put_url = flask.url_for('api_dataset.content', iuid=dataset["_id"], ext='csv', _external=True)
-    delete_url = flask.url_for('api_dataset.serve', iuid=dataset["_id"], _external=True)
+    if not apikey:
+        return None
+    put_url = flask.url_for(
+        "api_dataset.content", iuid=dataset["_id"], ext="csv", _external=True
+    )
+    delete_url = flask.url_for("api_dataset.serve", iuid=dataset["_id"], _external=True)
     return {
         "curl": {
             "title": "curl commands",
             "text": """<strong>curl</strong> is a command-line utility to
 transfer data to/from web servers. It is available for most computer operating
 systems. See <a target="_blank" href="https://curl.se/">curl.se</a>.""",
-            "content": f'curl {put_url} -H "x-apikey: {apikey}"' \
-            ' --upload-file path-to-content-file.csv',
-            "delete": f'curl {delete_url} -H "x-apikey: {apikey}" -X DELETE'},
+            "content": f'curl {put_url} -H "x-apikey: {apikey}"'
+            " --upload-file path-to-content-file.csv",
+            "delete": f'curl {delete_url} -H "x-apikey: {apikey}" -X DELETE',
+        },
         "python": {
             "title": "Python scripts using 'requests'",
             "text": """<strong>requests</strong> is a Python package for HTTP.
@@ -746,13 +825,13 @@ with open("path-to-content-file.csv", "rb") as infile:
 response = requests.put(url, headers=headers, data=data)
 print(response.status_code)    # Outputs 204
 """,
-                "delete": f"""import requests
+            "delete": f"""import requests
 
 url = "{delete_url}"
 headers = {{"x-apikey": "{apikey}"}}
 response = requests.delete(url, headers=headers)
 print(response.status_code)    # Outputs 204
-"""
+""",
         },
         "r": {
             "title": "R scripts",
@@ -774,6 +853,6 @@ PUT("{put_url}",
 
 DELETE("{delete_url}",
        add_headers("x-apikey"="{apikey}"))
-"""
-        }
+""",
+        },
     }

@@ -11,10 +11,10 @@ link = {
         "modified": {"type": "string", "format": "date-time"},
         "count": {"type": "integer"},
         "content-type": {"type": "string", "default": "application/json"},
-        "format": {"type": "string", "default": "json"}
+        "format": {"type": "string", "default": "json"},
     },
     "required": ["href"],
-    "additionalProperties": False
+    "additionalProperties": False,
 }
 
 user = {
@@ -22,20 +22,18 @@ user = {
     "type": "object",
     "properties": {
         "username": {"type": "string"},
-        "href": {"type": "string", "format": "uri"}
+        "href": {"type": "string", "format": "uri"},
     },
     "required": ["username", "href"],
-    "additionalProperties": False
+    "additionalProperties": False,
 }
 
 logs_link = {
     "title": "Link to the log of changes for the entity.",
     "type": "object",
-    "properties": {
-        "href": {"type": "string", "format": "uri"}
-    },
+    "properties": {"href": {"type": "string", "format": "uri"}},
     "required": ["href"],
-    "additionalProperties": False
+    "additionalProperties": False,
 }
 
 property_names = {"pattern": "^[a-zA-Z][a-zA-Z0-9_-]*$"}
@@ -48,23 +46,19 @@ iobody = {
         "schema": {
             "title": "JSON schema of data body content.",
             "type": "object",
-            "properties": {
-                "href": {"type": "string", "format": "uri"}
-            },
+            "properties": {"href": {"type": "string", "format": "uri"}},
             "required": ["href"],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     "required": ["content-type"],
-    "additionalProperties": False
+    "additionalProperties": False,
 }
 
 io = {
     "oneOf": [
         {"$ref": "#/definitions/iobody"},
-        {"type": "array",
-         "items": {"$ref": "#/definitions/iobody"}
-        }
+        {"type": "array", "items": {"$ref": "#/definitions/iobody"}},
     ]
 }
 
@@ -82,17 +76,12 @@ operations = {
             "properties": {
                 "title": {"type": "string"},
                 "href": {"type": "string", "format": "uri-template"},
-                "variables": {
-                    "type": "object"
-                },
-                "method": {
-                    "type": "string",
-                    "enum": ["POST", "PUT", "DELETE"]
-                },
+                "variables": {"type": "object"},
+                "method": {"type": "string", "enum": ["POST", "PUT", "DELETE"]},
                 "input": io,
                 "output": io,
             },
-            "required": ["href", "method"]
-        }
-    }
+            "required": ["href", "method"],
+        },
+    },
 }
