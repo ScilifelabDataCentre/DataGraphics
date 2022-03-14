@@ -4,7 +4,7 @@ import re
 import os.path
 import string
 
-__version__ = "0.12.6"
+__version__ = "0.13.0"
 
 
 class Constants:
@@ -99,6 +99,10 @@ class Constants:
 
     # JSON Schema; Draft 7 validator is currently hardwired.
     JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#"
+
+    # Miscellaneous.
+    FRONT_MATTER_RX = re.compile(r"^---(.*)---", re.DOTALL | re.MULTILINE)
+
 
     def __setattr__(self, key, value):
         raise ValueError("cannot set constant")

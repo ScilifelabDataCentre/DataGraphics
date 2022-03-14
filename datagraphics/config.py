@@ -31,6 +31,7 @@ DEFAULT_SETTINGS = dict(
     JSON_AS_ASCII=False,
     JSON_SORT_KEYS=False,
     JSONIFY_PRETTYPRINT_REGULAR=False,
+    DOCUMENTATION_DIR=os.path.join(constants.ROOT, "documentation"),
     MAX_RECORDS_INSPECT=2000,
     MIN_PASSWORD_LENGTH=6,
     PERMANENT_SESSION_LIFETIME=7 * 24 * 60 * 60,  # in seconds: 1 week
