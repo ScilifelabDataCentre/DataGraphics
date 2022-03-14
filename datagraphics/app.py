@@ -11,6 +11,7 @@ import datagraphics.dataset
 import datagraphics.datasets
 import datagraphics.graphic
 import datagraphics.graphics
+import datagraphics.doc
 
 import datagraphics.api.about
 import datagraphics.api.root
@@ -53,6 +54,7 @@ utils.init(app)
 datagraphics.dataset.init(app)
 datagraphics.graphic.init(app)
 datagraphics.user.init(app)
+datagraphics.doc.init(app)
 utils.mail.init_app(app)
 
 
@@ -191,6 +193,7 @@ app.register_blueprint(datagraphics.dataset.blueprint, url_prefix="/dataset")
 app.register_blueprint(datagraphics.datasets.blueprint, url_prefix="/datasets")
 app.register_blueprint(datagraphics.graphic.blueprint, url_prefix="/graphic")
 app.register_blueprint(datagraphics.graphics.blueprint, url_prefix="/graphics")
+app.register_blueprint(datagraphics.doc.blueprint, url_prefix="/documentation")
 
 app.register_blueprint(datagraphics.api.root.blueprint, url_prefix="/api")
 app.register_blueprint(datagraphics.api.about.blueprint, url_prefix="/api/about")
