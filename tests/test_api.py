@@ -1,4 +1,7 @@
-"Tests of the DataGraphics API."
+"""Test API access.
+
+Uses the 'requests' package.
+"""
 
 import csv
 import http.client
@@ -25,10 +28,8 @@ def settings():
     2) file 'settings.json' in this directory
     """
     result = {
-        "BROWSER": "Chrome",
         "BASE_URL": "http://127.0.0.1:5005/",
         "USERNAME": None,
-        "PASSWORD": None,
         "APIKEY": None,
     }
 
