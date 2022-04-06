@@ -29,8 +29,8 @@ def settings():
     """
     result = {
         "BASE_URL": "http://127.0.0.1:5005/",
-        "USERNAME": None,
-        "APIKEY": None,
+        "USER_USERNAME": None,
+        "USER_APIKEY": None,
     }
 
     try:
@@ -48,7 +48,7 @@ def settings():
 
 @pytest.fixture(scope="module")
 def headers(settings):
-    return {"x-apikey": settings["APIKEY"]}
+    return {"x-apikey": settings["USER_APIKEY"]}
 
 
 def test_software_info(settings, headers, schemas):
@@ -62,7 +62,7 @@ def test_software_info(settings, headers, schemas):
 def test_root_data(settings, schemas):
     "Get root information, compare to its schema."
     url = f"{settings['BASE_URL']}api"
-    headers = {"x-apikey": settings["APIKEY"]}
+    headers = {"x-apikey": settings["USER_APIKEY"]}
     response = requests.get(url, headers=headers)
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
@@ -70,7 +70,7 @@ def test_root_data(settings, schemas):
 
 def test_user_data(settings, headers, schemas):
     "Get user information."
-    url = f"{settings['BASE_URL']}api/user/{settings['USERNAME']}"
+    url = f"{settings['BASE_URL']}api/user/{settings['USER_USERNAME']}"
     response = requests.get(url, headers=headers)
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
@@ -78,14 +78,14 @@ def test_user_data(settings, headers, schemas):
 
 def test_user_datasets(settings, headers, schemas):
     "Datasets access."
-    url = f"{settings['BASE_URL']}api/datasets/user/{settings['USERNAME']}"
+    url = f"{settings['BASE_URL']}api/datasets/user/{settings['USER_USERNAME']}"
     response = requests.get(url, headers=headers)
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
 
 
 def test_create_dataset(settings, headers, schemas):
-    "Datasets create, update, delete."
+    "Dataset create, update, delete."
     url = f"{settings['BASE_URL']}api/dataset/"
     title = "My title"
     description = "My description."
@@ -304,7 +304,7 @@ def test_public_graphics(settings, headers, schemas):
 
 def test_user_graphics(settings, headers, schemas):
     "Get user's graphics."
-    url = f"{settings['BASE_URL']}api/graphics/user/{settings['USERNAME']}"
+    url = f"{settings['BASE_URL']}api/graphics/user/{settings['USER_USERNAME']}"
     response = requests.get(url, headers=headers)
     assert response.status_code == http.client.OK
     check_schema(response, schemas)
