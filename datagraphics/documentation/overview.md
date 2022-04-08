@@ -10,7 +10,7 @@ datasets. It uses [Vega-Lite](https://vega.github.io/vega-lite/),
 which is a JavaScript library implementing a grammar of interactive
 graphics using a [JSON syntax](https://www.json.org/json-en.html).
 
-## Dataset
+### Dataset
 
 A dataset contains data as well as some metadata describing it. It is
 owned by a user account.
@@ -58,7 +58,7 @@ applicable for it:
 - nominal
 - geojson
 
-## Graphic
+### Graphic
 
 A graphic is a visualization of a dataset. It is owned by a user
 account. A dataset can be visualized by any number of graphic items.
@@ -79,7 +79,7 @@ The specification of the visualization is written using the
 [Vega-Lite](https://vega.github.io/vega-lite/) high-level
 grammar. For more information on it, follow the link.
 
-## Access privileges
+### Access privileges
 
 Currently, the access privileges system is based on a very simple model
 where an item can have one of two possible access settings:
@@ -92,7 +92,7 @@ and deleted **only** by its owner.
 
 The access setting of dataset or a graphic can be changed by its owner.
 
-## User account
+### User account
 
 A user account in the system is required to create and edit datasets
 and graphics. A dataset and graphic is always owned by one and only one

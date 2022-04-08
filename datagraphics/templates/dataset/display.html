@@ -207,7 +207,7 @@
 	method="POST">
     {{ csrf_token() }}
     <input type="hidden" name="_http_method" value="DELETE">
-    <button type="submit" class="btn btn-block btn-danger"
+    <button id="delete" type="submit" class="btn btn-block btn-danger"
             {% if not possible_delete %}
             disabled title="Dataset can't be deleted; it is used in a graphic owned by the user."
             {% endif %}
