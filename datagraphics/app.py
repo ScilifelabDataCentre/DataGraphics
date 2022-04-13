@@ -2,6 +2,7 @@
 
 import flask
 import jinja2.utils
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import datagraphics.about
 import datagraphics.config
@@ -56,6 +57,9 @@ datagraphics.graphic.init(app)
 datagraphics.user.init(app)
 datagraphics.doc.init(app)
 utils.mail.init_app(app)
+
+if app.config["REVERSE_PROXY"]:
+    app.wsgi_app = ProxyFix(app.wsgi_app)
 
 
 @app.errorhandler(JsonException)
