@@ -106,7 +106,7 @@ def display(iuid):
         return flask.redirect(flask.url_for("home"))
     if not allow_view(dataset):
         utils.flash_error("View access to dataset not allowed.")
-        return flask.redirect(utils.url_referrer())
+        return flask.redirect(flask.url_for("home"))
     storage = sum([s["length"] for s in dataset.get("_attachments", {}).values()])
     return flask.render_template(
         "dataset/display.html",
