@@ -7,7 +7,7 @@ import time
 import click
 import flask
 
-import datagraphics.app
+import datagraphics.main
 import datagraphics.user
 from datagraphics import constants
 from datagraphics import utils
@@ -22,7 +22,7 @@ def cli():
 @cli.command()
 def counts():
     "Output counts of entities in the system."
-    with datagraphics.app.app.app_context():
+    with datagraphics.main.app.app_context():
         utils.set_db()
         click.echo(f"{utils.get_count('users', 'username'):>5} users")
         click.echo(f"{utils.get_count('datasets', 'owner_modified'):>5} datasets")
@@ -40,7 +40,7 @@ def counts():
 )
 def create_admin(username, email, password):
     "Create a new admin account."
-    with datagraphics.app.app.app_context():
+    with datagraphics.main.app.app_context():
         utils.set_db()
         try:
             with datagraphics.user.UserSaver() as saver:
@@ -65,7 +65,7 @@ def create_admin(username, email, password):
 )
 def create_user(username, email, password):
     "Create a new user account."
-    with datagraphics.app.app.app_context():
+    with datagraphics.main.app.app_context():
         utils.set_db()
         try:
             with datagraphics.user.UserSaver() as saver:
@@ -89,7 +89,7 @@ def create_user(username, email, password):
 )
 def password(username, password):
     "Set the password for a user account."
-    with datagraphics.app.app.app_context():
+    with datagraphics.main.app.app_context():
         utils.set_db()
         user = datagraphics.user.get_user(username=username)
         if user:
@@ -117,7 +117,7 @@ def password(username, password):
 )
 def dump(dumpfile, dumpdir, progressbar):
     "Dump all data in the database to a .tar.gz dump file."
-    with datagraphics.app.app.app_context():
+    with datagraphics.main.app.app_context():
         utils.set_db()
         if not dumpfile:
             dumpfile = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
@@ -136,11 +136,11 @@ def dump(dumpfile, dumpdir, progressbar):
 )
 def undump(dumpfile, progressbar):
     "Load a DataGraphics database dump file. The database must be empty."
-    with datagraphics.app.app.app_context():
+    with datagraphics.main.app.app_context():
         utils.set_db()
         if utils.get_count("users", "username") != 0:
             raise click.ClickException(
-                f"The database '{datagraphics.app.app.config['COUCHDB_DBNAME']}'"
+                f"The database '{datagraphics.main.app.config['COUCHDB_DBNAME']}'"
                 " is not empty."
             )
         ndocs, nfiles = flask.g.db.undump(dumpfile, progressbar=progressbar)
