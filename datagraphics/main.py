@@ -1,7 +1,7 @@
 "DataGraphics: Serve data and graphics on the web using Vega-Lite graphics."
 
 import flask
-import jinja2.utils
+import markupsafe
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import datagraphics.about
@@ -132,7 +132,7 @@ def debug():
     for key, value in sorted(flask.request.environ.items()):
         result.append(f"<tr><td>{key}</td><td>{value}</td></tr>")
     result.append("</table>")
-    return jinja2.utils.Markup("\n".join(result))
+    return markupsafe.Markup("\n".join(result))
 
 
 @app.route("/status")

@@ -13,9 +13,9 @@ import couchdb2
 import emoji
 import flask
 import flask_mail
-import jinja2.utils
 import jsonschema
 import marko
+import markupsafe
 import werkzeug.routing
 
 from datagraphics import constants
@@ -282,7 +282,7 @@ def csrf_token():
         '<input type="hidden" name="_csrf_token" value="%s">'
         % flask.session["_csrf_token"]
     )
-    return jinja2.utils.Markup(html)
+    return markupsafe.Markup(html)
 
 
 def check_csrf_token():
@@ -315,12 +315,12 @@ def tojson_noescape(value, indent=None):
 
 def markdown(value):
     "Template filter: Convert Markdown to HMTL."
-    return jinja2.utils.Markup(marko.Markdown().convert(value or ""))
+    return markupsafe.Markup(marko.Markdown().convert(value or ""))
 
 
 def emojize(value):
     "Template filter: Convert emoji shortcodes to character."
-    return jinja2.utils.Markup(emoji.emojize(value or "", use_aliases=True))
+    return markupsafe.Markup(emoji.emojize(value or "", use_aliases=True))
 
 
 def float_default(value, default=""):
