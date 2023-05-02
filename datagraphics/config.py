@@ -48,9 +48,6 @@ DEFAULT_SETTINGS = dict(
     USER_ENABLE_IMMEDIATELY=False,
     USER_ENABLE_EMAIL_WHITELIST=[],  # List of regexp's
     MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
-    ADMIN_USERNAME=None,  # Admin user to create at startup, if not exists.
-    ADMIN_EMAIL=None,
-    ADMIN_PASSWORD=None,
 )
 
 

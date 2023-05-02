@@ -81,12 +81,6 @@ def setup_template_context():
     )
 
 
-@app.before_first_request
-def initialize():
-    "Initialization before handling first request."
-    datagraphics.user.create_first_admin()
-
-
 @app.before_request
 def prepare():
     "Open the database connection; get the current user."
