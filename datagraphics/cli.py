@@ -146,6 +146,39 @@ def undump(dumpfile, progressbar):
         ndocs, nfiles = flask.g.db.undump(dumpfile, progressbar=progressbar)
         click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
+@cli.command()
+@click.argument("old_baseurl", type=str)
+@click.argument("new_baseurl", type=str)
+def baseurl(old_baseurl, new_baseurl):
+    "Exchange the base URL of all data sources for all graphics."
+    def exchange(data, old_baseurl, new_baseurl):
+        if isinstance(data, dict):
+            for key, value in list(data.items()):
+                if isinstance(value, (dict, list)):
+                    exchange(value, old_baseurl, new_baseurl)
+                elif key == "url" and value.startswith(old_baseurl):
+                    data["url"] = new_baseurl + value[len(old_baseurl):]
+                    click.echo(f"{value} -> {data['url']}")
+        elif isinstance(data, list):
+            for pos, value in enumerate(data):
+                if isinstance(value, (dict, list)):
+                    exchange(value, old_baseurl, new_baseurl)
+
+    with datagraphics.main.app.app_context():
+        utils.set_db()
+        view = flask.g.db.view(
+            "graphics",
+            "owner_modified",
+            startkey=("ZZZZZZ", "ZZZZZZ"),
+            endkey=("", ""),
+            include_docs=True,
+            reduce=False,
+            descending=True
+        )
+        for row in view:
+            exchange(row.doc, old_baseurl, new_baseurl)
+            flask.g.db.put(row.doc)
+
 
 if __name__ == "__main__":
     cli()
