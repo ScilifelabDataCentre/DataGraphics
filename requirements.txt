@@ -24,7 +24,7 @@ pyparsing==3.0.6
 pyrsistent==0.18.0
 pytest==6.2.5
 PyYAML==6.0
-requests==2.26.0
+requests==2.31.0
 six==1.16.0
 toml==0.10.2
 tqdm==4.62.3
