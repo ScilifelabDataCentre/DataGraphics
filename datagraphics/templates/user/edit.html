@@ -30,7 +30,7 @@
       </small>
     </div>
   </div>
-  {% if am_admin_or_self(user) %}
+  {% if g.am_admin %}
   <div class="form-group row">
     <label for="role" class="col-md-2 col-form-label text-right">Role</label>
     <div class="col-md">
@@ -45,7 +45,7 @@
       {% endfor %}
     </div>
   </div>
-  {% endif %} {# if am_admin_or_self(user) #}
+  {% endif %} {# if g.am_admin #}
   <div class="form-group row">
     <label for="apikey" class="col-md-2 text-right">API key</label>
     <div class="col-md">

@@ -384,6 +384,8 @@ class DatasetSaver(EntitySaver):
                 headers=headers,
                 timeout=flask.current_app.config["URL_UPDATE_TIMEOUT"],
             )
+        except requests.exceptions.ConnectionError:
+            raise ValueError("Could not connect to the remote server.")
         except requests.exceptions.Timeout:
             raise ValueError("Could not fetch data from URL; timeout.")
         if response.status_code != 200:
