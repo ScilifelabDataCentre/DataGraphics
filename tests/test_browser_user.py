@@ -29,7 +29,7 @@ def settings():
     2) file 'settings.json' in this directory
     """
     result = {
-        "BASE_URL": "http://127.0.0.1:5005/",
+        "BASE_URL": "http://127.0.0.1:5000/",
         "USER_USERNAME": None,
         "USER_PASSWORD": None
     }

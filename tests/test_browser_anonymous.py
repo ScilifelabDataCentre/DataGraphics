@@ -23,7 +23,7 @@ def settings():
     1) defaults
     2) file 'settings.json' in this directory
     """
-    result = {"BASE_URL": "http://127.0.0.1:5005/"}
+    result = {"BASE_URL": "http://127.0.0.1:5000/"}
 
     try:
         with open("settings.json", "rb") as infile:
