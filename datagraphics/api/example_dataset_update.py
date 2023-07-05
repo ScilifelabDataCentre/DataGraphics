@@ -12,7 +12,7 @@ APIKEY = "a7a4b1d2ee404c87a42daa5b5232f894"
 # The UUID is the identifier of the dataset, which must already exist.
 # The suffix determines the format of the data to PUT.
 
-JSON_URL = "http://127.0.0.1:5005/api/dataset/6e5696ff2059423ca40d3f59936a6671.json"
+JSON_URL = "http://127.0.0.1:5000/api/dataset/6e5696ff2059423ca40d3f59936a6671.json"
 
 # The dataset content is a list of dicts (records).
 # The keys of each record and the types of the values must
@@ -60,7 +60,7 @@ with tempfile.TemporaryFile("w+t") as outfile:
 
 # Note the suffix 'csv' here! This determines how the input data is interpreted.
 
-CSV_URL = "http://127.0.0.1:5005/api/dataset/6e5696ff2059423ca40d3f59936a6671.csv"
+CSV_URL = "http://127.0.0.1:5000/api/dataset/6e5696ff2059423ca40d3f59936a6671.csv"
 
 response = requests.put(CSV_URL, headers={"x-apikey": APIKEY}, data=csv_data)
 print(response)  # Success if this is 204 (= HTTP "No Content").
