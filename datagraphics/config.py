@@ -11,7 +11,6 @@ from datagraphics import utils
 
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
-    SERVER_NAME="127.0.0.1:5005",  # For URL generation; app.run() in devel.
     REVERSE_PROXY=False,
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
     LOG_DEBUG=False,
