@@ -1,4 +1,4 @@
-# ![DataGraphics logo](https://github.com/pekrau/DataGraphics/raw/devel/datagraphics/static/logo32.png) DataGraphics
+# ![DataGraphics logo](https://github.com/pekrau/DataGraphics/raw/master/datagraphics/static/logo32.png) DataGraphics
 
 Datasets and graphics served on the web using Vega-Lite.
 
