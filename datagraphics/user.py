@@ -48,9 +48,7 @@ blueprint = flask.Blueprint("user", __name__)
 def login():
     "Login to a user account."
     if utils.http_GET():
-        return flask.render_template(
-            "user/login.html", next=flask.request.args.get("next")
-        )
+        return flask.render_template("user/login.html")
     if utils.http_POST():
         username = flask.request.form.get("username")
         password = flask.request.form.get("password")
@@ -58,15 +56,14 @@ def login():
             do_login(
                 flask.request.form.get("username"), flask.request.form.get("password")
             )
-            try:
-                url = flask.session.pop("login_target_url")
-            except KeyError:
-                return flask.redirect(flask.url_for("datasets.user", username=username))
-            else:
-                return flask.redirect(next)
         except ValueError:
             utils.flash_error("Invalid user or password, or account disabled.")
             return flask.redirect(flask.url_for(".login"))
+        try:
+            url = flask.session.pop("login_target_url")
+        except KeyError:
+            url = flask.url_for("home")
+        return flask.redirect(url)
 
 
 @blueprint.route("/logout", methods=["POST"])
