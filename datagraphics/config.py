@@ -11,6 +11,7 @@ from datagraphics import utils
 
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
+    SERVER_NAME=None,
     REVERSE_PROXY=False,
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
     LOG_DEBUG=False,
@@ -18,9 +19,6 @@ DEFAULT_SETTINGS = dict(
     LOG_FILEPATH=None,
     LOG_ROTATING=0,  # Number of backup rotated log files, if any.
     LOG_FORMAT="%(levelname)-10s %(asctime)s %(message)s",
-    HOST_LOGO=None,  # Filename, must be in 'SITE_STATIC_DIR'.
-    HOST_NAME=None,
-    HOST_URL=None,
     CONTACT_EMAIL=None,
     SECRET_KEY=None,  # Must be set in 'settings.json'.
     SALT_LENGTH=12,

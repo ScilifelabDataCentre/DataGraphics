@@ -7,7 +7,6 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import datagraphics.about
 import datagraphics.config
 import datagraphics.user
-import datagraphics.site
 import datagraphics.dataset
 import datagraphics.datasets
 import datagraphics.graphic
@@ -186,7 +185,6 @@ def sitemap():
 # Set up the URL map.
 app.register_blueprint(datagraphics.about.blueprint, url_prefix="/about")
 app.register_blueprint(datagraphics.user.blueprint, url_prefix="/user")
-app.register_blueprint(datagraphics.site.blueprint, url_prefix="/site")
 app.register_blueprint(datagraphics.dataset.blueprint, url_prefix="/dataset")
 app.register_blueprint(datagraphics.datasets.blueprint, url_prefix="/datasets")
 app.register_blueprint(datagraphics.graphic.blueprint, url_prefix="/graphic")
