@@ -12,19 +12,20 @@ class Constants:
     URL = "https://github.com/pekrau/DataGraphics"
     ROOT = os.path.dirname(os.path.abspath(__file__))
 
-    BOOTSTRAP_VERSION = "4.6.1"
+    BOOTSTRAP_VERSION = "4.6.2"
     BOOTSTRAP_URL = "https://getbootstrap.com/"
     BOOTSTRAP_CSS_URL = (
-        "https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+        "https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
     )
     BOOTSTRAP_CSS_INTEGRITY = (
-        "sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn"
+        "sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
     )
+
     BOOTSTRAP_JS_URL = (
-        "https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+        "https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
     )
     BOOTSTRAP_JS_INTEGRITY = (
-        "sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
+        "sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
     )
 
     JQUERY_VERSION = "3.5.1"
@@ -51,12 +52,12 @@ class Constants:
     )
 
     VEGA_URL = "https://vega.github.io/vega/"
-    VEGA_VERSION = "5.19.1"
+    VEGA_VERSION = "5.25.0"
 
     VEGA_LITE_URL = "https://vega.github.io/vega-lite/"
-    VEGA_LITE_VERSION = "5.0.0"  # Must match schema file in 'static'.
+    VEGA_LITE_VERSION = "5.12.0"  # Must match schema file in 'static'.
     VEGA_LITE_SCHEMA_URL = "https://vega.github.io/schema/vega-lite/v5.json"
-    VEGA_EMBED_VERSION = "6.15.1"
+    VEGA_EMBED_VERSION = "6.22.1"
     VEGA_EMBED_URL = "https://github.com/vega/vega-embed"
     VEGA_LITE_TYPES = ("quantitative", "temporal", "ordinal", "nominal", "geojson")
 
