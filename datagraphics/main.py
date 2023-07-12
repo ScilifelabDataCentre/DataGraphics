@@ -6,12 +6,12 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 import datagraphics.about
 import datagraphics.config
-import datagraphics.user
 import datagraphics.dataset
 import datagraphics.datasets
+import datagraphics.doc
 import datagraphics.graphic
 import datagraphics.graphics
-import datagraphics.doc
+import datagraphics.user
 
 import datagraphics.api.about
 import datagraphics.api.root
@@ -46,16 +46,9 @@ class JsonException(Exception):
         return result
 
 
-app = flask.Flask(__name__)
-
-# Get the configuration and initialize modules (database).
-datagraphics.config.init(app)
-utils.init(app)
-datagraphics.dataset.init(app)
-datagraphics.graphic.init(app)
-datagraphics.user.init(app)
+# Get the app.
+app = datagraphics.config.create_app(__name__)
 datagraphics.doc.init(app)
-utils.mail.init_app(app)
 
 if app.config["REVERSE_PROXY"]:
     app.wsgi_app = ProxyFix(app.wsgi_app)

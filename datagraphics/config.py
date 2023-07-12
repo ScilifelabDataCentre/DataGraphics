@@ -6,8 +6,13 @@ import os.path
 
 import flask
 
+import datagraphics.dataset
+import datagraphics.graphic
+import datagraphics.user
+
 from datagraphics import constants
 from datagraphics import utils
+
 
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
@@ -47,6 +52,21 @@ DEFAULT_SETTINGS = dict(
     MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
 )
 
+
+def create_app(name, init_db=True):
+    "Create the Flask app instance and do the main configuration."
+    # The reason this is defined here, and not in 'main.py', is that the
+    # standalone 'cli.py' must also use it. There is further initialization
+    # done at the module level in 'main.py', which must not be done when this
+    # function is called from 'cli.py'. Therefore, the module 'datagraphics.main'
+    # cannot be imported by 'cli.py'.
+    app = flask.Flask(name)
+    init(app)
+    if init_db:
+        utils.init(app)
+        utils.mail.init_app(app)
+        load_db_designs(app)
+    return app
 
 def init(app):
     """Perform the configuration of the Flask app.
@@ -124,3 +144,10 @@ def init(app):
                 for variable in stencil["header"]["variables"]:
                     variable["name"] = "/".join(variable["path"])
                 app.config["STENCILS"][name] = stencil
+
+
+def load_db_designs(app):
+    "Load the design documents."
+    datagraphics.dataset.init(app)
+    datagraphics.graphic.init(app)
+    datagraphics.user.init(app)

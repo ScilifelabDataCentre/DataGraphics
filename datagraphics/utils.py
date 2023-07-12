@@ -87,13 +87,18 @@ def set_db(app=None):
 def get_db(app=None):
     if app is None:
         app = flask.current_app
-    server = couchdb2.Server(
+    return get_server(app=app)[app.config["COUCHDB_DBNAME"]]
+
+
+def get_server(app=None):
+    if app is None:
+        app = flask.current_app
+    return couchdb2.Server(
         href=app.config["COUCHDB_URL"],
         username=app.config["COUCHDB_USERNAME"],
         password=app.config["COUCHDB_PASSWORD"],
     )
-    return server[app.config["COUCHDB_DBNAME"]]
-
+    
 
 def get_count(designname, viewname, key=None):
     "Get the count for the given view and key."
