@@ -34,7 +34,6 @@ DEFAULT_SETTINGS = dict(
     JSON_AS_ASCII=False,
     JSON_SORT_KEYS=False,
     JSONIFY_PRETTYPRINT_REGULAR=False,
-    DOCUMENTATION_DIR=os.path.join(constants.ROOT, "documentation"),
     MAX_RECORDS_INSPECT=2000,
     MIN_PASSWORD_LENGTH=6,
     PERMANENT_SESSION_LIFETIME=7 * 24 * 60 * 60,  # in seconds: 1 week
@@ -120,6 +119,35 @@ def init(app):
         raise ValueError("SALT_LENGTH is too short")
     if app.config["MIN_PASSWORD_LENGTH"] <= 4:
         raise ValueError("MIN_PASSWORD_LENGTH is too short")
+
+    # Read and preprocess the documentation file.
+    with open("documentation.md") as infile:
+        lines = infile.readlines()
+    toc = []
+    current_level = 0
+    for line in lines:
+        if line.startswith("#"):
+            parts = line.split()
+            level = len(parts[0])
+            title = " ".join(parts[1:])
+            # All headers in the file are "clean", i.e. text only, no markup.
+            id = title.strip().replace(" ", "-").lower()
+            id = "".join(c for c in id if c in constants.ALLOWED_ID_CHARACTERS)
+            # Add to table of contents.
+            if level <= 2:
+                if level > current_level:
+                    for l in range(current_level, level):
+                        toc.append('<ul class="list-unstyled ml-3">')
+                    current_level = level
+                elif level < current_level:
+                    for l in range(level, current_level):
+                        toc.append("</ul>")
+                    current_level = level
+                toc.append(f'<li><a href="#{id}">{title}</a></li>')
+    for level in range(current_level):
+        toc.append("</ul>")
+    app.config["DOCUMENTATION_TOC"] = "\n".join(toc)
+    app.config["DOCUMENTATION"] = utils.markdown2html("".join(lines))
 
     # Read in JSON Schema for Vega-Lite from file in 'static'.
     filepath = os.path.join(

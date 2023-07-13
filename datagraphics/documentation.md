@@ -1,8 +1,4 @@
----
-title: Overview
-level: 0
-ordinal: 0
----
+# DataGraphics documentation
 
 DataGraphics is a system for serving static **datasets** and
 displaying **graphics** (plots, charts) that visualize the
@@ -10,7 +6,7 @@ datasets. It uses [Vega-Lite](https://vega.github.io/vega-lite/),
 which is a JavaScript library implementing a grammar of interactive
 graphics using a [JSON syntax](https://www.json.org/json-en.html).
 
-### Dataset
+# Dataset
 
 A dataset contains data as well as some metadata describing it. It is
 owned by a user account.
@@ -58,7 +54,7 @@ applicable for it:
 - nominal
 - geojson
 
-### Graphic
+# Graphic
 
 A graphic is a visualization of a dataset. It is owned by a user
 account. A dataset can be visualized by any number of graphic items.
@@ -79,7 +75,7 @@ The specification of the visualization is written using the
 [Vega-Lite](https://vega.github.io/vega-lite/) high-level
 grammar. For more information on it, follow the link.
 
-### Access privileges
+# Access privileges
 
 Currently, the access privileges system is based on a very simple model
 where an item can have one of two possible access settings:
@@ -92,7 +88,7 @@ and deleted **only** by its owner.
 
 The access setting of dataset or a graphic can be changed by its owner.
 
-### User account
+# User account
 
 A user account in the system is required to create and edit datasets
 and graphics. A dataset and graphic is always owned by one and only one
@@ -105,3 +101,94 @@ interface. This includes:
 - Changing ownership of items.
 - Creating, editing, deleting and viewing all items.
 - Registering, enabling or disabling other user accounts.
+
+
+# How to
+
+## Include a graphic in a web page
+
+A graphic can be included in a web page at another site. The required
+HTML code fragment can be downloaded from the graphic page by clicking
+the `HTML code` button on the right hand side of the web page for the
+graphic in the DataGraphics system.
+
+Here is an example of the HTML code:
+
+<hr>
+
+```
+<!-- The graphic will be rendered in this div element in the HTML page. -->
+<div id="graphic"></div>
+
+<!-- Add the code below to the JavaScript section of the HTML page. -->
+<script src="https://cdn.jsdelivr.net/npm/vega@5.12.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@4.12.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6.8.0"></script>
+<script src="https://datagraphics.dckube.scilifelab.se/graphic/ddb1119aefce47d58d0b3a49e98b4fcc.js?id=graphic"></script>
+```
+
+<hr>
+
+The first part of the fragment contains the `div` element where the
+graphic will be rendered. It must have its `id` attribute set. The
+value of this attribute must be passed as a query parameter to the URL
+in the JavaScript in the last `script` element in the second part of
+the fragment.
+
+The second part of the fragment contains the <code>script</code> elements
+including the various required JavaScript libraries, and the JavaScript
+code which actually renders the graphic. This part of the fragment is
+usually placed close to the end of the HTML document, just before the
+`</body>` tag.
+
+Please note that a graphic included on a web page at another site must
+have **public** access set, and its dataset must also be
+**public**. There is no way to include authentication information in
+the HTML code on a page.
+
+
+# API
+
+The Application Programming Interface (API) uses JSON. Access is
+granted by an API key which is set for a user account.
+
+Several of the web pages have a button in the upper right corner
+labelled **API** which links to the corresponding API resource.
+
+The documentation pages linked to on the right-hand side describes
+which of the HTTP operations (GET, PUT, POST, DELETE) are allowed,
+which input is required, what they do, and which output is produced.
+
+Using the [`requests` module](https://requests.readthedocs.io/en/master/),
+this is a minimal example of how to use the API. It fetches a list
+of the public datasets and outputs their titles.
+
+<hr>
+
+```
+import requests
+
+### Headers containing API key for authentication.
+headers = {"x-apikey": "549782425f324eb098ce42f260e41e7a"}
+
+### Get the top API endpoints.
+url = "{{ url_for('api.root') }}"
+response = requests.get(url, headers=headers)
+print(response.status_code)    # Should output '200'
+
+data = response.json()    # Contains links to other resources.
+
+### Get list of current public datasets and output titles.
+url = data["datasets"]["public"]["href"]
+response = requests.get(url, headers=headers)
+
+data = response.json()
+for dataset in data["datasets"]:
+    print(dataset["title"])
+```
+
+<hr>
+
+More examples of how to use the API can be found in the `test` folder
+of the software distribution; see the
+[DataGraphics GitHub repo](https://github.com/pekrau/DataGraphics/tree/devel/test).

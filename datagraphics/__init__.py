@@ -102,7 +102,7 @@ class Constants:
     JSON_SCHEMA_URL = "http://json-schema.org/draft-07/schema#"
 
     # Miscellaneous.
-    FRONT_MATTER_RX = re.compile(r"^---(.*)---", re.DOTALL | re.MULTILINE)
+    ALLOWED_ID_CHARACTERS = frozenset(string.ascii_lowercase + string.digits + "-_")
 
 
     def __setattr__(self, key, value):

@@ -73,7 +73,7 @@
 {% if graphic['description'] %}
 <div class="card my-2">
   <div class="card-body">
-    {{ graphic['description'] | markdown }}
+    {{ graphic['description'] | markdown2html }}
   </div>
 </div>
 {% endif %}
