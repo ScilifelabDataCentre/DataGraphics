@@ -102,19 +102,8 @@
           </li>
           {% endif %} {# if g.am_admin #}
 
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle mr-4" href="#" id="navbarDocumentation"
-               role="button" data-toggle="dropdown"
-               aria-haspopup="true" aria-expanded="false">Documentation</a>
-            <div class="dropdown-menu" aria-labelledby="navbarDocumentation">
-              <a href="{{ url_for('documentation.page', page='overview') }}"
-		 class="nav-link">Overview</a>
-              <a href="{{ url_for('documentation.endpoints') }}"
-		 class="nav-link">URL endpoints</a>
-              <a class="nav-link"
-                 href="{{ url_for('documentation.schemas') }}">API JSON Schemas</a>
-	    </div>
-          </li>
+          <a href="{{ url_for('documentation') }}" target="documentation"
+             class="nav-link mr-2">Documentation</a>
 
           <li class="nav-item dropdown">
             <a href="#" id="navbarAbout" class="nav-link dropdown-toggle"
@@ -210,31 +199,12 @@
       {% block footer %}
       <hr>
       <div class="row">
-        <div class="col-md">
-          {% if config['HOST_URL'] %}
-          <a href="{{ config['HOST_URL'] }}">
-            {% if config['HOST_LOGO'] %}
-            <img src="{{ url_for('site.static',filename=config['HOST_LOGO']) }}"
-                 title="{{ config['HOST_NAME'] or '' }}">
-            {% else %}
-            {{ config['HOST_NAME'] or '' }}
-            {% endif %}
-          </a>
-          {% else %}
-          {% if config['HOST_LOGO'] %}
-          <img src="{{ url_for('site.static', filename=config['HOST_LOGO']) }}"
-               title="{{ config['HOST_NAME'] or '' }}">
-          {% else %}
-          {{ config['HOST_NAME'] or '' }}
-          {% endif %}
-          {% endif %}
-        </div>
-        <div class="col-md">
+        <div class="col-md-4">
           {% if config['DEBUG'] %}
           <div class="small">Server execution time {{ g.timer.milliseconds }} ms</div>
           {% endif %}
         </div>
-        <div class="col-md offset-md-4 text-right">
+        <div class="col-md-4 offset-md-4 text-right">
           <a href="https://github.com/pekrau/DataGraphics">DataGraphics</a>
 	  {{ constants.VERSION }}
         </div>

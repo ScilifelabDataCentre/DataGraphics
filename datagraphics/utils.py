@@ -30,7 +30,7 @@ def init(app):
     app.url_map.converters["name"] = NameConverter
     app.url_map.converters["iuid"] = IuidConverter
     app.add_template_filter(tojson_noescape)
-    app.add_template_filter(markdown)
+    app.add_template_filter(markdown2html)
     app.add_template_filter(emojize)
     app.add_template_filter(float_default)
     db = get_db(app=app)
@@ -87,13 +87,18 @@ def set_db(app=None):
 def get_db(app=None):
     if app is None:
         app = flask.current_app
-    server = couchdb2.Server(
+    return get_server(app=app)[app.config["COUCHDB_DBNAME"]]
+
+
+def get_server(app=None):
+    if app is None:
+        app = flask.current_app
+    return couchdb2.Server(
         href=app.config["COUCHDB_URL"],
         username=app.config["COUCHDB_USERNAME"],
         password=app.config["COUCHDB_PASSWORD"],
     )
-    return server[app.config["COUCHDB_DBNAME"]]
-
+    
 
 def get_count(designname, viewname, key=None):
     "Get the count for the given view and key."
@@ -313,9 +318,48 @@ def tojson_noescape(value, indent=None):
     return json.dumps(value, indent=indent, ensure_ascii=False)
 
 
-def markdown(value):
-    "Template filter: Convert Markdown to HMTL."
-    return markupsafe.Markup(marko.Markdown().convert(value or ""))
+def markdown2html(value):
+    "Process the value from Markdown to HTML."
+    return marko.Markdown(renderer=HtmlRenderer).convert(value or "")
+
+
+class HtmlRenderer(marko.html_renderer.HTMLRenderer):
+    "Extension of Marko Markdown-to-HTML renderer."
+
+    def render_link(self, element):
+        """Allow setting <a> attribute '_target' to '_blank', when the title
+        begins with an exclamation point '!'.
+        """
+        if element.title and element.title.startswith("!"):
+            template = '<a target="_blank" href="{url}"{title}>{body}</a>'
+            element.title = element.title[1:]
+        else:
+            template = '<a href="{url}"{title}>{body}</a>'
+        title = (
+            ' title="{}"'.format(self.escape_html(element.title))
+            if element.title
+            else ""
+        )
+        return template.format(
+            url=self.escape_url(element.dest),
+            title=title,
+            body=self.render_children(element),
+        )
+
+    def render_heading(self, element):
+        "Add id to all headings."
+        id = self.get_text_only(element).replace(" ", "-").lower()
+        id = "".join(c for c in id if c in constants.ALLOWED_ID_CHARACTERS)
+        return '<h{level} id="{id}">{children}</h{level}>\n'.format(
+            level=element.level, id=id, children=self.render_children(element)
+        )
+
+    def get_text_only(self, element):
+        "Helper function to extract only the text from element and its children."
+        if isinstance(element.children, str):
+            return element.children
+        else:
+            return "".join([self.get_text_only(el) for el in element.children])
 
 
 def emojize(value):

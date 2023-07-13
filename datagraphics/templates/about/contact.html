@@ -11,17 +11,4 @@
   No contact email has been set for this site.
   {% endif %}
 </p>
-<p>
-  {% if config['HOST_NAME'] %}
-  This site is hosted by
-  {% if config['HOST_URL'] %}
-  <a href="{{ config['HOST_URL'] }}" target="blank">{{ config['HOST_NAME'] }}</a>.
-  {% else %}
-  {{ config['HOST_NAME'] }}.
-  No link has been set for the host.
-  {% endif %}
-  {% else %}
-  No information about the host has been set for this site.
-  {% endif %}
-</p>
 {% endblock %} {# block main #}

@@ -6,13 +6,11 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 import datagraphics.about
 import datagraphics.config
-import datagraphics.user
-import datagraphics.site
 import datagraphics.dataset
 import datagraphics.datasets
 import datagraphics.graphic
 import datagraphics.graphics
-import datagraphics.doc
+import datagraphics.user
 
 import datagraphics.api.about
 import datagraphics.api.root
@@ -47,16 +45,8 @@ class JsonException(Exception):
         return result
 
 
-app = flask.Flask(__name__)
-
-# Get the configuration and initialize modules (database).
-datagraphics.config.init(app)
-utils.init(app)
-datagraphics.dataset.init(app)
-datagraphics.graphic.init(app)
-datagraphics.user.init(app)
-datagraphics.doc.init(app)
-utils.mail.init_app(app)
+# Get the app.
+app = datagraphics.config.create_app(__name__)
 
 if app.config["REVERSE_PROXY"]:
     app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -86,7 +76,7 @@ def prepare():
     "Open the database connection; get the current user."
     flask.g.timer = utils.Timer()
     flask.g.db = utils.get_db()
-    flask.g.cache = {}  # key: iuid, value: doc
+    flask.g.cache = {}  # key: iuid, value: document
     flask.g.current_user = datagraphics.user.get_current_user()
     flask.g.am_admin = (
         flask.g.current_user and flask.g.current_user["role"] == constants.ADMIN
@@ -127,6 +117,12 @@ def debug():
         result.append(f"<tr><td>{key}</td><td>{value}</td></tr>")
     result.append("</table>")
     return markupsafe.Markup("\n".join(result))
+
+
+@app.route("/documentation")
+def documentation():
+    "Documentation page; the prepocessed file 'documentation.md'."
+    return flask.render_template("documentation.html")
 
 
 @app.route("/status")
@@ -186,12 +182,10 @@ def sitemap():
 # Set up the URL map.
 app.register_blueprint(datagraphics.about.blueprint, url_prefix="/about")
 app.register_blueprint(datagraphics.user.blueprint, url_prefix="/user")
-app.register_blueprint(datagraphics.site.blueprint, url_prefix="/site")
 app.register_blueprint(datagraphics.dataset.blueprint, url_prefix="/dataset")
 app.register_blueprint(datagraphics.datasets.blueprint, url_prefix="/datasets")
 app.register_blueprint(datagraphics.graphic.blueprint, url_prefix="/graphic")
 app.register_blueprint(datagraphics.graphics.blueprint, url_prefix="/graphics")
-app.register_blueprint(datagraphics.doc.blueprint, url_prefix="/documentation")
 
 app.register_blueprint(datagraphics.api.root.blueprint, url_prefix="/api")
 app.register_blueprint(datagraphics.api.about.blueprint, url_prefix="/api/about")

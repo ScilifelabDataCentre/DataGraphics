@@ -6,11 +6,17 @@ import os.path
 
 import flask
 
+import datagraphics.dataset
+import datagraphics.graphic
+import datagraphics.user
+
 from datagraphics import constants
 from datagraphics import utils
 
+
 # Default configurable values; modified by reading a JSON file in 'init'.
 DEFAULT_SETTINGS = dict(
+    SERVER_NAME=None,
     REVERSE_PROXY=False,
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
     LOG_DEBUG=False,
@@ -18,9 +24,6 @@ DEFAULT_SETTINGS = dict(
     LOG_FILEPATH=None,
     LOG_ROTATING=0,  # Number of backup rotated log files, if any.
     LOG_FORMAT="%(levelname)-10s %(asctime)s %(message)s",
-    HOST_LOGO=None,  # Filename, must be in 'SITE_STATIC_DIR'.
-    HOST_NAME=None,
-    HOST_URL=None,
     CONTACT_EMAIL=None,
     SECRET_KEY=None,  # Must be set in 'settings.json'.
     SALT_LENGTH=12,
@@ -31,7 +34,6 @@ DEFAULT_SETTINGS = dict(
     JSON_AS_ASCII=False,
     JSON_SORT_KEYS=False,
     JSONIFY_PRETTYPRINT_REGULAR=False,
-    DOCUMENTATION_DIR=os.path.join(constants.ROOT, "documentation"),
     MAX_RECORDS_INSPECT=2000,
     MIN_PASSWORD_LENGTH=6,
     PERMANENT_SESSION_LIFETIME=7 * 24 * 60 * 60,  # in seconds: 1 week
@@ -49,6 +51,21 @@ DEFAULT_SETTINGS = dict(
     MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
 )
 
+
+def create_app(name, init_db=True):
+    "Create the Flask app instance and do the main configuration."
+    # The reason this is defined here, and not in 'main.py', is that the
+    # standalone 'cli.py' must also use it. There is further initialization
+    # done at the module level in 'main.py', which must not be done when this
+    # function is called from 'cli.py'. Therefore, the module 'datagraphics.main'
+    # cannot be imported by 'cli.py'.
+    app = flask.Flask(name)
+    init(app)
+    if init_db:
+        utils.init(app)
+        utils.mail.init_app(app)
+        load_db_designs(app)
+    return app
 
 def init(app):
     """Perform the configuration of the Flask app.
@@ -103,6 +120,35 @@ def init(app):
     if app.config["MIN_PASSWORD_LENGTH"] <= 4:
         raise ValueError("MIN_PASSWORD_LENGTH is too short")
 
+    # Read and preprocess the documentation file.
+    with open("documentation.md") as infile:
+        lines = infile.readlines()
+    toc = []
+    current_level = 0
+    for line in lines:
+        if line.startswith("#"):
+            parts = line.split()
+            level = len(parts[0])
+            title = " ".join(parts[1:])
+            # All headers in the file are "clean", i.e. text only, no markup.
+            id = title.strip().replace(" ", "-").lower()
+            id = "".join(c for c in id if c in constants.ALLOWED_ID_CHARACTERS)
+            # Add to table of contents.
+            if level <= 2:
+                if level > current_level:
+                    for l in range(current_level, level):
+                        toc.append('<ul class="list-unstyled ml-3">')
+                    current_level = level
+                elif level < current_level:
+                    for l in range(level, current_level):
+                        toc.append("</ul>")
+                    current_level = level
+                toc.append(f'<li><a href="#{id}">{title}</a></li>')
+    for level in range(current_level):
+        toc.append("</ul>")
+    app.config["DOCUMENTATION_TOC"] = "\n".join(toc)
+    app.config["DOCUMENTATION"] = utils.markdown2html("".join(lines))
+
     # Read in JSON Schema for Vega-Lite from file in 'static'.
     filepath = os.path.join(
         constants.ROOT, f"static/v{constants.VEGA_LITE_VERSION}.json"
@@ -126,3 +172,10 @@ def init(app):
                 for variable in stencil["header"]["variables"]:
                     variable["name"] = "/".join(variable["path"])
                 app.config["STENCILS"][name] = stencil
+
+
+def load_db_designs(app):
+    "Load the design documents."
+    datagraphics.dataset.init(app)
+    datagraphics.graphic.init(app)
+    datagraphics.user.init(app)
