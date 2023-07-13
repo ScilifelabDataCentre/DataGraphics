@@ -5,6 +5,7 @@ import os
 import os.path
 
 import flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import datagraphics.dataset
 import datagraphics.graphic
@@ -119,6 +120,9 @@ def init(app):
         raise ValueError("SALT_LENGTH is too short")
     if app.config["MIN_PASSWORD_LENGTH"] <= 4:
         raise ValueError("MIN_PASSWORD_LENGTH is too short")
+
+    if app.config["REVERSE_PROXY"]:
+        app.wsgi_app = ProxyFix(app.wsgi_app)
 
     # Read and preprocess the documentation file.
     with open("documentation.md") as infile:
