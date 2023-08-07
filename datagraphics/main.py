@@ -2,7 +2,6 @@
 
 import flask
 import markupsafe
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 import datagraphics.about
 import datagraphics.config
@@ -26,6 +25,9 @@ from datagraphics import constants
 from datagraphics import utils
 
 
+app = datagraphics.config.create_app(__name__)
+
+
 class JsonException(Exception):
     "JSON API error response."
 
@@ -43,13 +45,6 @@ class JsonException(Exception):
         result["status_code"] = self.status_code
         result["message"] = self.message
         return result
-
-
-# Get the app.
-app = datagraphics.config.create_app(__name__)
-
-if app.config["REVERSE_PROXY"]:
-    app.wsgi_app = ProxyFix(app.wsgi_app)
 
 
 @app.errorhandler(JsonException)
@@ -142,11 +137,11 @@ def sitemap():
         dict(
             url=flask.url_for("home", _external=True), changefreq="daily", priority=1.0
         ),
-        dict(url=flask.url_for("about.contact", _external=True), changefreq="yearly"),
         dict(
-            url=flask.url_for("about.documentation", _external=True),
+            url=flask.url_for("documentation", _external=True),
             changefreq="monthly",
         ),
+        dict(url=flask.url_for("about.contact", _external=True), changefreq="yearly"),
         dict(url=flask.url_for("about.software", _external=True), changefreq="yearly"),
         dict(
             url=flask.url_for("datasets.public", _external=True),
