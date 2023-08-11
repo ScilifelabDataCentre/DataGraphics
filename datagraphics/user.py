@@ -49,7 +49,8 @@ def login():
     "Login to a user account."
     if utils.http_GET():
         return flask.render_template("user/login.html")
-    if utils.http_POST():
+
+    elif utils.http_POST():
         username = flask.request.form.get("username")
         password = flask.request.form.get("password")
         try:
