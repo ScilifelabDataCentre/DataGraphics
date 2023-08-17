@@ -1,6 +1,6 @@
 attrs==21.2.0
 blinker==1.6.2
-certifi==2021.10.8
+certifi==2023.7.22
 chardet==4.0.0
 charset-normalizer==2.0.8
 click==8.1.6
@@ -24,7 +24,7 @@ pyparsing==3.0.6
 pyrsistent==0.18.0
 pytest==6.2.5
 PyYAML==6.0.1
-requests==2.26.0
+requests==2.31.0
 six==1.16.0
 toml==0.10.2
 tqdm==4.62.3
